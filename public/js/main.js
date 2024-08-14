@@ -383,9 +383,17 @@ function updateWorld() {
     count += mosquito.fitness;
   }
   let averageFitness = count / allMosquitoes.length;
-  logAndMockConsole(`Average fitness of all mosquitoes: ${averageFitness}.`);
+  // Check if NaN.
+  if (averageFitness !== averageFitness) {
+    logAndMockConsole(`Average fitness of all mosquitoes: ${averageFitness}.`);
+  }
 
   renderWorld();
+
+  // Rest for half a second.
+  setTimeout(() => {
+    console.log("World updated.");
+  }, 500);
 }
 
 function startSimulation(event) {
