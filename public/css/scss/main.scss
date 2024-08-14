@@ -1,0 +1,159 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Courier New", Courier, monospace;
+    background-color: lightgray;
+
+    main {
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin: 2rem;
+
+        h1 {
+            font-weight: bolder;
+            text-transform: uppercase;
+            letter-spacing: .25rem;
+        }
+
+        h2 {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .125rem;
+        }
+
+        canvas {
+            border: 2px solid black;
+            padding: .5rem;
+        }
+
+        form {
+            display: flex;
+            flex-flow: row wrap;
+            width: 64vw;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+
+            label,
+            p {
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: .125rem;
+            }
+
+            label {
+                width: 50%;
+            }
+
+            p {
+                width: 100%;
+            }
+
+            input {
+                width: calc(50% - 1rem);
+                padding: 0rem;
+                min-height: 2rem;
+            }
+
+            button {
+                width: 50%;
+                padding: .5rem;
+                background-color: black;
+                color: white;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: .125rem;
+                cursor: pointer;
+                border: 1px solid white;
+            }
+        }
+
+        div#mock__console {
+            display: flex;
+            flex-flow: column nowrap;
+            gap: .5rem;
+            width: 64vw;
+            padding: 1rem;
+            border: 2px solid white;
+            background-color: black;
+            color: white;
+            overflow-y: auto;
+            min-height: 50vh;
+
+            p {
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: .125rem;
+                font-size: .875rem;
+            }
+        }
+    }
+}
+
+// Mobile
+@media screen and (max-width: 768px) {
+    body {
+        width: 100vw;
+        
+        main {
+            width: calc(100vw - 1rem);
+            margin: .5rem;
+
+            h1,
+            h2 {
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 1.125rem;
+            }
+
+            h2 {
+                font-size: 1rem;
+            }
+
+            canvas {
+                margin: .25rem;
+                padding: .25rem;
+            }
+
+            form {
+                width: 100%;
+                display: flex;
+                flex-flow: column nowrap;
+
+                label,
+                p,
+                input {
+                    font-size: .875rem;
+                    width: 100%;
+                }
+
+                input {
+                    min-height: 1rem;
+                }
+
+                button {
+                    padding: .25rem;
+                    font-size: .75rem;
+                }
+            }
+
+            div#mock__console {
+                width: 100%;
+                padding: .5rem;
+
+                p {
+                    font-size: .625rem;
+                }
+            }
+        }
+    }
+}
