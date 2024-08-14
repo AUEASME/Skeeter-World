@@ -23,6 +23,13 @@ body {
     width: calc(100vw - 2rem);
     color: black;
     text-decoration: none;
+
+    a,
+    a:visited {
+      color: black;
+      text-decoration: none;
+      text-align: center;
+    }
   }
 
   main {
@@ -58,17 +65,17 @@ body {
 
     th,
     td {
-        padding: 0.5rem;
+      padding: 0.5rem;
 
-        &.infected {
-            background-color: crimson;
-            color: white;
-        }
+      &.infected {
+        background-color: crimson;
+        color: white;
+      }
 
-        &.dead {
-            background-color: black;
-            color: white;
-        }
+      &.dead {
+        background-color: black;
+        color: white;
+      }
     }
 
     canvas {
@@ -163,6 +170,13 @@ body {
       }
 
       > p {
+        max-width: 100%;
+        font-size: 0.75rem;
+      }
+
+      table,
+      th,
+      td {
         max-width: 100%;
         font-size: 0.75rem;
       }
