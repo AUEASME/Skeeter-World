@@ -15,9 +15,13 @@ body {
         align-items: center;
         gap: 2rem;
         padding: 1rem;
-        font-weight: bold;
+        font-weight: bolder;
         text-transform: uppercase;
         letter-spacing: .125rem;
+        text-decoration: none;
+        margin: 1rem;
+        width: calc(100vw - 2rem);
+        color: black;
         text-decoration: none;
     }
 
