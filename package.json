@@ -1,7 +1,7 @@
 {
   "name": "mosquito",
   "version": "1.0.0",
-  "description": "Population dynamics simulation for mosquitos infected with Wolbachia bacteria.",
+  "description": "Population dynamics simulation for mosquitoes infected with Wolbachia bacteria.",
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm:watch-js\" \"npm:watch-scss\"",
