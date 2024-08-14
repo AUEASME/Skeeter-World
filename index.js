@@ -14,6 +14,9 @@ app
 app.get("/", (req, res) => {
   res.render("index", { title: "Home" });
 });
+app.get("/about", (req, res) => {
+  res.render("about", { title: "About" });
+});
 
 app.listen(3000, () => {
   console.log("Skeeter World is running at http://localhost:3000.");

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- STANDARD -->
+    <meta property="og:url" content="https://skeeter-world-l8n9v.ondigitalocean.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Skeeter World">
+    <meta property="og:title" content="About | Skeeter World 🦟" />
+    <meta property="og:description" content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria." />
+    <meta property="og:image" content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png" />
+    <meta property="og:image:alt" content="Skeeter World" />
+    <meta name="theme-color" content="#938170">
+    <!-- TWITTER -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="About | Skeeter World 🦟" />
+    <meta name="twitter:creator" content="@JSLBrowning" />
+    <meta name="twitter:description" content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria." />
+    <meta name="twitter:image" content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png" />
+    <meta name="twitter:image:alt" content="Skeeter World" />
+    <!-- END OF OGP DATA -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <title>About | Skeeter World 🦟</title>
+</head>
+<body>
+    <nav>
+        <a href="/">Home (Simualtion)</a>
+        <a href="/about">About</a>
+    </nav>
+    <main>
+        <h1>Skeeter World 🦟</h1>
+        <p>Skeeter World uses <a href="https://nodejs.org/en">Node.js</a> to simulate populations of mosquitoes infected with the bacteria <em>Wolbachia pipientis</em>, which results in a phenomenon called <strong>cytoplasmic incompatibility</strong>. What does that mean? Basically…</p>
+        <table>
+            <tr>
+                <th></th>
+                <th>Uninfected Male</th>
+                <th>Infected Male</th>
+            </tr>
+            <tr>
+                <th>Uninfected Female</th>
+                <th>Uninfected Offspring</th>
+                <th>Offspring dies.</th>
+            </tr>
+            <tr>
+                <th>Infected Female</th>
+                <th>Infected Offspring</th>
+                <th>Infected Offspring</th>
+            </tr>
+        </table>
+        <p>So how does that work? Inside the sperm of an infected male, the <em>Wolbachia</em> bacteria will produce a toxin that will kill the offspring if left unattended. Inside the egg of an infected <em>female</em>, however, that very same bacteria will produce an <em>antidote</em> to that toxin, meaning the offspring of infected sperm can survive! Through this simple toxin-antidote system, <em>Wolbachia</em> has become the single most common reproductive parasite in Earth’s biosphere.</p>
+        <p>You can learn more about this system, and how it may have evolved, in <a href="https://doi.org/10.3389/fmicb.2023.1116766">“Modeling emergence of Wolbachia toxin-antidote protein functions with an evolutionary algorithm”</a> by Beckmann <em>et al.</em>, published in 2023.</p>
+    </main>
+    <script src="/js/main.js"></script>
+</body>
+</html>

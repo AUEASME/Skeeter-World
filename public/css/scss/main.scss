@@ -8,6 +8,19 @@ body {
     font-family: "Courier New", Courier, monospace;
     background-color: lightgray;
 
+    nav {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        padding: 1rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: .125rem;
+        text-decoration: none;
+    }
+
     main {
         display: flex;
         flex-flow: column nowrap;
@@ -26,6 +39,11 @@ body {
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: .125rem;
+        }
+
+        > p {
+            max-width: 64vw;
+            text-align: justify;
         }
 
         canvas {
@@ -117,6 +135,11 @@ body {
 
             h2 {
                 font-size: 1rem;
+            }
+
+            > p {
+                max-width: 100%;
+                font-size: .75rem;
             }
 
             canvas {
