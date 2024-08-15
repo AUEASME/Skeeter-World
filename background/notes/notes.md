@@ -1,7 +1,5 @@
 # 8/8/2024 Meeting
 
-## CI Project
-
 Sterilization of the sperm of insects -- run by a two-gene system, one is a toxin, the other is an antidote.
 
 - Uninfected male and females will not be infected.
@@ -58,12 +56,15 @@ What is the *simplest* experiment we could do to get started? Maybe... **How doe
 
 Eventually reconnect to EASME by mapping actual gene system to population models. If they don't match up, find the source of the difference.
 
-## EA Core
+# My Thoughts
 
-Population of nested populations. We're not always gonna be working on genes in isolation! We need to be able to model ecological systems.
+Fitness determines mean number of children (per unit of blood?). Fitness also determines share of local blood supply each step. Some blood is consumed each step?
 
-Need to be able to model promoter and methylation genes, as well as introns and exons.
+For mate selection: rank all by fitness, then each unpaired female chooses the best male.
 
-RNA viruses might have a different rate of transition vs. transversion?
+Weight neighboring grid areas to define a direction for potential movement. Use difference between these and present grid to determine if we should move. Fitness could determine "accuracy" (standard deviation allowance).
 
-Process of recombination is the same for all organisms with DNA. Number of crossover points is the only real question. One-point crossover, two-point, et cetera. How many crossover points does a human chromosome have? Do they just "accumulate" over time? One-point crossover at each reproduction, but they do it over and over again? Do complex crossovers help with crossing fitness valleys?
+Blood in an area is a limited resource. Water is also a percentage for each area that modulates offspring survival (fitness × water = survival chance). Adult and baby survival are calculated separately, and babies take a generation to grow up.
+
+https://eperezcosano.github.io/hex-grid/
+https://www.redblobgames.com/grids/hexagons/
