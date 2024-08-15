@@ -78,6 +78,20 @@ body {
       }
     }
 
+    ol {
+      max-width: 64vw;
+      text-align: justify;
+
+      li {
+        margin-bottom: .5rem;
+      }
+
+      > ol {
+        margin-left: 2rem;
+        list-style: lower-roman;
+      }
+    }
+
     canvas {
       border: 2px solid black;
       padding: 0.5rem;
@@ -172,6 +186,16 @@ body {
       > p {
         max-width: 100%;
         font-size: 0.75rem;
+      }
+
+      ol {
+        max-width: 100%;
+        list-style-position: inside;
+
+        li {
+          font-size: 0.75rem;
+          line-height: .9375rem;
+        }
       }
 
       table,
