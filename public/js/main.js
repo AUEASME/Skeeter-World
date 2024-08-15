@@ -82,6 +82,7 @@ class Mosquito {
     if (this.infected !== 0) {
       this.fitness = this.infected.symbioteRate;
     }
+    this.position = { x: 0, y: 0 };
   }
 
   changeSex() {
@@ -107,13 +108,7 @@ class Mosquito {
 
   getCurrentPosition() {
     // Search the map for the cell containing this mosquito.
-    for (let y = 0; y < world.height; y++) {
-      for (let x = 0; x < world.width; x++) {
-        if (world.map[y][x].includes(this)) {
-          return { x, y };
-        }
-      }
-    }
+    return this.position;
   }
 
   migrate() {
@@ -140,6 +135,7 @@ class Mosquito {
         currentCell.x
       ].filter((m) => m !== this);
       world.map[bestCell.y][bestCell.x].push(this);
+      this.position = bestCell;
       return;
     }
 
@@ -170,6 +166,7 @@ class Mosquito {
         currentCell.x
       ].filter((m) => m !== this);
       world.map[bestCell.y][bestCell.x].push(this);
+      this.position = bestCell;
       return;
     }
   }
@@ -196,6 +193,7 @@ class Mosquito {
         }
         let child = new Mosquito(childInfection, dad.fitness, mom.fitness);
         world.map[currentCell.y][currentCell.x].push(child);
+        child.position = currentCell;
         allMosquitoes.push(child);
       }
     }
@@ -206,6 +204,7 @@ class Mosquito {
       }
       let child = new Mosquito(dad.infected, dad.fitness, mom.fitness);
       world.map[currentCell.y][currentCell.x].push(child);
+      child.position = currentCell;
       allMosquitoes.push(child);
       return;
     }
@@ -213,12 +212,14 @@ class Mosquito {
     else if (dad.infected === 0 && mom.infected !== 0) {
       let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
       world.map[currentCell.y][currentCell.x].push(child);
+      child.position = currentCell;
       allMosquitoes.push(child);
       return;
     } else {
       // If neither parent is infected…
       let child = new Mosquito(0, dad.fitness, mom.fitness);
       world.map[currentCell.y][currentCell.x].push(child);
+      child.position = currentCell;
       allMosquitoes.push(child);
     }
   }
@@ -241,6 +242,7 @@ class World {
         for (let i = 0; i < numberOfMosquitoes; i++) {
           let mosquito = new Mosquito();
           this.map[y][x].push(mosquito);
+          mosquito.position = { x, y };
           allMosquitoes.push(mosquito);
         }
       }
@@ -331,7 +333,7 @@ function updateWorld() {
   );
 
   logAndMockConsole("Starting migration phase…");
-  // Sort mosquitoes by fitness (lowest first)
+  // Sort mosquitoes by fitness (lowest first).
   allMosquitoes.sort((a, b) => a.fitness - b.fitness);
   // Migrate and reproduce.
   for (let mosquito of allMosquitoes) {
@@ -344,16 +346,12 @@ function updateWorld() {
   let eligibleFemales = allMosquitoes.filter((m) => m.sex === 0);
   while (eligibleFemales.length > 0) {
     let mom = eligibleFemales.pop();
-    let momPosition = mom.getCurrentPosition();
-    momPosition = [momPosition.x, momPosition.y];
     // Get all mosquitoes in eligibleMales that are in the same cell as mosquito.
     let mates = [];
     for (let male of eligibleMales) {
-      let malePosition = male.getCurrentPosition();
-      malePosition = [malePosition.x, malePosition.y];
       if (
-        momPosition[0] === malePosition[0] &&
-        momPosition[1] === malePosition[1]
+        male.position.x === mom.position.x &&
+        male.position.y === mom.position.y
       ) {
         mates.push(male);
       }
@@ -365,9 +363,11 @@ function updateWorld() {
       mom.reproduce(dad);
     }
   }
+  delete eligibleMales;
+  delete eligibleFemales;
   logAndMockConsole("Reproduction phase complete.");
 
-  // Population control: sort mosquitoes by fitness and preserve only the top 50 in each cell.
+  // Population control: sort mosquitoes by fitness and preserve only the best in each cell.
   allMosquitoes = [];
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
@@ -375,17 +375,6 @@ function updateWorld() {
       world.map[y][x] = world.map[y][x].slice(0, carryingCapacity);
       allMosquitoes = allMosquitoes.concat(world.map[y][x]);
     }
-  }
-
-  // Log average fitness of all mosquitoes.
-  let count = 0;
-  for (let mosquito of allMosquitoes) {
-    count += mosquito.fitness;
-  }
-  let averageFitness = count / allMosquitoes.length;
-  // Check if NaN.
-  if (averageFitness !== averageFitness) {
-    logAndMockConsole(`Average fitness of all mosquitoes: ${averageFitness}.`);
   }
 
   renderWorld();
