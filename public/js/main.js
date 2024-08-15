@@ -1,4 +1,6 @@
-let allMosquitoes = [];
+/********************
+ * HELPER FUNCTIONS *
+ ********************/
 
 function logAndMockConsole(text) {
   console.log(text);
@@ -20,6 +22,10 @@ function logAndMockConsole(text) {
   // Scroll the mock console to the bottom.
   mockConsole.scrollTop = mockConsole.scrollHeight;
 }
+
+/*******************
+ * WOLBACHIA CLASS *
+ *******************/
 
 class Wolbachia {
   constructor(killRate, rescueRate, symbioteRate, selfMutationRate) {
@@ -48,6 +54,10 @@ class Wolbachia {
     }
   }
 }
+
+/**************************************
+ * MOSQUITO CLASS, METHODS, AND SETUP *
+ **************************************/
 
 class Mosquito {
   constructor(infected, dad_fitness, mom_fitness) {
@@ -225,6 +235,12 @@ class Mosquito {
   }
 }
 
+let allMosquitoes = [];
+
+/***********************************
+ * WORLD CLASS, METHODS, AND SETUP *
+ ***********************************/
+
 class World {
   constructor(width, height) {
     this.width = width;
@@ -325,25 +341,25 @@ function renderWorld() {
   }
 }
 
-function updateWorld() {
-  logAndMockConsole(
-    `There are currently ${allMosquitoes.length} mosquitoes, ${
-      allMosquitoes.filter((m) => m.infected !== 0).length
-    } of whom are infected by Wolbachia.`
-  );
+/************************
+ * SIMULATION FUNCTIONS *
+ ************************/
 
+function migrateAll(population) {
   logAndMockConsole("Starting migration phase…");
   // Sort mosquitoes by fitness (lowest first).
-  allMosquitoes.sort((a, b) => a.fitness - b.fitness);
+  population.sort((a, b) => a.fitness - b.fitness);
   // Migrate and reproduce.
-  for (let mosquito of allMosquitoes) {
+  for (let mosquito of population) {
     mosquito.migrate();
   }
   logAndMockConsole("Migration phase complete.");
+}
 
+function reproduceAll(population) {
   logAndMockConsole("Starting reproduction phase…");
-  let eligibleMales = allMosquitoes.filter((m) => m.sex === 1);
-  let eligibleFemales = allMosquitoes.filter((m) => m.sex === 0);
+  let eligibleMales = population.filter((m) => m.sex === 1);
+  let eligibleFemales = population.filter((m) => m.sex === 0);
   while (eligibleFemales.length > 0) {
     let mom = eligibleFemales.pop();
     // Get all mosquitoes in eligibleMales that are in the same cell as mosquito.
@@ -366,6 +382,20 @@ function updateWorld() {
   delete eligibleMales;
   delete eligibleFemales;
   logAndMockConsole("Reproduction phase complete.");
+}
+
+function updateWorld() {
+  logAndMockConsole(
+    `There are currently ${allMosquitoes.length} mosquitoes, ${
+      allMosquitoes.filter((m) => m.infected !== 0).length
+    } of whom are infected by Wolbachia.`
+  );
+
+  // Migration phase.
+  migrateAll(allMosquitoes);
+
+  // Reproduction phase.
+  reproduceAll(allMosquitoes);
 
   // Population control: sort mosquitoes by fitness and preserve only the best in each cell.
   allMosquitoes = [];
@@ -378,11 +408,6 @@ function updateWorld() {
   }
 
   renderWorld();
-
-  // Rest for half a second.
-  setTimeout(() => {
-    console.log("World updated.");
-  }, 500);
 }
 
 function startSimulation(event) {
@@ -456,12 +481,3 @@ function startSimulation(event) {
   // Once per second, update the world.
   setInterval(updateWorld, 1000);
 }
-
-/**
- * WORLD STEP:
- * 1. Mosquitoes, in order of fitness, check if any neighboring cells have fewer mosquitoes. If so, they migrate.
- *    a. If no, they check if any neighboring cells have lower average fitness. If so, they migrate.
- *    b. If also no, they stay put.
- *    c. This is done least fit to most fit, so that the best individuals get the most accurate information.
- * 2. Mosquitoes reproduce, with each female selecting a male mate at random.
- */
