@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- STANDARD -->
+    <meta property="og:url" content="https://skeeter-world-l8n9v.ondigitalocean.app/about/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Skeeter World">
+    <meta property="og:title" content="About | Skeeter World 🦟" />
+    <meta property="og:description" content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria." />
+    <meta property="og:image" content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png" />
+    <meta property="og:image:alt" content="Skeeter World" />
+    <meta name="theme-color" content="#938170">
+    <!-- TWITTER -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="About | Skeeter World 🦟" />
+    <meta name="twitter:creator" content="@JSLBrowning" />
+    <meta name="twitter:description" content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria." />
+    <meta name="twitter:image" content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png" />
+    <meta name="twitter:image:alt" content="Skeeter World" />
+    <!-- END OF OGP DATA -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <title>About | Skeeter World 🦟</title>
+</head>
+<body>
+    <nav>
+        <a href="/">Home (Simualtion)</a>
+        <!-- <a href="/readme">Readme</a> -->
+        <a href="/about">About</a>
+    </nav>
+    <main>
+        <h1>Skeeter World 🦟</h1>
+        <h2>Readme</h2>
+        <ol>
+            <li>The cell capacity is how many mosquitoes are allowed to live in each cell of the grid. After reproduction, only that many most-fit individuals are kept in each cell.</li>
+            <li>The number of males and females infected at outset is pretty straightforward — that many of each sex will be infected with *Wolbachia* when the simulation starts.</li>
+            <li>The remaining parameters define how the *Wolbachia* works:</li>
+            <ol>
+                <li>Kill rate is the percent of sperm that will result in non-viable offspring when an infected male mates with an uninfected female.</li>
+                <li>Rescue rate is how effective the antidote is — if it's .95, for example, 95% of offspring produced by an infected male and female will survive.</li>
+                <li>Symbiote rate is the fitness cost or benefit of the infection — if it's .25, for example, the fitness of the host will be increased by 25%.</li>
+                <li>Mutation rate determines how often these values will change. Mutations always increase or decrease the preceding values by .01. A mutation rate of .1 would mean this happens every ten generations on average.</li>
+            </ol>
+        </ol>
+    </main>
+    <script src="/js/main.js"></script>
+</body>
+</html>
