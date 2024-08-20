@@ -455,10 +455,7 @@ function updateWorld() {
   generation++;
 
   if (shouldStopSimulation()) {
-    logAndMockConsole("Simulation has ended.");
-
-    // Stop the simulation.
-    clearInterval(simulationIntervalID);
+    stopSimulation();
   }
 }
 
@@ -475,6 +472,11 @@ function shouldStopSimulation() {
     logAndMockConsole("All mosquitoes are infected.");
     return true;
   }
+}
+
+function stopSimulation() {
+  logAndMockConsole("Simulation has been stopped.");
+  clearInterval(simulationIntervalID);
 }
 
 function startSimulation(event) {
@@ -535,6 +537,8 @@ function startSimulation(event) {
   // Show mock console.
   let mockConsole = document.getElementById("mock__console");
   mockConsole.style.display = "flex";
+  let stopButton = document.getElementById("stop");
+  stopButton.style.display = "block";
   // Show plot.
   let plot = document.getElementById("plot");
   plot.style.display = "block";
