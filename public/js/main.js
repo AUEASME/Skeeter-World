@@ -344,6 +344,7 @@ function renderWorld() {
 /************************
  * SIMULATION FUNCTIONS *
  ************************/
+let simulationIntervalID;
 
 function migrateAll(population) {
   logAndMockConsole("Starting migration phase…");
@@ -408,6 +409,28 @@ function updateWorld() {
   }
 
   renderWorld();
+
+  if (shouldStopSimulation()) {
+    logAndMockConsole("Simulation has ended.");
+
+    // Stop the simulation.
+    clearInterval(simulationIntervalID);
+  }
+}
+
+function shouldStopSimulation() {
+  // Check if infection has been eradicated.
+  let infectedMosquitoes = allMosquitoes.filter((m) => m.infected !== 0);
+  if (infectedMosquitoes.length === 0) {
+    logAndMockConsole("Infection has been eradicated.");
+    return true;
+  }
+
+  // Check if all mosquitoes are infected.
+  if (infectedMosquitoes.length === allMosquitoes.length) {
+    logAndMockConsole("All mosquitoes are infected.");
+    return true;
+  }
 }
 
 function startSimulation(event) {
@@ -479,5 +502,5 @@ function startSimulation(event) {
 
   renderWorld();
   // Once per second, update the world.
-  setInterval(updateWorld, 1000);
+  simulationIntervalID = setInterval(updateWorld, 1000);
 }
