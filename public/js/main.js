@@ -15,12 +15,9 @@ function logAndMockConsole(text) {
   // Append the paragraph element to the mock console.
   mockConsole.appendChild(p);
   // If there are more than 32 children in the mock console, remove the first one.
-  while (mockConsole.children.length > 32) {
+  while (mockConsole.children.length > 24) {
     mockConsole.removeChild(mockConsole.children[0]);
   }
-
-  // Scroll the mock console to the bottom.
-  mockConsole.scrollTop = mockConsole.scrollHeight;
 }
 
 /*******************
@@ -385,6 +382,47 @@ function reproduceAll(population) {
   logAndMockConsole("Reproduction phase complete.");
 }
 
+let generation = 0;
+
+let trace1 = {
+  x: [],
+  y: [],
+  name: "Uninfected",
+  type: "scatter",
+  marker: { color: "red" },
+};
+
+let trace2 = {
+  x: [],
+  y: [],
+  name: "Infected",
+  type: "scatter",
+  marker: { color: "HotPink" },
+};
+
+function updatePlot(generation) {
+  let uninfectedCount = allMosquitoes.filter((m) => m.infected === 0).length;
+  let infectedCount = allMosquitoes.filter((m) => m.infected !== 0).length;
+
+  trace1.x.push(generation);
+  trace1.y.push(uninfectedCount);
+  trace2.x.push(generation);
+  trace2.y.push(infectedCount);
+
+  let layout = {
+    title: "Mosquito Infection Status",
+    xaxis: {
+      title: "Generation",
+    },
+    yaxis: {
+      title: "Mosquito Count",
+    },
+    barmode: "stack",
+  };
+
+  Plotly.newPlot("plot", [trace1, trace2], layout);
+}
+
 function updateWorld() {
   logAndMockConsole(
     `There are currently ${allMosquitoes.length} mosquitoes, ${
@@ -409,6 +447,10 @@ function updateWorld() {
   }
 
   renderWorld();
+
+  // Update the plot.
+  updatePlot(generation + 1);
+  generation++;
 
   if (shouldStopSimulation()) {
     logAndMockConsole("Simulation has ended.");
@@ -491,6 +533,9 @@ function startSimulation(event) {
   // Show mock console.
   let mockConsole = document.getElementById("mock__console");
   mockConsole.style.display = "flex";
+  // Show plot.
+  let plot = document.getElementById("plot");
+  plot.style.display = "block";
   // Show world.
   let worldCanvas = document.getElementById("world");
   worldCanvas.style.display = "block";

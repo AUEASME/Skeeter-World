@@ -158,6 +158,12 @@ body {
         font-size: 0.875rem;
       }
     }
+
+    div#plot {
+      width: 64vw;
+      padding: 0rem;
+      min-height: 45vh;
+    }
   }
 }
 
