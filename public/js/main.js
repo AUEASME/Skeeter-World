@@ -309,14 +309,14 @@ class World {
 }
 
 // Create world.
-let world = new World(8, 8);
+let world = new World(12, 12);
 let carryingCapacity = 64;
 
 function renderWorld() {
   // Get the canvas element.
   let canvas = document.getElementById("world");
   let context = canvas.getContext("2d");
-  let cellSize = 32;
+  let cellSize = 24;
   canvas.width = world.width * cellSize;
   canvas.height = world.height * cellSize;
   // Canvas should be white by default.
@@ -429,7 +429,7 @@ function startSimulation(event) {
   }
   let infectedFemaleCount =
     document.getElementById("infected__females").value || 10;
-  if (infectedFemaleCount < 2) {
+  if (infectedFemaleCount < 1) {
     alert(
       "At least one female needs to be infected, or this simulation is pointless."
     );
