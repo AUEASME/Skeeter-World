@@ -190,15 +190,7 @@ class Mosquito {
     // If both parents are infected…
     if (dad.infected !== 0 && mom.infected !== 0) {
       if (Math.random() < mom.infected.rescueRate) {
-        // Flip a coin to decide which parent's infection to inherit.
-        let coin = Math.random();
-        let childInfection;
-        if (coin < 0.5) {
-          childInfection = dad.infected;
-        } else {
-          childInfection = mom.infected;
-        }
-        let child = new Mosquito(childInfection, dad.fitness, mom.fitness);
+        let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
         world.map[currentCell.y][currentCell.x].push(child);
         child.position = currentCell;
         allMosquitoes.push(child);
