@@ -70,12 +70,20 @@ body {
     > p {
       max-width: 64vw;
       text-align: justify;
+      font-weight: 300;
+
+      strong {
+        font-weight: 900;
+        text-transform: uppercase;
+      }
     }
 
     table,
     th,
     td {
       border: 1px solid black;
+      font-weight: 600;
+      text-transform: uppercase;
     }
 
     th,
@@ -99,6 +107,11 @@ body {
 
       li {
         margin-bottom: 0.5rem;
+
+        strong {
+          font-weight: 900;
+          text-transform: uppercase;
+        }
       }
 
       > ol {
@@ -122,9 +135,8 @@ body {
 
       label,
       p {
-        font-weight: 600;
+        font-weight: 300;
         text-transform: uppercase;
-        letter-spacing: 0.125rem;
       }
 
       label {
@@ -150,7 +162,6 @@ body {
         text-transform: uppercase;
         letter-spacing: 0.125rem;
         cursor: pointer;
-        border: 1px solid white;
       }
     }
 
@@ -164,7 +175,6 @@ body {
       background-color: black;
       color: white;
       overflow-y: auto;
-      // min-height: 50vh;
 
       p {
         font-weight: 600;
@@ -175,7 +185,7 @@ body {
     }
 
     button#stop {
-      width: 32vw;
+      width: 50%;
       padding: 0.5rem;
       background-color: black;
       color: white;
