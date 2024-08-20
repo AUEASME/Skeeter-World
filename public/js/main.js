@@ -471,9 +471,12 @@ function startSimulation(event) {
   }
   let symbioteRate =
     document.getElementById("symbiote__rate").value || undefined;
-  if (symbioteRate > 0.5 || symbioteRate < -0.5) {
-    alert("Symbiote rate must be between -0.5 and 0.5.");
+  if (symbioteRate > 1 || symbioteRate < -1) {
+    alert("Symbiote rate must be between -1 and 1.");
     return;
+  } else {
+    // Divide by 2 so that the rate is between -0.5 and 0.5.
+    symbioteRate /= 2;
   }
   let mutationRate =
     document.getElementById("mutation__rate").value || undefined;
