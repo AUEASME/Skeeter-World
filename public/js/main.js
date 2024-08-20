@@ -541,6 +541,8 @@ function startSimulation(event) {
   // Show world.
   let worldCanvas = document.getElementById("world");
   worldCanvas.style.display = "block";
+  let key = document.getElementById("key");
+  key.style.display = "block";
 
   world.populate();
   for (let i = 0; i < infectedMaleCount; i++) {
