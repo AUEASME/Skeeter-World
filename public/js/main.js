@@ -542,7 +542,7 @@ function startSimulation(event) {
   let worldCanvas = document.getElementById("world");
   worldCanvas.style.display = "block";
   let key = document.getElementById("key");
-  key.style.display = "block";
+  key.style.display = "flex";
 
   world.populate();
   for (let i = 0; i < infectedMaleCount; i++) {
