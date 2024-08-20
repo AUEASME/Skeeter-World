@@ -389,6 +389,7 @@ let trace1 = {
   y: [],
   name: "Uninfected",
   type: "scatter",
+  mode: "lines",
   marker: { color: "red" },
 };
 
@@ -397,6 +398,7 @@ let trace2 = {
   y: [],
   name: "Infected",
   type: "scatter",
+  mode: "lines",
   marker: { color: "HotPink" },
 };
 
