@@ -318,10 +318,13 @@ function renderWorld() {
       let green = 255;
       let blue = 255;
       for (let mosquito of cell) {
-        // Make the cell more red for each mosquito, and more blue if the mosquito is infected.
-        green -= 255 / carryingCapacity;
+        // Make the cell more red for each uninfected mosquito, and more blue for each infected mosquito.
         if (mosquito.infected === 0) {
+          green -= 255 / carryingCapacity;
           blue -= 255 / carryingCapacity;
+        } else {
+          green -= 255 / carryingCapacity;
+          red -= 255 / carryingCapacity;
         }
       }
       context.fillStyle = `rgb(${red}, ${green}, ${blue})`;
