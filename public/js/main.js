@@ -384,45 +384,25 @@ function renderWorld() {
  ************************/
 let simulationIntervalID;
 
-function migrateAll(population) {
+function mosquitoDay(population) {
   // Sort mosquitoes by fitness (lowest first).
   population.sort((a, b) => a.fitness - b.fitness);
-  // Migrate and reproduce.
+  
   for (let mosquito of population) {
+    // Migrate and reproduce.
     mosquito.migrate();
-  }
-}
 
-function reproduceAll(population) {
-  logAndMockConsole("Starting reproduction phase…");
-  let eligibleMales = population.filter((m) => m.sex === 1);
-  let eligibleFemales = population.filter((m) => m.sex === 0);
-  while (eligibleFemales.length > 0) {
-    let mom = eligibleFemales.pop();
-    // Get all mosquitoes in eligibleMales that are in the same cell as mosquito.
-    let mates = [];
-    for (let male of eligibleMales) {
-      if (
-        male.position.x === mom.position.x &&
-        male.position.y === mom.position.y
-      ) {
-        mates.push(male);
+    // If mosquito is female, reproduce.
+    if (mosquito.sex === 0) {
+      let eligibleMales = population.filter((m) => m.sex === 1 && m.position.x === mosquito.position.x && m.position.y === mosquito.position.y);
+      if (eligibleMales.length > 0) {
+        // Get the male with the highest fitness.
+        eligibleMales.sort((a, b) => b.fitness - a.fitness);
+        mosquito.reproduce(eligibleMales[0]);
       }
     }
-    if (mates.length > 0) {
-      // Get the male with the highest fitness.
-      mates.sort((a, b) => b.fitness - a.fitness);
-      let dad = mates[0];
-      mom.reproduce(dad);
-    }
-  }
-  delete eligibleMales;
-  delete eligibleFemales;
-  logAndMockConsole("Reproduction phase complete.");
-}
 
-function ageAll(population) {
-  for (let mosquito of population) {
+    // Age mosquito.
     mosquito.ageUp();
   }
 }
@@ -478,13 +458,7 @@ function updateWorld() {
   );
 
   // Migration phase.
-  migrateAll(allMosquitoes);
-
-  // Reproduction phase.
-  reproduceAll(allMosquitoes);
-
-  // Age phase.
-  ageAll(allMosquitoes);
+  mosquitoDay(allMosquitoes);
 
   // Population control: sort mosquitoes by fitness and preserve only the best in each cell.
   allMosquitoes = [];
