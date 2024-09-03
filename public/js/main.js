@@ -69,7 +69,7 @@ class Mosquito {
         infected.killRate,
         infected.rescueRate,
         infected.symbioteRate,
-        infected.selfMutationRate
+        infected.selfMutationRate,
       );
 
       if (infected.selfMutationRate < Math.random()) {
@@ -135,7 +135,7 @@ class Mosquito {
         killRate,
         rescueRate,
         symbioteRate,
-        selfMutationRate
+        selfMutationRate,
       );
     } else {
       this.infected = 0;
@@ -179,7 +179,7 @@ class Mosquito {
     let currentFitness =
       world.map[currentCell.y][currentCell.x].reduce(
         (acc, m) => acc + m.fitness,
-        0
+        0,
       ) / currentPopulation;
     let bestFitness = currentFitness;
     for (let dy = -1; dy <= 1; dy++) {
@@ -317,7 +317,7 @@ class World {
       killRate,
       rescueRate,
       symbioteRate,
-      mutationRate
+      mutationRate,
     );
   }
 
@@ -338,7 +338,7 @@ class World {
       killRate,
       rescueRate,
       symbioteRate,
-      mutationRate
+      mutationRate,
     );
   }
 }
@@ -474,7 +474,7 @@ function updateWorld() {
   logAndMockConsole(
     `There are currently ${allMosquitoes.length} mosquitoes, ${
       allMosquitoes.filter((m) => m.infected !== 0).length
-    } of whom are infected by Wolbachia.`
+    } of whom are infected by Wolbachia.`,
   );
 
   // Migration phase.
@@ -563,7 +563,7 @@ function startSimulation(event) {
     document.getElementById("infected__females").value || 10;
   if (infectedFemaleCount < 1) {
     alert(
-      "At least one female needs to be infected, or this simulation is pointless."
+      "At least one female needs to be infected, or this simulation is pointless.",
     );
     return;
   }

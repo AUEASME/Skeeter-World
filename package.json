@@ -15,6 +15,7 @@
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "nodemon": "^3.1.4",
+    "prettier": "^3.3.3",
     "sass": "^1.77.8"
   },
   "type": "module"
