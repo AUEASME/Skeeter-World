@@ -451,6 +451,8 @@ function updatePlot(generation) {
 }
 
 function updateWorld() {
+  logAndMockConsole(`Beginning day ${generation + 1}…`);
+
   logAndMockConsole(
     `There are currently ${allMosquitoes.length} mosquitoes, ${
       allMosquitoes.filter((m) => m.infected !== 0).length
@@ -471,6 +473,8 @@ function updateWorld() {
   }
 
   renderWorld();
+
+  logAndMockConsole(`Day ${generation + 1} has ended.`);
 
   // Update the plot.
   updatePlot(generation + 1);
