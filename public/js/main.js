@@ -90,6 +90,33 @@ class Mosquito {
       this.fitness = this.infected.symbioteRate;
     }
     this.position = { x: 0, y: 0 };
+    /**
+     * Mosquito life cycle:
+     * 1. Egg stage: approximately 2-3 days.
+     * 2. Larval stage: approximately 4-10 days.
+     * 3. Pupal stage: approximately 2-3 days.
+     * 4. Adult stage: 6-7 days (male), ~6 weeks (female).
+     */
+    this.age = 0;
+  }
+
+  age() {
+    this.age++;
+    if (this.sex === 1 && this.age > 18) {
+      // Kill self.
+      let currentCell = this.getCurrentPosition();
+      world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
+        currentCell.x
+      ].filter((m) => m !== this);
+    }
+
+    if (this.sex === 0 && this.age > 54) {
+      // Kill self.
+      let currentCell = this.getCurrentPosition();
+      world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
+        currentCell.x
+      ].filter((m) => m !== this);
+    }
   }
 
   changeSex() {
@@ -179,6 +206,10 @@ class Mosquito {
   }
 
   reproduce(mate) {
+    if (this.age < 12) {
+      return;
+    }
+
     let currentCell = this.getCurrentPosition();
     // If both parents are infected, the child has a mom.infection.rescueRate chance of surviving, in which case it inherits one of the parents' infections.
     // If the dad is infected but the mom is not, the child has a dad.infection.killRate chance of immediately dying, otherwise it inherits the dad's infection.
