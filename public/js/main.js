@@ -525,6 +525,21 @@ function shouldStopSimulation() {
 function stopSimulation() {
   logAndMockConsole("Simulation has been stopped.");
   clearInterval(simulationIntervalID);
+
+  // Change the button to a "Resume" button.
+  let stopButton = document.getElementById("stop");
+  stopButton.textContent = "Resume Simulation";
+  stopButton.onclick = resumeSimulation;
+}
+
+function resumeSimulation() {
+  logAndMockConsole("Simulation has been resumed.");
+  simulationIntervalID = setInterval(updateWorld, 1000);
+
+  // Change the button back to a "Stop" button.
+  let stopButton = document.getElementById("stop");
+  stopButton.textContent = "Stop Simulation";
+  stopButton.onclick = stopSimulation;
 }
 
 function startSimulation(event) {
