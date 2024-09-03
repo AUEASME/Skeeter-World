@@ -98,9 +98,11 @@ class Mosquito {
      * 4. Adult stage: 6-7 days (male), ~6 weeks (female).
      */
     this.age = 0;
+    // "but a single female mosquito may produce up to 10 broods throughout her life."
+    this.breedingCooldown = 0;
   }
 
-  age() {
+  ageUp() {
     this.age++;
     if (this.sex === 1 && this.age > 18) {
       // Kill self.
@@ -206,9 +208,19 @@ class Mosquito {
   }
 
   reproduce(mate) {
-    if (this.age < 12) {
+    // Ensure we're an adult.
+    // "Mosquitoes begin breeding about 28 hours after they reach adulthood."
+    if (this.age < 14) {
       return;
     }
+
+    // Ensure we haven't reproduced too recently..
+    if (this.breedingCooldown > 0) {
+      this.breedingCooldown--;
+      return;
+    }
+
+    this.breedingCooldown = 4;
 
     let currentCell = this.getCurrentPosition();
     // If both parents are infected, the child has a mom.infection.rescueRate chance of surviving, in which case it inherits one of the parents' infections.
@@ -218,39 +230,42 @@ class Mosquito {
     // Child fitness is the average of the parents' fitness.
     let dad = mate,
       mom = this;
-    // If both parents are infected…
-    if (dad.infected !== 0 && mom.infected !== 0) {
-      if (Math.random() < mom.infected.rescueRate) {
+    let number_of_eggs = Math.floor(Math.random() * 100);
+    for (let i = 0; i < number_of_eggs; i++) {
+      // If both parents are infected…
+      if (dad.infected !== 0 && mom.infected !== 0) {
+        if (Math.random() < mom.infected.rescueRate) {
+          let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
+          world.map[currentCell.y][currentCell.x].push(child);
+          child.position = currentCell;
+          allMosquitoes.push(child);
+        }
+      }
+      // If the dad is infected but the mom is not…
+      else if (dad.infected !== 0 && mom.infected === 0) {
+        if (Math.random() < dad.infected.killRate) {
+          return;
+        }
+        let child = new Mosquito(dad.infected, dad.fitness, mom.fitness);
+        world.map[currentCell.y][currentCell.x].push(child);
+        child.position = currentCell;
+        allMosquitoes.push(child);
+        return;
+      }
+      // If the mom is infected but the dad is not…
+      else if (dad.infected === 0 && mom.infected !== 0) {
         let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
         world.map[currentCell.y][currentCell.x].push(child);
         child.position = currentCell;
         allMosquitoes.push(child);
-      }
-    }
-    // If the dad is infected but the mom is not…
-    else if (dad.infected !== 0 && mom.infected === 0) {
-      if (Math.random() < dad.infected.killRate) {
         return;
+      } else {
+        // If neither parent is infected…
+        let child = new Mosquito(0, dad.fitness, mom.fitness);
+        world.map[currentCell.y][currentCell.x].push(child);
+        child.position = currentCell;
+        allMosquitoes.push(child);
       }
-      let child = new Mosquito(dad.infected, dad.fitness, mom.fitness);
-      world.map[currentCell.y][currentCell.x].push(child);
-      child.position = currentCell;
-      allMosquitoes.push(child);
-      return;
-    }
-    // If the mom is infected but the dad is not…
-    else if (dad.infected === 0 && mom.infected !== 0) {
-      let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
-      world.map[currentCell.y][currentCell.x].push(child);
-      child.position = currentCell;
-      allMosquitoes.push(child);
-      return;
-    } else {
-      // If neither parent is infected…
-      let child = new Mosquito(0, dad.fitness, mom.fitness);
-      world.map[currentCell.y][currentCell.x].push(child);
-      child.position = currentCell;
-      allMosquitoes.push(child);
     }
   }
 }
@@ -370,14 +385,12 @@ function renderWorld() {
 let simulationIntervalID;
 
 function migrateAll(population) {
-  logAndMockConsole("Starting migration phase…");
   // Sort mosquitoes by fitness (lowest first).
   population.sort((a, b) => a.fitness - b.fitness);
   // Migrate and reproduce.
   for (let mosquito of population) {
     mosquito.migrate();
   }
-  logAndMockConsole("Migration phase complete.");
 }
 
 function reproduceAll(population) {
@@ -406,6 +419,12 @@ function reproduceAll(population) {
   delete eligibleMales;
   delete eligibleFemales;
   logAndMockConsole("Reproduction phase complete.");
+}
+
+function ageAll(population) {
+  for (let mosquito of population) {
+    mosquito.ageUp();
+  }
 }
 
 let generation = 0;
@@ -463,6 +482,9 @@ function updateWorld() {
 
   // Reproduction phase.
   reproduceAll(allMosquitoes);
+
+  // Age phase.
+  ageAll(allMosquitoes);
 
   // Population control: sort mosquitoes by fitness and preserve only the best in each cell.
   allMosquitoes = [];
