@@ -1,75 +1,110 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- STANDARD -->
-    <meta property="og:url" content="https://skeeter-world-l8n9v.ondigitalocean.app/" />
+    <meta
+      property="og:url"
+      content="https://skeeter-world-l8n9v.ondigitalocean.app/"
+    />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Skeeter World">
+    <meta property="og:site_name" content="Skeeter World" />
     <meta property="og:title" content="Skeeter World 🦟" />
-    <meta property="og:description" content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria." />
-    <meta property="og:image" content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png" />
+    <meta
+      property="og:description"
+      content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria."
+    />
+    <meta
+      property="og:image"
+      content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png"
+    />
     <meta property="og:image:alt" content="Skeeter World" />
-    <meta name="theme-color" content="#1d4d39">
+    <meta name="theme-color" content="#1d4d39" />
     <!-- TWITTER -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Skeeter World 🦟" />
     <meta name="twitter:creator" content="@JSLBrowning" />
-    <meta name="twitter:description" content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria." />
-    <meta name="twitter:image" content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png" />
+    <meta
+      name="twitter:description"
+      content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria."
+    />
+    <meta
+      name="twitter:image"
+      content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png"
+    />
     <meta name="twitter:image:alt" content="Skeeter World" />
     <!-- END OF OGP DATA -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
     <title>Skeeter World 🦟</title>
-</head>
-<body>
+  </head>
+  <body>
     <nav>
-        <!-- <a href="/">Home (Simualtion)</a> -->
-        <a href="/readme">Readme</a>
-        <a href="/about">About</a>
+      <!-- <a href="/">Home (Simualtion)</a> -->
+      <a href="/readme">Readme</a>
+      <a href="/about">About</a>
     </nav>
     <main>
-        <h1>Skeeter World 🦟</h1>
-        <h2>Population dynamics simulation for mosquitoes infected with <em>Wolbachia</em> bacteria.</h2>
-        <canvas id="world" style="display: none;"></canvas>
-        <div id="key" style="display: none;">
-            <p style="color: red;">Uninfected</p>
-            <p style="color: blue;">Infected</p>
-        </div>
-        <form id="start__params">
-            <!-- World Parameters -->
-            <label for="capacity">Max cell capacity (default 64):</label>
-            <input type="number" id="capacity" name="capacity">
-            <p>Note: increasing the above value beyond the default may result in a slow simulation!</p>
-            <label for="infected__males">Number of males to infect at outset (default 0):</label>
-            <input type="number" id="infected__males" name="infected__males">
-            <label for="infected__females">Number of females to infect at outset (default 5):</label>
-            <input type="number" id="infected__females" name="infected__females">
-            <!-- Wolbachia Parameters -->
-            <label for="kill__rate">Initial CI rate for <em>Wolbachia</em> (0 to 1, random by default):</label>
-            <input type="number" id="kill__rate" name="kill__rate">
-            <label for="rescue__rate">Initial CI rescue rate for <em>Wolbachia</em> (0 to 1, random by default):</label>
-            <input type="number" id="rescue__rate" name="rescue__rate">
-            <label for="symbiote__rate">Start fitness impact for <em>Wolbachia</em> (-1 to 1, random by default):</label>
-            <input type="number" id="symbiote__rate" name="symbiote__rate">
-            <label for="mutation__rate">Mutation rate for <em>Wolbachia</em> (0 to 1, defining the percent chance of a mutation each generation, random by default):</label>
-            <input type="number" id="mutation__rate" name="mutation__rate">
-            <!-- Start -->
-            <button id="start" onclick="startSimulation(event)">Start Simulation</button>
-        </form>
-        <div id="mock__console" style="display: none;">
-            
-        </div>
-        <button id="stop" onclick="stopSimulation()" style="display: none;">
-            Stop Simulation
+      <h1>Skeeter World 🦟</h1>
+      <h2>
+        Population dynamics simulation for mosquitoes infected with
+        <em>Wolbachia</em> bacteria.
+      </h2>
+      <canvas id="world" style="display: none"></canvas>
+      <div id="key" style="display: none">
+        <p style="color: red">Uninfected</p>
+        <p style="color: blue">Infected</p>
+      </div>
+      <form id="start__params">
+        <!-- World Parameters -->
+        <label for="capacity">Max cell capacity (default 64):</label>
+        <input type="number" id="capacity" name="capacity" />
+        <p>
+          Note: increasing the above value beyond the default may result in a
+          slow simulation!
+        </p>
+        <label for="infected__males"
+          >Number of males to infect at outset (default 0):</label
+        >
+        <input type="number" id="infected__males" name="infected__males" />
+        <label for="infected__females"
+          >Number of females to infect at outset (default 5):</label
+        >
+        <input type="number" id="infected__females" name="infected__females" />
+        <!-- Wolbachia Parameters -->
+        <label for="kill__rate"
+          >Initial CI rate for <em>Wolbachia</em> (0 to 1, random by
+          default):</label
+        >
+        <input type="number" id="kill__rate" name="kill__rate" />
+        <label for="rescue__rate"
+          >Initial CI rescue rate for <em>Wolbachia</em> (0 to 1, random by
+          default):</label
+        >
+        <input type="number" id="rescue__rate" name="rescue__rate" />
+        <label for="symbiote__rate"
+          >Start fitness impact for <em>Wolbachia</em> (-1 to 1, random by
+          default):</label
+        >
+        <input type="number" id="symbiote__rate" name="symbiote__rate" />
+        <label for="mutation__rate"
+          >Mutation rate for <em>Wolbachia</em> (0 to 1, defining the percent
+          chance of a mutation each generation, random by default):</label
+        >
+        <input type="number" id="mutation__rate" name="mutation__rate" />
+        <!-- Start -->
+        <button id="start" onclick="startSimulation(event)">
+          Start Simulation
         </button>
-        <div id="plot" style="display: none;">
-
-        </div>
+      </form>
+      <button id="stop" onclick="stopSimulation()" style="display: none">
+        Stop Simulation
+      </button>
+      <div id="plot" style="display: none"></div>
+      <div id="mock__console" style="display: none"></div>
     </main>
     <script src="/js/main.js"></script>
     <script src="/js/plotly-2.34.0.min.js" charset="utf-8"></script>
-</body>
+  </body>
 </html>
