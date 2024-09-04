@@ -69,7 +69,7 @@ class Mosquito {
         infected.killRate,
         infected.rescueRate,
         infected.symbioteRate,
-        infected.selfMutationRate,
+        infected.selfMutationRate
       );
 
       if (infected.selfMutationRate < Math.random()) {
@@ -135,7 +135,7 @@ class Mosquito {
         killRate,
         rescueRate,
         symbioteRate,
-        selfMutationRate,
+        selfMutationRate
       );
     } else {
       this.infected = 0;
@@ -179,7 +179,7 @@ class Mosquito {
     let currentFitness =
       world.map[currentCell.y][currentCell.x].reduce(
         (acc, m) => acc + m.fitness,
-        0,
+        0
       ) / currentPopulation;
     let bestFitness = currentFitness;
     for (let dy = -1; dy <= 1; dy++) {
@@ -317,7 +317,7 @@ class World {
       killRate,
       rescueRate,
       symbioteRate,
-      mutationRate,
+      mutationRate
     );
   }
 
@@ -338,20 +338,20 @@ class World {
       killRate,
       rescueRate,
       symbioteRate,
-      mutationRate,
+      mutationRate
     );
   }
 }
 
 // Create world.
-let world = new World(12, 12);
+let world = new World(24, 24);
 let carryingCapacity = 64;
 
 function renderWorld() {
   // Get the canvas element.
   let canvas = document.getElementById("world");
   let context = canvas.getContext("2d");
-  let cellSize = 24;
+  let cellSize = 12;
   canvas.width = world.width * cellSize;
   canvas.height = world.height * cellSize;
   // Canvas should be white by default.
@@ -387,14 +387,28 @@ let simulationIntervalID;
 function mosquitoDay(population) {
   // Sort mosquitoes by fitness (lowest first).
   population.sort((a, b) => a.fitness - b.fitness);
-  
+
+  // Make a 2D grid for all the males in the map.
+  let males = new Array(world.height)
+    .fill(0)
+    .map(() => new Array(world.width).fill(0).map(() => []));
+
+  // Assign each male to their cell.
+  for (let mosquito of population) {
+    if (mosquito.sex === 1) {
+      let currentCell = mosquito.getCurrentPosition();
+      males[currentCell.y][currentCell.x].push(mosquito);
+    }
+  }
+
   for (let mosquito of population) {
     // Migrate and reproduce.
     mosquito.migrate();
+    let currentCell = mosquito.getCurrentPosition();
 
     // If mosquito is female, reproduce.
     if (mosquito.sex === 0) {
-      let eligibleMales = population.filter((m) => m.sex === 1 && m.position.x === mosquito.position.x && m.position.y === mosquito.position.y);
+      let eligibleMales = males[currentCell.y][currentCell.x];
       if (eligibleMales.length > 0) {
         // Get the male with the highest fitness.
         eligibleMales.sort((a, b) => b.fitness - a.fitness);
@@ -456,7 +470,7 @@ function updateWorld() {
   logAndMockConsole(
     `There are currently ${allMosquitoes.length} mosquitoes, ${
       allMosquitoes.filter((m) => m.infected !== 0).length
-    } of whom are infected by Wolbachia.`,
+    } of whom are infected by Wolbachia.`
   );
 
   // Migration phase.
@@ -541,7 +555,7 @@ function startSimulation(event) {
     document.getElementById("infected__females").value || 10;
   if (infectedFemaleCount < 1) {
     alert(
-      "At least one female needs to be infected, or this simulation is pointless.",
+      "At least one female needs to be infected, or this simulation is pointless."
     );
     return;
   }
