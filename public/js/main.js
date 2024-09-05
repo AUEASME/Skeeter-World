@@ -26,29 +26,44 @@ function logAndMockConsole(text) {
 
 class Wolbachia {
   constructor(killRate, rescueRate, symbioteRate, selfMutationRate) {
+    // Kill rate should scale with the amount of toxin produced in the bacteria by its plasmids.
+    // If there are five toxin plasmids and only four antitoxin plasmids... the kill rate should be... the toxicity of the fifth toxin plasmid?
     if (killRate === undefined) {
       this.killRate = Math.random();
     } else {
       this.killRate = killRate;
     }
 
+    // Rescue rate should scale with the amount of antitoxin produced in the bacteria by its plasmids.
     if (rescueRate === undefined) {
       this.rescueRate = Math.random();
     } else {
       this.rescueRate = rescueRate;
     }
 
+    // The antitoxins probably have an environmental benefit.
+    // So high levels of antitoxin production should benefit the overall fitness of the bacteria.
     if (symbioteRate === undefined) {
       this.symbioteRate = 0.5 + Math.random();
     } else {
       this.symbioteRate = 1.0 + symbioteRate;
     }
 
+    // If the bacteria mutates... it might... incorporate a plasmid into its own DNA?
     if (selfMutationRate === undefined) {
       this.selfMutationRate = Math.random();
     } else {
       this.selfMutationRate = selfMutationRate;
     }
+  }
+
+  reproduce() {
+    console.log("Working on it.")
+    // When the bacteria reproduces, the plasmids are split between the two daughter cells.
+    // Of course, most bacteria only have about ten plasmids each, so when the mosquitoes reproduce... most Wolbachia would be left with no plasmids.
+    // So we'll somehow need to simulate plasmid reproduction...
+    // Okay, so reproduce() should take a number as an argument, that being the number of mosquitoes being produced.
+    // Then it realistically simulates the cell divisions of Wolbachia to cover all the mosquito offspring.
   }
 }
 
