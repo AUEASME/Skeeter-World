@@ -52,6 +52,14 @@ class Wolbachia {
   }
 }
 
+class Plasmid {
+  constructor(effect) {
+    // If the effect is negative, the plasmid is producing a toxin.
+    // If the effect is positive, the plasmid is producing a beneficial protein/antitoxin.
+    this.effect = effect;
+  }
+}
+
 /**************************************
  * MOSQUITO CLASS, METHODS, AND SETUP *
  **************************************/
