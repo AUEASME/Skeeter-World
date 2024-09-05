@@ -90,6 +90,7 @@ class Mosquito {
       this.fitness = this.infected.symbioteRate;
     }
     this.position = { x: 0, y: 0 };
+    this.birthplace = this.position;
     /**
      * Mosquito life cycle:
      * 1. Egg stage: approximately 2-3 days.
@@ -106,7 +107,7 @@ class Mosquito {
     this.age++;
     if (this.sex === 1 && this.age > 18) {
       // Kill self.
-      let currentCell = this.getCurrentPosition();
+      let currentCell = this.position;
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
         currentCell.x
       ].filter((m) => m !== this);
@@ -114,7 +115,7 @@ class Mosquito {
 
     if (this.sex === 0 && this.age > 54) {
       // Kill self.
-      let currentCell = this.getCurrentPosition();
+      let currentCell = this.position;
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
         currentCell.x
       ].filter((m) => m !== this);
@@ -142,14 +143,9 @@ class Mosquito {
     }
   }
 
-  getCurrentPosition() {
-    // Search the map for the cell containing this mosquito.
-    return this.position;
-  }
-
   migrate() {
     // Check if any neighboring cell has fewer mosquitoes. If it does, move there.
-    let currentCell = this.getCurrentPosition();
+    let currentCell = this.position;
     let currentPopulation = world.map[currentCell.y][currentCell.x].length;
     let bestCell = currentCell;
     let bestPopulation = currentPopulation;
@@ -222,7 +218,7 @@ class Mosquito {
 
     this.breedingCooldown = 4;
 
-    let currentCell = this.getCurrentPosition();
+    let currentCell = this.position;
     // If both parents are infected, the child has a mom.infection.rescueRate chance of surviving, in which case it inherits one of the parents' infections.
     // If the dad is infected but the mom is not, the child has a dad.infection.killRate chance of immediately dying, otherwise it inherits the dad's infection.
     // If the mom is infected but the dad is not, the child survives, but inherits the mom's infection.
@@ -237,7 +233,7 @@ class Mosquito {
         if (Math.random() < mom.infected.rescueRate) {
           let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
           world.map[currentCell.y][currentCell.x].push(child);
-          child.position = currentCell;
+          child.birthplace = child.position = currentCell;
           allMosquitoes.push(child);
         }
       }
@@ -248,7 +244,7 @@ class Mosquito {
         }
         let child = new Mosquito(dad.infected, dad.fitness, mom.fitness);
         world.map[currentCell.y][currentCell.x].push(child);
-        child.position = currentCell;
+        child.birthplace = child.position = currentCell;
         allMosquitoes.push(child);
         return;
       }
@@ -256,14 +252,14 @@ class Mosquito {
       else if (dad.infected === 0 && mom.infected !== 0) {
         let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
         world.map[currentCell.y][currentCell.x].push(child);
-        child.position = currentCell;
+        child.birthplace = child.position = currentCell;
         allMosquitoes.push(child);
         return;
       } else {
         // If neither parent is infected…
         let child = new Mosquito(0, dad.fitness, mom.fitness);
         world.map[currentCell.y][currentCell.x].push(child);
-        child.position = currentCell;
+        child.birthplace = child.position = currentCell;
         allMosquitoes.push(child);
       }
     }
@@ -293,7 +289,7 @@ class World {
         for (let i = 0; i < numberOfMosquitoes; i++) {
           let mosquito = new Mosquito();
           this.map[y][x].push(mosquito);
-          mosquito.position = { x, y };
+          mosquito.birthplace = mosquito.position = { x, y };
           allMosquitoes.push(mosquito);
         }
       }
@@ -396,7 +392,7 @@ function mosquitoDay(population) {
   // Assign each male to their cell.
   for (let mosquito of population) {
     if (mosquito.sex === 1) {
-      let currentCell = mosquito.getCurrentPosition();
+      let currentCell = mosquito.position;
       males[currentCell.y][currentCell.x].push(mosquito);
     }
   }
@@ -404,7 +400,7 @@ function mosquitoDay(population) {
   for (let mosquito of population) {
     // Migrate and reproduce.
     mosquito.migrate();
-    let currentCell = mosquito.getCurrentPosition();
+    let currentCell = mosquito.position;
 
     // If mosquito is female, reproduce.
     if (mosquito.sex === 0) {
