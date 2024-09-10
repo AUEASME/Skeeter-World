@@ -87,13 +87,23 @@ class Wolbachia {
  */
 
 
-class Plasmid {
-  constructor(effect) {
-    // If the effect is negative, the plasmid is producing a toxin.
-    // If the effect is positive, the plasmid is producing a beneficial protein/antitoxin.
-    this.effect = effect;
+class Gene {
+  constructor() {
+    // Set the type to either 0 (antitoxin) or 1 (nitrogen transporter).
+    this.type = Math.round(Math.random());
+    // Set the effectivness to a random value between 0 and 1.
+    this.effectiveness = Math.random();
   }
 }
+
+
+class Plasmid {
+  constructor() {
+    // Add a random gene.
+    this.gene = new Gene();
+  }
+}
+
 
 /**************************************
  * MOSQUITO CLASS, METHODS, AND SETUP *
