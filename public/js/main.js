@@ -67,6 +67,26 @@ class Wolbachia {
   }
 }
 
+
+/**
+ * ANTITOXIN-FIRST STRATEGY:
+ * In an "anti-toxin first" scenario, as this paper proposes, a TA system can evolve when the A gene provides some *environmental* advantage to the host, such as resistance to a toxin produced by a competitor.
+ * The T gene is then "recruited" to extend the local advantage of the partner A gene.
+ * TOXIN-FIRST STRATEGY:
+ * A "toxin-first" route may also be possible, if we assume the toxin is *not* harmful in all contexts. Some compounds may be toxic in some environments, but beneficial in others.
+ * "…conditionally expressed proteins that transport nitrogenous compounds when preferred sources of nitrogen are limiting can be both adaptive and either deleterious or lethal depending on the environment.
+ * "In a nitrogen-limiting environment in which amino acids may be prevalent, an amino acid transporter is adaptive. However, in the same environment with toxic amino acid analogues, expression of the transporter may be deleterious or lethal.
+ * "Similarly, transporters can suppress the effects of mutations in biosynthetic pathways, being adaptive when the essential metabolite cannot be made,
+ * "but deleterious when a toxic analogue is also present. In both cases, toxicity is an environment-dependent side-effect of an otherwise adaptive trait."
+ * 
+ * Environment can be rich in amino acids or toxic amino acid analogues.
+ * Environment can also be rich or lacking in nitrogenous compounds.
+ * Genes can compensate for lack of nitrogen by absorbing amino acids or their toxic analogues, with the fitness cost/benefit being dependent on the ratio of amino acids to toxic analogues.
+ * Genes can also provide resistance to toxic analogues.
+ * Genes can be on plasmids or in the chromosome. Mutation rate determines transfer between plasmids and chromosome.
+ */
+
+
 class Plasmid {
   constructor(effect) {
     // If the effect is negative, the plasmid is producing a toxin.
