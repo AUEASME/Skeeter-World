@@ -58,7 +58,7 @@ class Wolbachia {
   }
 
   reproduce() {
-    console.log("Working on it.")
+    console.log("Working on it.");
     // When the bacteria reproduces, the plasmids are split between the two daughter cells.
     // Of course, most bacteria only have about ten plasmids each, so when the mosquitoes reproduce... most Wolbachia would be left with no plasmids.
     // So we'll somehow need to simulate plasmid reproduction...
@@ -66,7 +66,6 @@ class Wolbachia {
     // Then it realistically simulates the cell divisions of Wolbachia to cover all the mosquito offspring.
   }
 }
-
 
 /**
  * ANTITOXIN-FIRST STRATEGY:
@@ -78,14 +77,13 @@ class Wolbachia {
  * "In a nitrogen-limiting environment in which amino acids may be prevalent, an amino acid transporter is adaptive. However, in the same environment with toxic amino acid analogues, expression of the transporter may be deleterious or lethal.
  * "Similarly, transporters can suppress the effects of mutations in biosynthetic pathways, being adaptive when the essential metabolite cannot be made,
  * "but deleterious when a toxic analogue is also present. In both cases, toxicity is an environment-dependent side-effect of an otherwise adaptive trait."
- * 
+ *
  * Environment can be rich in amino acids or toxic amino acid analogues.
  * Environment can also be rich or lacking in nitrogenous compounds.
  * Genes can compensate for lack of nitrogen by absorbing amino acids or their toxic analogues, with the fitness cost/benefit being dependent on the ratio of amino acids to toxic analogues.
  * Genes can also provide resistance to toxic analogues.
  * Genes can be on plasmids or in the chromosome. Mutation rate determines transfer between plasmids and chromosome.
  */
-
 
 class Gene {
   constructor() {
@@ -96,14 +94,12 @@ class Gene {
   }
 }
 
-
 class Plasmid {
   constructor() {
     // Add a random gene.
     this.gene = new Gene();
   }
 }
-
 
 /**************************************
  * MOSQUITO CLASS, METHODS, AND SETUP *
@@ -327,11 +323,32 @@ let allMosquitoes = [];
 
 class World {
   constructor(width, height) {
+    // Generate an empty map of the given width and height.
     this.width = width;
     this.height = height;
     this.map = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0).map(() => []));
+
+    // Generate random distributions of nitrogen.
+    this.nitro = new Array(height)
+      .fill(0)
+      .map(() => new Array(width).fill(0).map(() => []));
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        this.nitro[y][x] = Math.random();
+      }
+    }
+
+    // Generate random distributions of amino acids (the reciprocal will be toxic analogues).
+    this.amino = new Array(height)
+      .fill(0)
+      .map(() => new Array(width).fill(0).map(() => []));
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        this.amino[y][x] = Math.random();
+      }
+    }
   }
 
   populate() {
