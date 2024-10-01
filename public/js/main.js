@@ -210,26 +210,29 @@ class Wolbachia {
  **************************************/
 
 class Mosquito {
-  constructor(infected, dad_fitness, mom_fitness) {
+  constructor(infected, dad, mom) {
     // this.sex can be 0 (female) or 1 (male).
     this.sex = Math.round(Math.random());
     // this.infected can be 0 (not infected) or 1 (infected).
-    if (infected === undefined || infected === 0) {
-      this.infected = 0;
-    } else {
-      // Make a copy of the Wolbachia object passed in.
-      this.infected = structuredClone(infected);
+    this.infected = [];
+    // If infected is an array, make a structured clone of all the Wolbachia in the array.
+    if (infected) {
+      this.infected = infected.map((w) => structuredClone(w));
     }
 
-    // this.fitness is the average of the fitness of the parents.
+    // Generate a random fitness value.
     this.fitness = Math.random();
-    if (dad_fitness && mom_fitness) {
-      this.fitness = (dad_fitness + mom_fitness) / 2;
-    }
-    if (this.infected !== 0) {
-      this.fitness = this.infected.symbioteRate;
-    }
+
+    // Position is set by outside code.
     this.position = { x: 0, y: 0 };
+
+    // If this mosquito is the child of two other mosquitoes, override the random values.
+    if (dad && mom) {
+      this.fitness = (dad.fitness + mom.fitness) / 2;
+      this.position = mom.position;
+    }
+
+    // Birthplace is IMMUTABLE — it is set when the mosquito is created and never changes.
     this.birthplace = this.position;
 
     /**
@@ -242,6 +245,7 @@ class Mosquito {
     this.age = 0;
     // "but a single female mosquito may produce up to 10 broods throughout her life."
     this.breedingCooldown = 0;
+    this.reproductiveSuccessRate = 1;
 
     // Wolbachia produces toxins and antidotes.
     // So each mosquito has a resevoir of toxins and antidotes produced each day.
@@ -249,6 +253,10 @@ class Mosquito {
     // On death, the mosquito releases those chemicals into the environment.
     this.toxins = [];
     this.antitoxins = [];
+  }
+
+  evaluateReproductiveSuccess() {
+    this.reproductiveSuccessRate = evaluateToxinStatus(this);
   }
 
   evaluateFitness() {
@@ -378,39 +386,16 @@ class Mosquito {
       mom = this;
     let number_of_eggs = Math.floor(Math.random() * 100);
     for (let i = 0; i < number_of_eggs; i++) {
-      // If both parents are infected…
-      if (dad.infected !== 0 && mom.infected !== 0) {
-        if (Math.random() < mom.infected.rescueRate) {
-          let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
-          world.map[currentCell.y][currentCell.x].push(child);
-          child.birthplace = child.position = currentCell;
-          allMosquitoes.push(child);
-        }
+      // First, if the father is infected, we need to determine if the sperm survives.
+      let spermSurvives = true;
+      if (dad.infected !== 0) {
+        spermSurvives = Math.random() < dad.infected.symbioteRate;
       }
-      // If the dad is infected but the mom is not…
-      else if (dad.infected !== 0 && mom.infected === 0) {
-        if (Math.random() < dad.infected.killRate) {
-          return;
-        }
-        let child = new Mosquito(dad.infected, dad.fitness, mom.fitness);
-        world.map[currentCell.y][currentCell.x].push(child);
-        child.birthplace = child.position = currentCell;
-        allMosquitoes.push(child);
-        return;
-      }
-      // If the mom is infected but the dad is not…
-      else if (dad.infected === 0 && mom.infected !== 0) {
+
+      if (spermSurvives) {
         let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
         world.map[currentCell.y][currentCell.x].push(child);
-        child.birthplace = child.position = currentCell;
-        allMosquitoes.push(child);
-        return;
-      } else {
-        // If neither parent is infected…
-        let child = new Mosquito(0, dad.fitness, mom.fitness);
-        world.map[currentCell.y][currentCell.x].push(child);
-        child.birthplace = child.position = currentCell;
-        allMosquitoes.push(child);
+        child.position = currentCell;
       }
     }
   }
