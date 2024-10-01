@@ -2,16 +2,19 @@
  * HELPER FUNCTIONS *
  ********************/
 
+let mockConsole = null;
+
 function logAndMockConsole(text) {
   console.log(text);
 
-  // Get #mock__console div.
-  let mockConsole = document.getElementById("mock__console");
+  if (mockConsole === null) {
+    mockConsole = document.getElementById("mock__console");
+  }
+
   // Create a new paragraph element.
   let p = document.createElement("p");
   // Set the text content of the paragraph element to the text passed in.
-  let currentTime = new Date().toLocaleTimeString();
-  p.textContent = `[${currentTime}] ${text}`;
+  p.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
   // Append the paragraph element to the mock console.
   mockConsole.appendChild(p);
   // If there are more than 32 children in the mock console, remove the first one.
@@ -20,52 +23,26 @@ function logAndMockConsole(text) {
   }
 }
 
-/*******************
- * WOLBACHIA CLASS *
- *******************/
+function lockAndKeyMatch(firstString = "0000", secondString = "0000") {
+  // Ensure the strings are the same length.
+  if (firstString.length !== secondString.length) {
+    return 0;
+  }
 
-class Wolbachia {
-  constructor(killRate, rescueRate, symbioteRate, selfMutationRate) {
-    // Kill rate should scale with the amount of toxin produced in the bacteria by its plasmids.
-    // If there are five toxin plasmids and only four antitoxin plasmids... the kill rate should be... the toxicity of the fifth toxin plasmid?
-    if (killRate === undefined) {
-      this.killRate = Math.random();
-    } else {
-      this.killRate = killRate;
-    }
-
-    // Rescue rate should scale with the amount of antitoxin produced in the bacteria by its plasmids.
-    if (rescueRate === undefined) {
-      this.rescueRate = Math.random();
-    } else {
-      this.rescueRate = rescueRate;
-    }
-
-    // The antitoxins probably have an environmental benefit.
-    // So high levels of antitoxin production should benefit the overall fitness of the bacteria.
-    if (symbioteRate === undefined) {
-      this.symbioteRate = 0.5 + Math.random();
-    } else {
-      this.symbioteRate = 1.0 + symbioteRate;
-    }
-
-    // If the bacteria mutates... it might... incorporate a plasmid into its own DNA?
-    if (selfMutationRate === undefined) {
-      this.selfMutationRate = Math.random();
-    } else {
-      this.selfMutationRate = selfMutationRate;
+  // Return a value between 0 and 1, where 0 means the strings are completely different and 1 means they are identical.
+  let matches = 0;
+  for (let i = 0; i < firstString.length; i++) {
+    if (firstString[i] === secondString[i]) {
+      matches++;
     }
   }
 
-  reproduce() {
-    console.log("Working on it.");
-    // When the bacteria reproduces, the plasmids are split between the two daughter cells.
-    // Of course, most bacteria only have about ten plasmids each, so when the mosquitoes reproduce... most Wolbachia would be left with no plasmids.
-    // So we'll somehow need to simulate plasmid reproduction...
-    // Okay, so reproduce() should take a number as an argument, that being the number of mosquitoes being produced.
-    // Then it realistically simulates the cell divisions of Wolbachia to cover all the mosquito offspring.
-  }
+  return matches / firstString.length;
 }
+
+/*********************
+ * WOLBACHIA CLASSES *
+ *********************/
 
 /**
  * ANTITOXIN-FIRST STRATEGY:
@@ -77,27 +54,107 @@ class Wolbachia {
  * "In a nitrogen-limiting environment in which amino acids may be prevalent, an amino acid transporter is adaptive. However, in the same environment with toxic amino acid analogues, expression of the transporter may be deleterious or lethal.
  * "Similarly, transporters can suppress the effects of mutations in biosynthetic pathways, being adaptive when the essential metabolite cannot be made,
  * "but deleterious when a toxic analogue is also present. In both cases, toxicity is an environment-dependent side-effect of an otherwise adaptive trait."
- *
- * Environment can be rich in amino acids or toxic amino acid analogues.
- * Environment can also be rich or lacking in nitrogenous compounds.
- * Genes can compensate for lack of nitrogen by absorbing amino acids or their toxic analogues, with the fitness cost/benefit being dependent on the ratio of amino acids to toxic analogues.
- * Genes can also provide resistance to toxic analogues.
- * Genes can be on plasmids or in the chromosome. Mutation rate determines transfer between plasmids and chromosome.
  */
 
 class Gene {
-  constructor() {
-    // Set the type to either 0 (antitoxin) or 1 (nitrogen transporter).
-    this.type = Math.round(Math.random());
-    // Set the effectivness to a random value between 0 and 1.
-    this.effectiveness = Math.random();
+  constructor(producer = false) {
+    // Set the type to either 0 (production), 1 (uptake), or 2 (resistance).
+    if (producer) {
+      this.type = 0;
+    } else {
+      // Randomly choose between 1 and 2.
+      this.type = Math.floor(Math.random() * 2) + 1;
+    }
+    // Set the chemical to a random binary string of length 4.
+    this.chemical = "0000";
+    for (let i = 0; i < 4; i++) {
+      // Flip a coin. If heads, set the ith character to 1.
+      if (Math.random() < 0.5) {
+        this.chemical =
+          this.chemical.substring(0, i) + "1" + this.chemical.substring(i + 1);
+      }
+    }
   }
 }
 
-class Plasmid {
-  constructor() {
-    // Add a random gene.
-    this.gene = new Gene();
+class Wolbachia {
+  constructor(random = false) {
+    // The genome is mostly IMMUTABLE — once a gene is added to it, it cannot be removed.
+    // The genome is copied from the parent when the bacteria reproduces.
+    this.genome = [];
+    // If random is true, generate a random genome.
+    if (random) {
+      for (let i = 0; i < 2; i++) {
+        this.genome.push(new Gene());
+      }
+    }
+
+    // Plasmids are mutable — they can be lost during reproduction.
+    this.plasmids = [];
+    // If random is true, generate a random number of plasmids.
+    if (random) {
+      for (let i = 0; i < 5; i++) {
+        this.plasmids.push(new Gene());
+      }
+    }
+  }
+
+  reproduce(num_offspring) {
+    // When the bacteria reproduces, the plasmids are split between the two daughter cells.
+    // Of course, most bacteria only have about ten plasmids each, so when the mosquitoes reproduce... most Wolbachia would be left with no plasmids.
+    // So we'll somehow need to simulate plasmid reproduction...
+    // Okay, so reproduce() should take a number as an argument, that being the number of mosquitoes being produced.
+    // Then it realistically simulates the cell divisions of Wolbachia to cover all the mosquito offspring.
+
+    let offspring = [];
+
+    for (let i = 0; i < num_offspring; i++) {
+      let newWolbachia = new Wolbachia();
+
+      // Copy the genome.
+      newWolbachia.genome = this.genome.slice();
+
+      // Copy the plasmids.
+      newWolbachia.plasmids = this.plasmids.slice();
+
+      // Randomly remove half the plasmids.
+      newWolbachia.plasmids = newWolbachia.plasmids.filter(
+        () => Math.random() > 0.5
+      );
+
+      // Randomly duplicate plasmids from the child until we're back to the original number.
+      while (newWolbachia.plasmids.length < this.plasmids.length) {
+        let randomPlasmid = structuredClone(
+          newWolbachia.plasmids[
+            Math.floor(Math.random() * newWolbachia.plasmids.length)
+          ]
+        );
+        newWolbachia.plasmids.push(randomPlasmid);
+      }
+
+      offspring.push(newWolbachia);
+    }
+
+    return offspring;
+  }
+
+  conjugate(mate) {
+    // Choose a random plasmid.
+    let randomPlasmid =
+      this.plasmids[Math.floor(Math.random() * this.plasmids.length)];
+
+    // Duplicate that plasmid into the plasmid array of the mate.
+    mate.plasmids.push(structuredClone(randomPlasmid));
+  }
+
+  integrate() {
+    // Choose a random plasmid.
+    let randomPlasmid =
+      this.plasmids[Math.floor(Math.random() * this.plasmids.length)];
+
+    // Move it from the plasmid array to the genome array.
+    this.genome.push(structuredClone(randomPlasmid));
+    this.plasmids = this.plasmids.filter((p) => p !== randomPlasmid);
   }
 }
 
@@ -114,22 +171,9 @@ class Mosquito {
       this.infected = 0;
     } else {
       // Make a copy of the Wolbachia object passed in.
-      this.infected = new Wolbachia(
-        infected.killRate,
-        infected.rescueRate,
-        infected.symbioteRate,
-        infected.selfMutationRate
-      );
-
-      if (infected.selfMutationRate < Math.random()) {
-        // Modulate killRate by .01 in either direction.
-        this.infected.killRate += Math.random() * 0.02 - 0.01;
-        // Modulate rescueRate by .01 in either direction.
-        this.infected.rescueRate += Math.random() * 0.02 - 0.01;
-        // Modulate symbioteRate by .01 in either direction.
-        this.infected.symbioteRate += Math.random() * 0.02 - 0.01;
-      }
+      this.infected = structuredClone(infected);
     }
+
     // this.fitness is the average of the fitness of the parents.
     this.fitness = Math.random();
     if (dad_fitness && mom_fitness) {
@@ -140,6 +184,7 @@ class Mosquito {
     }
     this.position = { x: 0, y: 0 };
     this.birthplace = this.position;
+
     /**
      * Mosquito life cycle:
      * 1. Egg stage: approximately 2-3 days.
@@ -150,6 +195,20 @@ class Mosquito {
     this.age = 0;
     // "but a single female mosquito may produce up to 10 broods throughout her life."
     this.breedingCooldown = 0;
+
+    // Wolbachia produces toxins and antidotes.
+    // So each mosquito has a resevoir of toxins and antidotes produced each day.
+    // The proportion of those determines reproductive success.
+    // On death, the mosquito releases those chemicals into the environment.
+    this.toxins = [];
+    this.antitoxins = [];
+  }
+
+  evaluateFitness() {
+    // Get concentrations of each chemical in current cell.
+    // If individual has a MATCHING uptake gene, increase fitness.
+    // If the individual does NOT have a matching uptake gene, decrease fitness proportional to... how many uptake genes they DO have.
+    // Increase fitness if they have a resistance gene MATCHING the uptaken toxins.
   }
 
   ageUp() {
@@ -179,14 +238,9 @@ class Mosquito {
     }
   }
 
-  changeInfectionStatus(killRate, rescueRate, symbioteRate, selfMutationRate) {
+  changeInfectionStatus() {
     if (this.infected === 0) {
-      this.infected = new Wolbachia(
-        killRate,
-        rescueRate,
-        symbioteRate,
-        selfMutationRate
-      );
+      this.infected = new Wolbachia(true);
     } else {
       this.infected = 0;
     }
@@ -326,29 +380,18 @@ class World {
     // Generate an empty map of the given width and height.
     this.width = width;
     this.height = height;
+    // Mosquitoes...
     this.map = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0).map(() => []));
-
-    // Generate random distributions of nitrogen.
-    this.nitro = new Array(height)
+    // ...environmental toxins...
+    this.toxins = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0).map(() => []));
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        this.nitro[y][x] = Math.random();
-      }
-    }
-
-    // Generate random distributions of amino acids (the reciprocal will be toxic analogues).
-    this.amino = new Array(height)
+    // ...and environmental antitoxins.
+    this.antitoxins = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0).map(() => []));
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        this.amino[y][x] = Math.random();
-      }
-    }
   }
 
   populate() {
