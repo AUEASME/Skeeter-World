@@ -1,15 +1,18 @@
+/*************************
+ * SIMULATION PARAMETERS *
+ *************************/
+
+let killRate = 0.5;
+let rescueRate = 1.0;
+
 /********************
  * HELPER FUNCTIONS *
  ********************/
 
-let mockConsole = null;
+let mockConsole = document.getElementById("mock__console");
 
 function logAndMockConsole(text) {
   console.log(text);
-
-  if (mockConsole === null) {
-    mockConsole = document.getElementById("mock__console");
-  }
 
   // Create a new paragraph element.
   let p = document.createElement("p");
@@ -38,6 +41,50 @@ function lockAndKeyMatch(firstString = "0000", secondString = "0000") {
   }
 
   return matches / firstString.length;
+}
+
+function evaluateToxinStatus(mosquito) {
+  // Okay, first off, for each toxin, we need to see if we have an EXACT MATCH antitoxin.
+  // If so, they cancel each other out, and are removed.
+  // Chance of neutralization is determined by the rescue rate.
+  for (let toxin of mosquito.toxins) {
+    for (let antitoxin of mosquito.antitoxins) {
+      if (toxin.chemical === antitoxin.chemical) {
+        if (Math.random() < rescueRate) {
+          mosquito.toxins = mosquito.toxins.filter((t) => t !== toxin);
+          mosquito.antitoxins = mosquito.antitoxins.filter(
+            (a) => a !== antitoxin
+          );
+        }
+      }
+    }
+  }
+
+  // For each remaining toxin, find the closest antitoxin match, and have a [LOCK AND KEY MATCH * RESCUE RATE] chance of neutralizing it.
+  for (let toxin of mosquito.toxins) {
+    let bestMatch = 0;
+    let bestAntitoxin = null;
+    for (let antitoxin of mosquito.antitoxins) {
+      let match = lockAndKeyMatch(toxin.chemical, antitoxin.chemical);
+      if (match > bestMatch) {
+        bestMatch = match;
+        bestAntitoxin = antitoxin;
+      }
+    }
+    if (Math.random() < bestMatch * rescueRate) {
+      mosquito.toxins = mosquito.toxins.filter((t) => t !== toxin);
+      mosquito.antitoxins = mosquito.antitoxins.filter(
+        (a) => a !== bestAntitoxin
+      );
+    }
+  }
+
+  // If any toxins are left... the mosquito has a... reduced chance of reproducing.
+  // How do we calculate that value? Should it be user-determined? Kill rate?
+  // If the kill rate is .5, each toxin remaining has a 50% chance of killing... each offspring.
+  // So if there are 3 toxins, the mosquito has a 12.5% chance of reproducing.
+  let reproductionSuccess = Math.pow(1 - killRate, mosquito.toxins.length);
+  return reproductionSuccess;
 }
 
 /*********************
@@ -409,7 +456,7 @@ class World {
     }
   }
 
-  infectMale(killRate, rescueRate, symbioteRate, mutationRate) {
+  infectMale() {
     // Find a random male and infect him.
     let males = allMosquitoes.filter((m) => m.sex === 1 && m.infected === 0);
 
@@ -422,15 +469,10 @@ class World {
     }
 
     let randomMosquito = males[Math.floor(Math.random() * males.length)];
-    randomMosquito.changeInfectionStatus(
-      killRate,
-      rescueRate,
-      symbioteRate,
-      mutationRate
-    );
+    randomMosquito.changeInfectionStatus();
   }
 
-  infectFemale(killRate, rescueRate, symbioteRate, mutationRate) {
+  infectFemale() {
     // Find a random female and infect her.
     let females = allMosquitoes.filter((m) => m.sex === 0 && m.infected === 0);
 
@@ -443,12 +485,7 @@ class World {
     }
 
     let randomMosquito = females[Math.floor(Math.random() * females.length)];
-    randomMosquito.changeInfectionStatus(
-      killRate,
-      rescueRate,
-      symbioteRate,
-      mutationRate
-    );
+    randomMosquito.changeInfectionStatus();
   }
 }
 
@@ -647,14 +684,7 @@ function startSimulation(event) {
   // Prevent default form submission.
   event.preventDefault();
 
-  let formCapacity = document.getElementById("capacity").value || 64;
-  if (formCapacity < 1) {
-    alert("Carrying capacity must be at least 1.");
-    return;
-  } else if (formCapacity !== carryingCapacity) {
-    carryingCapacity = formCapacity;
-  }
-
+  // Get initial infection parameters.
   let infectedMaleCount = document.getElementById("infected__males").value || 0;
   if (infectedMaleCount < 0) {
     alert("Infected male count cannot be less than zero.");
@@ -669,38 +699,13 @@ function startSimulation(event) {
     return;
   }
 
-  let killRate = document.getElementById("kill__rate").value || undefined;
-  if (killRate > 1 || killRate < 0) {
-    alert("Kill rate must be between 0 and 1.");
-    return;
-  }
-  let rescueRate = document.getElementById("rescue__rate").value || undefined;
-  if (rescueRate > 1 || rescueRate < 0) {
-    alert("Rescue rate must be between 0 and 1.");
-    return;
-  }
-  let symbioteRate =
-    document.getElementById("symbiote__rate").value || undefined;
-  if (symbioteRate > 1 || symbioteRate < -1) {
-    alert("Symbiote rate must be between -1 and 1.");
-    return;
-  } else {
-    // Divide by 2 so that the rate is between -0.5 and 0.5.
-    symbioteRate /= 2;
-  }
-  let mutationRate =
-    document.getElementById("mutation__rate").value || undefined;
-  if (mutationRate > 1 || mutationRate < 0) {
-    alert("Mutation rate must be between 0 and 1.");
-    return;
-  }
   // Delete form.
   let form = document.getElementById("start__params");
   form.remove();
 
   // Show mock console.
-  let mockConsole = document.getElementById("mock__console");
   mockConsole.style.display = "flex";
+  // Show stop button.
   let stopButton = document.getElementById("stop");
   stopButton.style.display = "block";
   // Show plot.
@@ -709,9 +714,11 @@ function startSimulation(event) {
   // Show world.
   let worldCanvas = document.getElementById("world");
   worldCanvas.style.display = "block";
+  // Show key.
   let key = document.getElementById("key");
   key.style.display = "flex";
 
+  // Set up the world.
   world.populate();
   for (let i = 0; i < infectedMaleCount; i++) {
     world.infectMale(killRate, rescueRate, symbioteRate, mutationRate);
@@ -719,8 +726,8 @@ function startSimulation(event) {
   for (let i = 0; i < infectedFemaleCount; i++) {
     world.infectFemale(killRate, rescueRate, symbioteRate, mutationRate);
   }
-
   renderWorld();
+
   // Once per second, update the world.
   simulationIntervalID = setInterval(updateWorld, 1000);
 }
