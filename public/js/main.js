@@ -39,32 +39,31 @@ function lockAndKeyMatch(firstString = "0000", secondString = "0000") {
       matches++;
     }
   }
-
   return matches / firstString.length;
 }
 
-function evaluateToxinStatus(mosquito) {
+function evaluateToxinStatus(dad, mom) {
   // Okay, first off, for each toxin, we need to see if we have an EXACT MATCH antitoxin.
   // If so, they cancel each other out, and are removed.
   // Chance of neutralization is determined by the rescue rate.
-  for (let toxin of mosquito.toxins) {
-    for (let antitoxin of mosquito.antitoxins) {
+  let dadToxins = dad.toxins;
+  let momToxins = mom.toxins;
+  for (let toxin of dadToxins) {
+    for (let antitoxin of momToxins) {
       if (toxin.chemical === antitoxin.chemical) {
         if (Math.random() < rescueRate) {
-          mosquito.toxins = mosquito.toxins.filter((t) => t !== toxin);
-          mosquito.antitoxins = mosquito.antitoxins.filter(
-            (a) => a !== antitoxin
-          );
+          dadToxins = dadToxins.filter((t) => t !== toxin);
+          momToxins = momToxins.filter((a) => a !== antitoxin);
         }
       }
     }
   }
 
   // For each remaining toxin, find the closest antitoxin match, and have a [LOCK AND KEY MATCH * RESCUE RATE] chance of neutralizing it.
-  for (let toxin of mosquito.toxins) {
+  for (let toxin of dadToxins) {
     let bestMatch = 0;
     let bestAntitoxin = null;
-    for (let antitoxin of mosquito.antitoxins) {
+    for (let antitoxin of momToxins) {
       let match = lockAndKeyMatch(toxin.chemical, antitoxin.chemical);
       if (match > bestMatch) {
         bestMatch = match;
@@ -72,17 +71,16 @@ function evaluateToxinStatus(mosquito) {
       }
     }
     if (Math.random() < bestMatch * rescueRate) {
-      mosquito.toxins = mosquito.toxins.filter((t) => t !== toxin);
-      mosquito.antitoxins = mosquito.antitoxins.filter(
-        (a) => a !== bestAntitoxin
-      );
+      dadToxins = dadToxins.filter((t) => t !== toxin);
+      momToxins = momToxins.filter((a) => a !== bestAntitoxin);
     }
   }
 
   // If any toxins are left... the mosquito has a... reduced chance of reproducing.
   // How do we calculate that value? Should it be user-determined? Kill rate?
   // If the kill rate is .5, each toxin remaining has a 50% chance of killing... each offspring.
-  // So if there are 3 toxins, the mosquito has a 12.5% chance of reproducing.
+  // So if there are 3 toxins, the mosquito has a 12.5% chance of successfully reproducing.
+  // Or rather, each offspring has a 12.5% chance of surviving.
   let reproductionSuccess = Math.pow(1 - killRate, mosquito.toxins.length);
   return reproductionSuccess;
 }
@@ -217,7 +215,7 @@ class Mosquito {
     this.infected = [];
     // If infected is an array, make a structured clone of all the Wolbachia in the array.
     if (infected) {
-      this.infected = infected.map((w) => structuredClone(w));
+      this.infected = infected;
     }
 
     // Generate a random fitness value.
@@ -245,25 +243,18 @@ class Mosquito {
     this.age = 0;
     // "but a single female mosquito may produce up to 10 broods throughout her life."
     this.breedingCooldown = 0;
-    this.reproductiveSuccessRate = 1;
 
     // Wolbachia produces toxins and antidotes.
-    // So each mosquito has a resevoir of toxins and antidotes produced each day.
+    // So each mosquito has a concentration of toxins and antidotes produced each day.
     // The proportion of those determines reproductive success.
-    // On death, the mosquito releases those chemicals into the environment.
     this.toxins = [];
     this.antitoxins = [];
   }
 
-  evaluateReproductiveSuccess() {
-    this.reproductiveSuccessRate = evaluateToxinStatus(this);
-  }
-
   evaluateFitness() {
-    // Get concentrations of each chemical in current cell.
-    // If individual has a MATCHING uptake gene, increase fitness.
-    // If the individual does NOT have a matching uptake gene, decrease fitness proportional to... how many uptake genes they DO have.
-    // Increase fitness if they have a resistance gene MATCHING the uptaken toxins.
+    console.log("Working on it.");
+    // Antitoxins in females should increase fitness.
+    // Toxins in males... should NOT affect fitness?
   }
 
   ageUp() {
@@ -387,15 +378,28 @@ class Mosquito {
     let number_of_eggs = Math.floor(Math.random() * 100);
     for (let i = 0; i < number_of_eggs; i++) {
       // First, if the father is infected, we need to determine if the sperm survives.
-      let spermSurvives = true;
       if (dad.infected !== 0) {
-        spermSurvives = Math.random() < dad.infected.symbioteRate;
-      }
+        // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
+        if (Math.random() < evaluateToxinStatus(dad, mom)) {
+          // Sperm survives.
+          // Create a new infection from the parents' infections.
+          let mixedInfection = [];
+          for (let i = 0; i < dad.infected.length; i++) {
+            if (Math.random() < 0.5) {
+              mixedInfection.push(structuredClone(dad.infected[i]));
+            }
+          }
+          for (let i = 0; i < mom.infected.length; i++) {
+            if (Math.random() < 0.5) {
+              mixedInfection.push(structuredClone(mom.infected[i]));
+            }
+          }
 
-      if (spermSurvives) {
-        let child = new Mosquito(mom.infected, dad.fitness, mom.fitness);
-        world.map[currentCell.y][currentCell.x].push(child);
-        child.position = currentCell;
+          // Create a new mosquito with the mixed infection and place it in the current cell.
+          let child = new Mosquito(mixedInfection, dad.fitness, mom.fitness);
+          world.map[currentCell.y][currentCell.x].push(child);
+          child.position = currentCell;
+        }
       }
     }
   }
