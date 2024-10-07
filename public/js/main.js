@@ -47,13 +47,13 @@ function evaluateToxinStatus(dad, mom) {
   // If so, they cancel each other out, and are removed.
   // Chance of neutralization is determined by the rescue rate.
   let dadToxins = dad.toxins;
-  let momToxins = mom.toxins;
+  let momAntitoxins = mom.antitoxins;
   for (let toxin of dadToxins) {
-    for (let antitoxin of momToxins) {
+    for (let antitoxin of momAntitoxins) {
       if (toxin.chemical === antitoxin.chemical) {
         if (Math.random() < rescueRate) {
           dadToxins = dadToxins.filter((t) => t !== toxin);
-          momToxins = momToxins.filter((a) => a !== antitoxin);
+          momAntitoxins = momAntitoxins.filter((a) => a !== antitoxin);
         }
       }
     }
@@ -63,7 +63,7 @@ function evaluateToxinStatus(dad, mom) {
   for (let toxin of dadToxins) {
     let bestMatch = 0;
     let bestAntitoxin = null;
-    for (let antitoxin of momToxins) {
+    for (let antitoxin of momAntitoxins) {
       let match = lockAndKeyMatch(toxin.chemical, antitoxin.chemical);
       if (match > bestMatch) {
         bestMatch = match;
@@ -72,7 +72,7 @@ function evaluateToxinStatus(dad, mom) {
     }
     if (Math.random() < bestMatch * rescueRate) {
       dadToxins = dadToxins.filter((t) => t !== toxin);
-      momToxins = momToxins.filter((a) => a !== bestAntitoxin);
+      momAntitoxins = momAntitoxins.filter((a) => a !== bestAntitoxin);
     }
   }
 
@@ -81,8 +81,7 @@ function evaluateToxinStatus(dad, mom) {
   // If the kill rate is .5, each toxin remaining has a 50% chance of killing... each offspring.
   // So if there are 3 toxins, the mosquito has a 12.5% chance of successfully reproducing.
   // Or rather, each offspring has a 12.5% chance of surviving.
-  let reproductionSuccess = Math.pow(1 - killRate, mosquito.toxins.length);
-  return reproductionSuccess;
+  return Math.pow(1 - killRate, dad.toxins.length);
 }
 
 /*********************
@@ -102,14 +101,10 @@ function evaluateToxinStatus(dad, mom) {
  */
 
 class Gene {
-  constructor(producer = false) {
-    // Set the type to either 0 (production), 1 (uptake), or 2 (resistance).
-    if (producer) {
-      this.type = 0;
-    } else {
-      // Randomly choose between 1 and 2.
-      this.type = Math.floor(Math.random() * 2) + 1;
-    }
+  constructor() {
+    // Randomly choose a type (0 for toxin, 1 for antitoxin).
+    this.type = Math.round(Math.random());
+    
     // Set the chemical to a random binary string of length 4.
     this.chemical = "0000";
     for (let i = 0; i < 4; i++) {
