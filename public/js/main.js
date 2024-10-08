@@ -222,6 +222,16 @@ class Wolbachia {
           (randomPlasmid.chemical[randomIndex] === "0" ? "1" : "0") +
           randomPlasmid.chemical.substring(randomIndex + 1);
       }
+
+      // If plasmid array is less than eight, slight chance to create a new plasmid.
+      if (newWolbachia.plasmids.length < 8 && Math.random() < 0.05) {
+        newWolbachia.plasmids.push(new Gene());
+      }
+
+      // If gene array is less than four, slight chance to integrate a plasmid into the genome.
+      if (newWolbachia.genome.length < 4 && Math.random() < 0.05) {
+        this.integrate();
+      }
     }
 
     return offspring;
