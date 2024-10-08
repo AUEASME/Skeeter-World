@@ -498,7 +498,9 @@ class World {
 
   infectMale() {
     // Find a random male and infect him.
-    let males = allMosquitoes.filter((m) => m.sex === 1 && m.infected.length === 0);
+    let males = allMosquitoes.filter(
+      (m) => m.sex === 1 && m.infected.length === 0
+    );
 
     if (males.length === 0) {
       // Select a random mosquito and change its sex.
@@ -514,7 +516,9 @@ class World {
 
   infectFemale() {
     // Find a random female and infect her.
-    let females = allMosquitoes.filter((m) => m.sex === 0 && m.infected.length === 0);
+    let females = allMosquitoes.filter(
+      (m) => m.sex === 0 && m.infected.length === 0
+    );
 
     if (females.length === 0) {
       // Select a random mosquito and change its sex.
@@ -526,6 +530,64 @@ class World {
 
     let randomMosquito = females[Math.floor(Math.random() * females.length)];
     randomMosquito.changeInfectionStatus();
+  }
+
+  getAverageToxinCountInMales() {
+    // Get all males in the world.
+    const males = allMosquitoes.filter(
+      (m) => m.sex === 1 && m.infected.length > 0
+    );
+
+    // Get all unique toxins produced inside that male.
+    let lengths = [];
+    for (let m of males) {
+      let toxins = new Set();
+      for (let w of m.infected) {
+        for (let g of w.genome) {
+          if (g.type === 0) {
+            toxins.add(g.chemical);
+          }
+        }
+        for (let g of w.plasmids) {
+          if (g.type === 0) {
+            toxins.add(g.chemical);
+          }
+        }
+      }
+      lengths.push(toxins.size);
+    }
+
+    // Return the average number of unique toxins.
+    return lengths.reduce((acc, l) => acc + l, 0) / lengths.length;
+  }
+
+  get AverageAntitoxinCountInFemales() {
+    // Get all females in the world.
+    const females = allMosquitoes.filter(
+      (m) => m.sex === 0 && m.infected.length > 0
+    );
+
+    // Get all unique antitoxins produced inside each male.
+    let lengths = [];
+    for (let f of females) {
+      let antitoxins = new Set();
+      for (let w of f.infected) {
+        for (let g of w.genome) {
+          if (g.type === 1) {
+            antitoxins.add(g.chemical);
+          }
+        }
+        for (let g of w.plasmids) {
+          if (g.type === 1) {
+            antitoxins.add(g.chemical);
+          }
+        }
+      }
+      lengths.push(antitoxins.size);
+    }
+
+    // Return the average number of unique antitoxins.
+    return lengths.reduce((acc, l) => acc + l, 0) / lengths.length;
   }
 }
 
@@ -626,9 +688,32 @@ let trace2 = {
   marker: { color: "HotPink" },
 };
 
+let trace3 = {
+  x: [],
+  y: [],
+  name: "Average Toxin Count in Each Male",
+  type: "scatter",
+  mode: "lines",
+  marker: { color: "blue" },
+};
+
+let trace4 = {
+  x: [],
+  y: [],
+  name: "Average Antitoxin Count in Each Female",
+  type: "scatter",
+  mode: "lines",
+  marker: { color: "green" },
+};
+
 function updatePlot(generation) {
-  let uninfectedCount = allMosquitoes.filter((m) => m.infected.length === 0).length;
-  let infectedCount = allMosquitoes.filter((m) => m.infected.length !== 0).length;
+  // Update infection plot.
+  let uninfectedCount = allMosquitoes.filter(
+    (m) => m.infected.length === 0
+  ).length;
+  let infectedCount = allMosquitoes.filter(
+    (m) => m.infected.length !== 0
+  ).length;
 
   trace1.x.push(generation);
   trace1.y.push(uninfectedCount);
@@ -647,6 +732,44 @@ function updatePlot(generation) {
   };
 
   Plotly.newPlot("plot", [trace1, trace2], layout);
+
+  // Update toxin plot.
+  let averageToxinCountInMales = world.getAverageToxinCountInMales();
+  console.log(averageToxinCountInMales);
+
+  trace3.x.push(generation);
+  trace3.y.push(averageToxinCountInMales);
+
+  let layout2 = {
+    title: "Average Toxin Count in Male Mosquitoes",
+    xaxis: {
+      title: "Generation",
+    },
+    yaxis: {
+      title: "Average Toxin Count",
+    },
+  };
+
+  Plotly.newPlot("toxin__plot", [trace3], layout2);
+
+  // Update antitoxin plot.
+  let averageAntitoxinCountInFemales = world.AverageAntitoxinCountInFemales;
+  console.log(averageAntitoxinCountInFemales);
+
+  trace4.x.push(generation);
+  trace4.y.push(averageAntitoxinCountInFemales);
+
+  let layout3 = {
+    title: "Average Antitoxin Count in Female Mosquitoes",
+    xaxis: {
+      title: "Generation",
+    },
+    yaxis: {
+      title: "Average Antitoxin Count",
+    },
+  };
+
+  Plotly.newPlot("antitoxin__plot", [trace4], layout3);
 }
 
 function updateWorld() {
@@ -761,6 +884,10 @@ function startSimulation(event) {
   // Show plot.
   let plot = document.getElementById("plot");
   plot.style.display = "block";
+  let toxinPlot = document.getElementById("toxin__plot");
+  toxinPlot.style.display = "block";
+  let antitoxinPlot = document.getElementById("antitoxin__plot");
+  antitoxinPlot.style.display = "block";
   // Show world.
   let worldCanvas = document.getElementById("world");
   worldCanvas.style.display = "block";

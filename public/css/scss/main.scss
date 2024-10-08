@@ -197,7 +197,9 @@ body {
       cursor: pointer;
     }
 
-    div#plot {
+    div#plot,
+    div#toxin__plot,
+    div#antitoxin__plot {
       width: 64vw;
       padding: 0rem;
       min-height: 45vh;
