@@ -329,10 +329,10 @@ class Mosquito {
   }
 
   changeInfectionStatus() {
-    if (this.infected === 0) {
-      this.infected = new Wolbachia(true);
+    if (this.infected.length === 0) {
+      this.infected = [new Wolbachia(true)];
     } else {
-      this.infected = 0;
+      this.infected = [];
     }
   }
 
@@ -422,7 +422,7 @@ class Mosquito {
     let number_of_eggs = Math.floor(Math.random() * 100);
     for (let i = 0; i < number_of_eggs; i++) {
       // First, if the father is infected, we need to determine if the sperm survives.
-      if (dad.infected !== 0) {
+      if (dad.infected.length !== 0) {
         // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
         if (Math.random() < evaluateToxinStatus(dad, mom)) {
           // Sperm survives.
@@ -488,7 +488,7 @@ class World {
 
   infectMale() {
     // Find a random male and infect him.
-    let males = allMosquitoes.filter((m) => m.sex === 1 && m.infected === 0);
+    let males = allMosquitoes.filter((m) => m.sex === 1 && m.infected.length === 0);
 
     if (males.length === 0) {
       // Select a random mosquito and change its sex.
@@ -504,7 +504,7 @@ class World {
 
   infectFemale() {
     // Find a random female and infect her.
-    let females = allMosquitoes.filter((m) => m.sex === 0 && m.infected === 0);
+    let females = allMosquitoes.filter((m) => m.sex === 0 && m.infected.length === 0);
 
     if (females.length === 0) {
       // Select a random mosquito and change its sex.
@@ -540,7 +540,7 @@ function renderWorld() {
       let green = 255;
       let blue = 255;
       for (let mosquito of cell) {
-        if (mosquito.infected === 0) {
+        if (mosquito.infected.length === 0) {
           green -= 255 / carryingCapacity;
           blue -= 255 / carryingCapacity;
         } else {
@@ -617,8 +617,8 @@ let trace2 = {
 };
 
 function updatePlot(generation) {
-  let uninfectedCount = allMosquitoes.filter((m) => m.infected === 0).length;
-  let infectedCount = allMosquitoes.filter((m) => m.infected !== 0).length;
+  let uninfectedCount = allMosquitoes.filter((m) => m.infected.length === 0).length;
+  let infectedCount = allMosquitoes.filter((m) => m.infected.length !== 0).length;
 
   trace1.x.push(generation);
   trace1.y.push(uninfectedCount);
@@ -644,7 +644,7 @@ function updateWorld() {
 
   logAndMockConsole(
     `There are currently ${allMosquitoes.length} mosquitoes, ${
-      allMosquitoes.filter((m) => m.infected !== 0).length
+      allMosquitoes.filter((m) => m.infected.length !== 0).length
     } of whom are infected by Wolbachia.`
   );
 
@@ -676,7 +676,7 @@ function updateWorld() {
 
 function shouldStopSimulation() {
   // Check if infection has been eradicated.
-  let infectedMosquitoes = allMosquitoes.filter((m) => m.infected !== 0);
+  let infectedMosquitoes = allMosquitoes.filter((m) => m.infected.length > 0);
   if (infectedMosquitoes.length === 0) {
     logAndMockConsole("Infection has been eradicated.");
     return true;
