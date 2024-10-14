@@ -6,7 +6,7 @@
     <!-- STANDARD -->
     <meta
       property="og:url"
-      content="https://skeeter-world-l8n9v.ondigitalocean.app/"
+      content="https://skeeter.world/"
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Skeeter World" />
@@ -17,7 +17,7 @@
     />
     <meta
       property="og:image"
-      content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png"
+      content="https://skeeter.world/img/ogp.png"
     />
     <meta property="og:image:alt" content="Skeeter World" />
     <meta name="theme-color" content="#1d4d39" />
@@ -31,7 +31,7 @@
     />
     <meta
       name="twitter:image"
-      content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png"
+      content="https://skeeter.world/img/ogp.png"
     />
     <meta name="twitter:image:alt" content="Skeeter World" />
     <!-- END OF OGP DATA -->
@@ -67,6 +67,10 @@
         >
         <input type="number" id="infected__females" name="infected__females" />
         <!-- Wolbachia Parameters -->
+        <label for="toxin__length">
+          Toxin/antitoxin length (default 4 bits):
+        </label>
+        <input type="number" id="toxin__length" name="toxin__length" />
         <label for="kill__rate"
           >Initial CI rate for <em>Wolbachia</em> (0 to 1, .5 by
           default):</label
@@ -77,12 +81,15 @@
           default):</label
         >
         <input type="number" id="rescue__rate" name="rescue__rate" />
+        <!-- Simulation Parameters -->
+        <label for="duration">Duration of simulation (default 365 days):</label>
+        <input type="number" id="duration" name="duration" />
         <!-- Start -->
         <button id="start" onclick="startSimulation(event)">
           Start Simulation
         </button>
       </form>
-      <button id="stop" onclick="stopSimulation()" style="display: none">
+      <button id="stop" onclick="stopSimulation(true)" style="display: none">
         Stop Simulation
       </button>
       <div id="plot" style="display: none"></div>

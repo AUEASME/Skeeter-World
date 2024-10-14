@@ -6,24 +6,24 @@
     <!-- STANDARD -->
     <meta
       property="og:url"
-      content="https://skeeter-world-l8n9v.ondigitalocean.app/about/"
+      content="https://skeeter.world/readme/"
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Skeeter World" />
-    <meta property="og:title" content="About | Skeeter World 🦟" />
+    <meta property="og:title" content="Readme | Skeeter World 🦟" />
     <meta
       property="og:description"
       content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria."
     />
     <meta
       property="og:image"
-      content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png"
+      content="https://skeeter.world/img/ogp.png"
     />
     <meta property="og:image:alt" content="Skeeter World" />
     <meta name="theme-color" content="#1d4d39" />
     <!-- TWITTER -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="About | Skeeter World 🦟" />
+    <meta name="twitter:title" content="Readme | Skeeter World 🦟" />
     <meta name="twitter:creator" content="@JSLBrowning" />
     <meta
       name="twitter:description"
@@ -31,61 +31,34 @@
     />
     <meta
       name="twitter:image"
-      content="https://skeeter-world-l8n9v.ondigitalocean.app/img/ogp.png"
+      content="https://skeeter.world/img/ogp.png"
     />
     <meta name="twitter:image:alt" content="Skeeter World" />
     <!-- END OF OGP DATA -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
-    <title>About | Skeeter World 🦟</title>
+    <title>Readme | Skeeter World 🦟</title>
   </head>
   <body>
     <nav>
       <a href="/">Home (Simualtion)</a>
       <!-- <a href="/readme">Readme</a> -->
-      <a href="/about">About</a>
+      <a href="/readme">Readme</a>
     </nav>
     <main>
       <h2>Skeeter World 🦟</h2>
       <h1>Readme</h1>
       <ol>
         <li>
-          The <strong>cell capacity</strong> is how many mosquitoes are allowed
-          to live in each cell of the grid. After reproduction, only that many
-          most-fit individuals are kept in each cell.
+          The <strong>number of males to infect at outset</strong> determines how many males are given a random <em>Wolbachia</em> infection at the start of the simulation. Randomly-generated infections have two genes and five plasmids, with each being a random toxin or antitoxin (only the toxins are active in males).
         </li>
         <li>
-          The number of males and females <strong>infected at outset</strong> is
-          pretty straightforward — that many of each sex will be infected with
-          <em>Wolbachia</em> when the simulation starts.
+          The <strong>number of females to infect at outset</strong> determines how many females are given a random <em>Wolbachia</em> infection at the start of the simulation (only antitoxins are active in females).
         </li>
-        <li>
-          The remaining parameters define how the <em>Wolbachia</em> works:
-        </li>
-        <ol>
-          <li>
-            <strong>CI rate</strong> is the percent of sperm that will result in
-            non-viable offspring when an infected male mates with an uninfected
-            female.
-          </li>
-          <li>
-            <strong>CI rescue rate</strong> is how effective the antidote is —
-            if it's .95, for example, 95% of offspring produced by an infected
-            male and female will survive.
-          </li>
-          <li>
-            <strong>Fitness impact</strong> is the fitness cost or benefit of
-            the infection — if it's .25, for example, the fitness of the host
-            will be increased by 25%.
-          </li>
-          <li>
-            <strong>Mutation rate</strong> determines how often these values
-            will change. Mutations always increase or decrease
-            <strong>one</strong> of the preceding values (chosen at random) by
-            .01 (1%). A mutation rate of .1 would mean this happens every ten
-            generations on average.
-          </li>
-        </ol>
+        <li>The <strong>toxin/antitoxin length</strong> determines how long the binary strings for these simulated chemicals are. For example, if this is set to the default of <strong>4</strong>, a toxin might look like this: <strong>0110</strong>. If this toxin were produced in a male, it would be cancelled out by an antitoxin of the same string (<strong>0110</strong>) in a female.</li>
+        <li>The <strong>CI rate</strong> determines how potent toxins are — that is, how likely a non-neutralized toxin is to kill a given offspring. This is calculated as <code>(1 - CI_RATE)<sup>TOXIN_COUNT</sup></code>.</li>
+        <li>The <strong>CI rescue rate</strong> determines how likely a perfectly-matched antitoxin is to neutralize its toxin — if this is <strong>1</strong>, and the female parent has one antitoxin perfectly matching every toxin produced by her male mate, all their offspring will survive.</li>
+        <li>The <strong>duration</strong> determines the maximum length of the simulation in days. At the end of this duration (or at the point <em>Wolbachia</em> is eliminated entirely or infects everyone, whichever comes first), a JSON file containing data from the simulation will automatically be downloaded. Mosquitoes take 14 days to reach maturity.</li>
       </ol>
     </main>
     <script src="/js/main.js"></script>

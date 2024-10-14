@@ -30,6 +30,14 @@
   font-family: "JetBrains Mono", monospace;
 }
 
+code {
+  background-color: rgba(128, 128, 128, .5);
+  padding: .125rem;
+  border: 1px solid dimgray;
+  border-radius: .125rem;
+  font-size: .875rem;
+}
+
 body {
   font-family: "Courier New", Courier, monospace;
   background-color: lightgray;

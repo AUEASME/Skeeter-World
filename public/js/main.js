@@ -4,6 +4,10 @@
 
 let killRate = 0.5;
 let rescueRate = 1.0;
+let chemicalLength = 4;
+let mutationRate = 0.01;
+let duration = 365;
+let outputData = [];
 
 /********************
  * HELPER FUNCTIONS *
@@ -142,12 +146,13 @@ class Gene {
     this.type = Math.round(Math.random());
 
     // Set the chemical to a random binary string of length 4.
-    this.chemical = "0000";
-    for (let i = 0; i < 4; i++) {
+    this.chemical = "";
+    for (let i = 0; i < chemicalLength; i++) {
       // Flip a coin. If heads, set the ith character to 1.
       if (Math.random() < 0.5) {
-        this.chemical =
-          this.chemical.substring(0, i) + "1" + this.chemical.substring(i + 1);
+        this.chemical += "1";
+      } else {
+        this.chemical += "0";
       }
     }
   }
@@ -211,7 +216,7 @@ class Wolbachia {
       offspring.push(newWolbachia);
 
       // Randomly mutate a plasmid.
-      if (Math.random() < 0.1) {
+      if (Math.random() < mutationRate) {
         let randomPlasmid =
           newWolbachia.plasmids[
             Math.floor(Math.random() * newWolbachia.plasmids.length)
@@ -223,13 +228,23 @@ class Wolbachia {
           randomPlasmid.chemical.substring(randomIndex + 1);
       }
 
-      // If plasmid array is less than eight, slight chance to create a new plasmid.
-      if (newWolbachia.plasmids.length < 8 && Math.random() < 0.05) {
-        newWolbachia.plasmids.push(new Gene());
+      // Slight chance to generate a new plasmid or lose one.
+      if (Math.random() < 0.001) {
+        if (Math.random() < 0.5) {
+          newWolbachia.plasmids.push(new Gene());
+        } else {
+          if (newWolbachia.plasmids.length > 0) {
+            // Remove a random plasmid.
+            newWolbachia.plasmids.splice(
+              Math.floor(Math.random() * newWolbachia.plasmids.length),
+              1
+            );
+          }
+        }
       }
 
       // If gene array is less than four, slight chance to integrate a plasmid into the genome.
-      if (newWolbachia.genome.length < 4 && Math.random() < 0.05) {
+      if (newWolbachia.genome.length < 4 && Math.random() < 0.0005) {
         this.integrate();
       }
     }
@@ -668,7 +683,7 @@ function mosquitoDay(population) {
   }
 }
 
-let generation = 0;
+let day = 0;
 
 let trace1 = {
   x: [],
@@ -706,7 +721,7 @@ let trace4 = {
   marker: { color: "green" },
 };
 
-function updatePlot(generation) {
+function updatePlot(day) {
   // Update infection plot.
   let uninfectedCount = allMosquitoes.filter(
     (m) => m.infected.length === 0
@@ -715,15 +730,15 @@ function updatePlot(generation) {
     (m) => m.infected.length !== 0
   ).length;
 
-  trace1.x.push(generation);
+  trace1.x.push(day);
   trace1.y.push(uninfectedCount);
-  trace2.x.push(generation);
+  trace2.x.push(day);
   trace2.y.push(infectedCount);
 
   let layout = {
     title: "Mosquito Infection Status",
     xaxis: {
-      title: "Generation",
+      title: "Day",
     },
     yaxis: {
       title: "Mosquito Count",
@@ -735,15 +750,14 @@ function updatePlot(generation) {
 
   // Update toxin plot.
   let averageToxinCountInMales = world.getAverageToxinCountInMales();
-  console.log(averageToxinCountInMales);
 
-  trace3.x.push(generation);
+  trace3.x.push(day);
   trace3.y.push(averageToxinCountInMales);
 
   let layout2 = {
     title: "Average Toxin Count in Male Mosquitoes",
     xaxis: {
-      title: "Generation",
+      title: "Day",
     },
     yaxis: {
       title: "Average Toxin Count",
@@ -754,15 +768,14 @@ function updatePlot(generation) {
 
   // Update antitoxin plot.
   let averageAntitoxinCountInFemales = world.AverageAntitoxinCountInFemales;
-  console.log(averageAntitoxinCountInFemales);
 
-  trace4.x.push(generation);
+  trace4.x.push(day);
   trace4.y.push(averageAntitoxinCountInFemales);
 
   let layout3 = {
     title: "Average Antitoxin Count in Female Mosquitoes",
     xaxis: {
-      title: "Generation",
+      title: "Day",
     },
     yaxis: {
       title: "Average Antitoxin Count",
@@ -770,10 +783,18 @@ function updatePlot(generation) {
   };
 
   Plotly.newPlot("antitoxin__plot", [trace4], layout3);
+
+  outputData.push({
+    day,
+    uninfectedCount,
+    infectedCount,
+    averageToxinCountInMales,
+    averageAntitoxinCountInFemales,
+  });
 }
 
 function updateWorld() {
-  logAndMockConsole(`Beginning day ${generation + 1}…`);
+  logAndMockConsole(`Beginning day ${day + 1}…`);
 
   logAndMockConsole(
     `There are currently ${allMosquitoes.length} mosquitoes, ${
@@ -796,18 +817,24 @@ function updateWorld() {
 
   renderWorld();
 
-  logAndMockConsole(`Day ${generation + 1} has ended.`);
+  logAndMockConsole(`Day ${day + 1} has ended.`);
 
   // Update the plot.
-  updatePlot(generation + 1);
-  generation++;
+  updatePlot(day + 1);
+  day++;
 
-  if (shouldStopSimulation()) {
+  if (shouldStopSimulation(day)) {
     stopSimulation();
   }
 }
 
-function shouldStopSimulation() {
+function shouldStopSimulation(day) {
+  // Check if the simulation has run for the specified duration.
+  if (day == duration) {
+    logAndMockConsole(`Simulation has run for ${duration} days.`);
+    return true;
+  }
+
   // Check if infection has been eradicated.
   let infectedMosquitoes = allMosquitoes.filter((m) => m.infected.length > 0);
   if (infectedMosquitoes.length === 0) {
@@ -822,9 +849,21 @@ function shouldStopSimulation() {
   }
 }
 
-function stopSimulation() {
+function stopSimulation(pause = false) {
   logAndMockConsole("Simulation has been stopped.");
   clearInterval(simulationIntervalID);
+
+  if (pause == false) {
+    // Download the data to a JSON file.
+    let data =
+      "text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(outputData));
+    let a = document.createElement("a");
+    a.href = "data:" + data;
+    a.download = "simulation_data.json";
+    a.innerHTML = "Download JSON";
+    a.click();
+  }
 
   // Change the button to a "Resume" button.
   let stopButton = document.getElementById("stop");
@@ -861,6 +900,16 @@ function startSimulation(event) {
     );
     return;
   }
+  chemicalLength = document.getElementById("toxin__length").value || 4;
+  if (chemicalLength < 2) {
+    alert("Toxin/antitoxin length must be at least 2.");
+    return;
+  } else if (chemicalLength > 8) {
+    alert(
+      "Toxin/antitoxin lengths greater than 8 will result in a very low chance of a matching TA system generating!"
+    );
+    return;
+  }
   killRate = document.getElementById("kill__rate").value || 0.5;
   if (killRate < 0 || killRate > 1) {
     alert("Kill rate must be between 0 and 1.");
@@ -869,6 +918,18 @@ function startSimulation(event) {
   rescueRate = document.getElementById("rescue__rate").value || 1;
   if (rescueRate < 0 || rescueRate > 1) {
     alert("Rescue rate must be between 0 and 1.");
+    return;
+  }
+  duration = document.getElementById("duration").value || 365;
+  if (duration < 28) {
+    alert(
+      "Durations of less than 28 days will allow almost no time for mosquitoes to mature and reproduce!"
+    );
+    return;
+  } else if (duration > 730) {
+    alert(
+      "Durations of more than two years will result in a very long simulation!"
+    );
     return;
   }
 
