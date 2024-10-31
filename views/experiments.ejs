@@ -6,11 +6,11 @@
     <!-- STANDARD -->
     <meta
       property="og:url"
-      content="https://skeeter-world-l8n9v.ondigitalocean.app/about/"
+      content="https://skeeter-world-l8n9v.ondigitalocean.app/experiments/"
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Skeeter World" />
-    <meta property="og:title" content="About | Skeeter World 🦟" />
+    <meta property="og:title" content="Experiments | Skeeter World 🦟" />
     <meta
       property="og:description"
       content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria."
@@ -23,7 +23,7 @@
     <meta name="theme-color" content="#1d4d39" />
     <!-- TWITTER -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="About | Skeeter World 🦟" />
+    <meta name="twitter:title" content="Experiments | Skeeter World 🦟" />
     <meta name="twitter:creator" content="@JSLBrowning" />
     <meta
       name="twitter:description"
@@ -37,17 +37,17 @@
     <!-- END OF OGP DATA -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
-    <title>About | Skeeter World 🦟</title>
+    <title>Experiments | Skeeter World 🦟</title>
   </head>
   <body>
     <nav>
       <a href="/">Home (Simualtion)</a>
       <a href="/readme">Readme</a>
-      <!-- <a href="/about">About</a> -->
+      <!-- <a href="/experiments">Experiments</a> -->
     </nav>
     <main>
       <h2>Skeeter World 🦟</h2>
-      <h1>About</h1>
+      <h1>Experiments</h1>
       <p>
         Skeeter World uses <a href="https://nodejs.org/en">Node.js</a> to
         simulate populations of mosquitoes infected with the bacteria
@@ -58,17 +58,17 @@
       <table>
         <tr>
           <th></th>
-          <th>Uninfected Female</th>
-          <th class="infected">Infected Female</th>
-        </tr>
-        <tr>
           <th>Uninfected Male</th>
-          <th>Uninfected Offspring</th>
-          <th class="infected">Infected Offspring</th>
+          <th>Infected Male</th>
         </tr>
         <tr>
-          <th class="infected">Infected Male</th>
+          <th>Uninfected Female</th>
+          <th>Uninfected Offspring</th>
           <th class="dead">No Offspring</th>
+        </tr>
+        <tr>
+          <th>Infected Female</th>
+          <th class="infected">Infected Offspring</th>
           <th class="infected">Infected Offspring</th>
         </tr>
       </table>
@@ -77,13 +77,19 @@
         <em>Wolbachia</em> bacteria will produce a toxin that will kill the
         offspring if left unattended. Inside the egg of an infected
         <em>female</em>, however, that very same bacteria will produce an
-        <em>antidote</em> to that toxin, meaning the offspring of modified sperm
+        <em>antidote</em> to that toxin, meaning the offspring of infected sperm
         can survive! Through this simple toxin-antidote system,
         <em>Wolbachia</em> has become the single most common reproductive
         parasite in Earth’s biosphere.
       </p>
-      <p>You can learn more about this system by reading <a href="https://doi.org/10.1016/j.tig.2018.12.004">“The Toxin-Antidote Model of Cytoplasmic Incompatibility: Genetics and Evolutionary Implications”</a> by Beckmann et al., published in 2019.</p>
-      <p>You can how this system may have evolved by reading <a href="https://doi.org/10.3389/fmicb.2023.1116766">“Modeling emergence of Wolbachia toxin-antidote protein functions with an evolutionary algorithm”</a> by Beckmann <em>et al.</em>, published in 2023.</p>
+      <p>
+        You can learn more about this system, and how it may have evolved, in
+        <a href="https://doi.org/10.3389/fmicb.2023.1116766"
+          >“Modeling emergence of Wolbachia toxin-antidote protein functions
+          with an evolutionary algorithm”</a
+        >
+        by Beckmann <em>et al.</em>, published in 2023.
+      </p>
     </main>
     <script src="/js/main.js"></script>
   </body>
