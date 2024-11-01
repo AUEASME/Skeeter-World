@@ -203,6 +203,15 @@ class Wolbachia {
         () => Math.random() > 0.5
       );
 
+      // If no plasmids are left, randomly add one from the parent.
+      if (newWolbachia.plasmids.length === 0) {
+        newWolbachia.plasmids.push(
+          structuredClone(
+            this.plasmids[Math.floor(Math.random() * this.plasmids.length)]
+          )
+        );
+      }
+
       // Randomly duplicate plasmids from the child until we're back to the original number.
       while (newWolbachia.plasmids.length < this.plasmids.length) {
         let randomPlasmid = structuredClone(
@@ -213,10 +222,8 @@ class Wolbachia {
         newWolbachia.plasmids.push(randomPlasmid);
       }
 
-      offspring.push(newWolbachia);
-
-      // Randomly mutate a plasmid.
-      if (Math.random() < mutationRate) {
+      /* Randomly mutate a plasmid.
+      if (Math.random() < 0.01) {
         let randomPlasmid =
           newWolbachia.plasmids[
             Math.floor(Math.random() * newWolbachia.plasmids.length)
@@ -228,25 +235,18 @@ class Wolbachia {
           randomPlasmid.chemical.substring(randomIndex + 1);
       }
 
-      // Slight chance to generate a new plasmid or lose one.
-      if (Math.random() < 0.001) {
-        if (Math.random() < 0.5) {
-          newWolbachia.plasmids.push(new Gene());
-        } else {
-          if (newWolbachia.plasmids.length > 0) {
-            // Remove a random plasmid.
-            newWolbachia.plasmids.splice(
-              Math.floor(Math.random() * newWolbachia.plasmids.length),
-              1
-            );
-          }
-        }
+      // If plasmid array is less than eight, slight chance to create a new plasmid.
+      if (newWolbachia.plasmids.length < 8 && Math.random() < 0.005) {
+        newWolbachia.plasmids.push(new Gene());
       }
 
       // If gene array is less than four, slight chance to integrate a plasmid into the genome.
-      if (newWolbachia.genome.length < 4 && Math.random() < 0.0005) {
+      if (newWolbachia.genome.length < 4 && Math.random() < 0.005) {
         this.integrate();
       }
+      */
+
+      offspring.push(newWolbachia);
     }
 
     return offspring;
@@ -446,28 +446,28 @@ class Mosquito {
       mom = this;
     let number_of_eggs = Math.floor(Math.random() * 100);
     for (let i = 0; i < number_of_eggs; i++) {
-      // First, if the father is infected, we need to determine if the sperm survives.
+      // First, create an appropriate number of new infections, one for each potential child.
+      let twoDimensionalArrayOfInfections = [];
+      for (let j = 0; j < number_of_eggs; j++) {
+        for (let k = 0; k < mom.infected.length; k++) {
+          twoDimensionalArrayOfInfections.push(
+            mom.infected[k].reproduce(number_of_eggs)
+          );
+        }
+      }
+
+      // Second, if the father is infected, we need to determine if the sperm survives.
       if (dad.infected.length !== 0) {
         // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
         if (Math.random() < evaluateToxinStatus(dad, mom)) {
           // Sperm survives.
-          // Create a new infection from the parents' infections.
+          // Create a new infection from the mom's infection by getting a Wolbachia from each array in the twoDimensionalArrayOfInfections.
           let mixedInfection = [];
-          for (let i = 0; i < dad.infected.length; i++) {
-            if (Math.random() < 0.5) {
-              mixedInfection.push(structuredClone(dad.infected[i]));
-            }
-          }
-          for (let i = 0; i < mom.infected.length; i++) {
-            if (Math.random() < 0.5) {
-              mixedInfection.push(structuredClone(mom.infected[i]));
-            }
-          }
-          // Randomize the order of the mixed infection.
-          mixedInfection.sort(() => Math.random() - 0.5);
-          // If the mixed infection is longer than eight, truncate it.
-          if (mixedInfection.length > 8) {
-            mixedInfection = mixedInfection.slice(0, 8);
+          for (let array of twoDimensionalArrayOfInfections) {
+            // Pop a random Wolbachia from the array.
+            let randomIndex = Math.floor(Math.random() * array.length);
+            mixedInfection.push(array[randomIndex]);
+            array.splice(randomIndex, 1);
           }
 
           // Create a new mosquito with the mixed infection and place it in the current cell.
