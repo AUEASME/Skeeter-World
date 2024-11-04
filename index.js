@@ -12,7 +12,10 @@ app
   .set("view engine", "ejs");
 
 app.get("/", (req, res) => {
-  res.render("index", { title: "Home" });
+  res.render("index", { title: "Skeeter World" });
+});
+app.get("/experiments", (req, res) => {
+  res.render("experiments", { title: "Experiments" });
 });
 app.get("/readme", (req, res) => {
   res.render("readme", { title: "Readme" });
