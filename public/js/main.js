@@ -457,12 +457,14 @@ class Mosquito {
       if (dad.infected.length !== 0) {
         // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
         if (Math.random() < toxinStatus) {
-          // Sperm survives.
-          let child = new Mosquito(
-            twoDimensionalArrayOfInfections[i],
-            dad,
-            mom
+          let mixedInfection = dad.infected[0].reproduce(1);
+          // Merge the infections.
+          mixedInfection = mixedInfection.concat(
+            twoDimensionalArrayOfInfections[i]
           );
+
+          // Sperm survives.
+          let child = new Mosquito(mixedInfection, dad, mom);
           world.map[currentCell.y][currentCell.x].push(child);
           child.position = currentCell;
         }
