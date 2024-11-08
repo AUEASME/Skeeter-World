@@ -4,10 +4,6 @@
 
 let killRate = 0.5;
 let rescueRate = 1.0;
-let chemicalLength = 4;
-let mutationRate = 0.01;
-let duration = 365;
-let outputData = [];
 
 /********************
  * HELPER FUNCTIONS *
@@ -146,13 +142,12 @@ class Gene {
     this.type = Math.round(Math.random());
 
     // Set the chemical to a random binary string of length 4.
-    this.chemical = "";
-    for (let i = 0; i < chemicalLength; i++) {
+    this.chemical = "0000";
+    for (let i = 0; i < 4; i++) {
       // Flip a coin. If heads, set the ith character to 1.
       if (Math.random() < 0.5) {
-        this.chemical += "1";
-      } else {
-        this.chemical += "0";
+        this.chemical =
+          this.chemical.substring(0, i) + "1" + this.chemical.substring(i + 1);
       }
     }
   }
@@ -648,6 +643,7 @@ let simulationIntervalID;
 
 function mosquitoDay(population) {
   // Sort mosquitoes by fitness (lowest first).
+  console.log("Sorting mosquitoes by fitness…");
   population.sort((a, b) => a.fitness - b.fitness);
 
   // Make a 2D grid for all the males in the map.
@@ -656,6 +652,7 @@ function mosquitoDay(population) {
     .map(() => new Array(world.width).fill(0).map(() => []));
 
   // Assign each male to their cell.
+  console.log("Fetching males…");
   for (let mosquito of population) {
     if (mosquito.sex === 1) {
       let currentCell = mosquito.position;
@@ -663,6 +660,7 @@ function mosquitoDay(population) {
     }
   }
 
+  console.log("Migrating and breeding mosquitoes…");
   for (let mosquito of population) {
     // Migrate and reproduce.
     mosquito.migrate();
@@ -683,7 +681,7 @@ function mosquitoDay(population) {
   }
 }
 
-let day = 0;
+let generation = 0;
 
 let trace1 = {
   x: [],
@@ -721,7 +719,9 @@ let trace4 = {
   marker: { color: "green" },
 };
 
-function updatePlot(day) {
+function updatePlot(generation) {
+  console.log("Updating plot…");
+
   // Update infection plot.
   let uninfectedCount = allMosquitoes.filter(
     (m) => m.infected.length === 0
@@ -730,15 +730,15 @@ function updatePlot(day) {
     (m) => m.infected.length !== 0
   ).length;
 
-  trace1.x.push(day);
+  trace1.x.push(generation);
   trace1.y.push(uninfectedCount);
-  trace2.x.push(day);
+  trace2.x.push(generation);
   trace2.y.push(infectedCount);
 
   let layout = {
     title: "Mosquito Infection Status",
     xaxis: {
-      title: "Day",
+      title: "Generation",
     },
     yaxis: {
       title: "Mosquito Count",
@@ -751,13 +751,13 @@ function updatePlot(day) {
   // Update toxin plot.
   let averageToxinCountInMales = world.getAverageToxinCountInMales();
 
-  trace3.x.push(day);
+  trace3.x.push(generation);
   trace3.y.push(averageToxinCountInMales);
 
   let layout2 = {
     title: "Average Toxin Count in Male Mosquitoes",
     xaxis: {
-      title: "Day",
+      title: "Generation",
     },
     yaxis: {
       title: "Average Toxin Count",
@@ -769,13 +769,13 @@ function updatePlot(day) {
   // Update antitoxin plot.
   let averageAntitoxinCountInFemales = world.AverageAntitoxinCountInFemales;
 
-  trace4.x.push(day);
+  trace4.x.push(generation);
   trace4.y.push(averageAntitoxinCountInFemales);
 
   let layout3 = {
     title: "Average Antitoxin Count in Female Mosquitoes",
     xaxis: {
-      title: "Day",
+      title: "Generation",
     },
     yaxis: {
       title: "Average Antitoxin Count",
@@ -783,18 +783,10 @@ function updatePlot(day) {
   };
 
   Plotly.newPlot("antitoxin__plot", [trace4], layout3);
-
-  outputData.push({
-    day,
-    uninfectedCount,
-    infectedCount,
-    averageToxinCountInMales,
-    averageAntitoxinCountInFemales,
-  });
 }
 
 function updateWorld() {
-  logAndMockConsole(`Beginning day ${day + 1}…`);
+  logAndMockConsole(`Beginning day ${generation + 1}…`);
 
   logAndMockConsole(
     `There are currently ${allMosquitoes.length} mosquitoes, ${
@@ -817,24 +809,18 @@ function updateWorld() {
 
   renderWorld();
 
-  logAndMockConsole(`Day ${day + 1} has ended.`);
+  logAndMockConsole(`Day ${generation + 1} has ended.`);
 
   // Update the plot.
-  updatePlot(day + 1);
-  day++;
+  updatePlot(generation + 1);
+  generation++;
 
-  if (shouldStopSimulation(day)) {
+  if (shouldStopSimulation()) {
     stopSimulation();
   }
 }
 
-function shouldStopSimulation(day) {
-  // Check if the simulation has run for the specified duration.
-  if (day == duration) {
-    logAndMockConsole(`Simulation has run for ${duration} days.`);
-    return true;
-  }
-
+function shouldStopSimulation() {
   // Check if infection has been eradicated.
   let infectedMosquitoes = allMosquitoes.filter((m) => m.infected.length > 0);
   if (infectedMosquitoes.length === 0) {
@@ -849,21 +835,9 @@ function shouldStopSimulation(day) {
   }
 }
 
-function stopSimulation(pause = false) {
+function stopSimulation() {
   logAndMockConsole("Simulation has been stopped.");
   clearInterval(simulationIntervalID);
-
-  if (pause == false) {
-    // Download the data to a JSON file.
-    let data =
-      "text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(outputData));
-    let a = document.createElement("a");
-    a.href = "data:" + data;
-    a.download = "simulation_data.json";
-    a.innerHTML = "Download JSON";
-    a.click();
-  }
 
   // Change the button to a "Resume" button.
   let stopButton = document.getElementById("stop");
@@ -900,16 +874,6 @@ function startSimulation(event) {
     );
     return;
   }
-  chemicalLength = document.getElementById("toxin__length").value || 4;
-  if (chemicalLength < 2) {
-    alert("Toxin/antitoxin length must be at least 2.");
-    return;
-  } else if (chemicalLength > 8) {
-    alert(
-      "Toxin/antitoxin lengths greater than 8 will result in a very low chance of a matching TA system generating!"
-    );
-    return;
-  }
   killRate = document.getElementById("kill__rate").value || 0.5;
   if (killRate < 0 || killRate > 1) {
     alert("Kill rate must be between 0 and 1.");
@@ -918,18 +882,6 @@ function startSimulation(event) {
   rescueRate = document.getElementById("rescue__rate").value || 1;
   if (rescueRate < 0 || rescueRate > 1) {
     alert("Rescue rate must be between 0 and 1.");
-    return;
-  }
-  duration = document.getElementById("duration").value || 365;
-  if (duration < 28) {
-    alert(
-      "Durations of less than 28 days will allow almost no time for mosquitoes to mature and reproduce!"
-    );
-    return;
-  } else if (duration > 730) {
-    alert(
-      "Durations of more than two years will result in a very long simulation!"
-    );
     return;
   }
 
