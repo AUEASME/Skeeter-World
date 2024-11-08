@@ -554,25 +554,25 @@ class World {
     // Get all unique toxins produced inside that male.
     let lengths = [];
     for (let m of males) {
-      if (m.infected.length === 0) {
+      if (m.infected.length == 0) {
         lengths.push(0);
         continue;
-      }
-
-      let toxins = new Set();
-      for (let w of m.infected) {
-        for (let g of w.genome) {
-          if (g.type === 0) {
-            toxins.add(g.chemical);
+      } else {
+        let toxins = new Set();
+        for (let w of m.infected) {
+          for (let g of w.genome) {
+            if (g.type === 0) {
+              toxins.add(g.chemical);
+            }
+          }
+          for (let g of w.plasmids) {
+            if (g.type === 0) {
+              toxins.add(g.chemical);
+            }
           }
         }
-        for (let g of w.plasmids) {
-          if (g.type === 0) {
-            toxins.add(g.chemical);
-          }
-        }
+        lengths.push(toxins.size);
       }
-      lengths.push(toxins.size);
     }
 
     // Return the average number of unique toxins.
@@ -588,25 +588,25 @@ class World {
     // Get all unique antitoxins produced inside each male.
     let lengths = [];
     for (let f of females) {
-      if (f.infected.length === 0) {
+      if (f.infected.length == 0) {
         lengths.push(0);
         continue;
-      }
-
-      let antitoxins = new Set();
-      for (let w of f.infected) {
-        for (let g of w.genome) {
-          if (g.type === 1) {
-            antitoxins.add(g.chemical);
+      } else {
+        let antitoxins = new Set();
+        for (let w of f.infected) {
+          for (let g of w.genome) {
+            if (g.type === 1) {
+              antitoxins.add(g.chemical);
+            }
+          }
+          for (let g of w.plasmids) {
+            if (g.type === 1) {
+              antitoxins.add(g.chemical);
+            }
           }
         }
-        for (let g of w.plasmids) {
-          if (g.type === 1) {
-            antitoxins.add(g.chemical);
-          }
-        }
+        lengths.push(antitoxins.size);
       }
-      lengths.push(antitoxins.size);
     }
 
     // Return the average number of unique antitoxins.
