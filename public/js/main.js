@@ -584,6 +584,11 @@ class World {
     let lengths = [];
     for (let f of females) {
       let antitoxins = new Set();
+      if (f.infected.length === 0) {
+        lengths.push(0);
+        continue;
+      }
+
       for (let w of f.infected) {
         for (let g of w.genome) {
           if (g.type === 1) {
