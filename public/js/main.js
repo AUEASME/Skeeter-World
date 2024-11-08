@@ -554,6 +554,11 @@ class World {
     // Get all unique toxins produced inside that male.
     let lengths = [];
     for (let m of males) {
+      if (m.infected.length === 0) {
+        lengths.push(0);
+        continue;
+      }
+
       let toxins = new Set();
       for (let w of m.infected) {
         for (let g of w.genome) {
@@ -583,12 +588,12 @@ class World {
     // Get all unique antitoxins produced inside each male.
     let lengths = [];
     for (let f of females) {
-      let antitoxins = new Set();
       if (f.infected.length === 0) {
         lengths.push(0);
         continue;
       }
 
+      let antitoxins = new Set();
       for (let w of f.infected) {
         for (let g of w.genome) {
           if (g.type === 1) {
