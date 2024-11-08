@@ -439,37 +439,38 @@ class Mosquito {
     // Child fitness is the average of the parents' fitness.
     let dad = mate,
       mom = this;
-    let number_of_eggs = Math.floor(Math.random() * 100);
-    for (let i = 0; i < number_of_eggs; i++) {
-      // First, create an appropriate number of new infections, one for each potential child.
-      let twoDimensionalArrayOfInfections = [];
-      for (let j = 0; j < number_of_eggs; j++) {
-        for (let k = 0; k < mom.infected.length; k++) {
-          twoDimensionalArrayOfInfections.push(
-            mom.infected[k].reproduce(number_of_eggs)
-          );
-        }
+    let numberOfEggs = Math.floor(Math.random() * 100);
+    let toxinStatus = evaluateToxinStatus(dad, mom);
+    // First, create an appropriate number of new infections, one for each potential child.
+    let twoDimensionalArrayOfInfections = [];
+    if (mom.infected.length !== 0) {
+      for (let j = 0; j < numberOfEggs; j++) {
+        let randomIndex = Math.floor(Math.random() * mom.infected.length);
+        twoDimensionalArrayOfInfections.push(
+          mom.infected[randomIndex].reproduce(numberOfEggs)
+        );
       }
+    }
 
+    for (let i = 0; i < numberOfEggs; i++) {
       // Second, if the father is infected, we need to determine if the sperm survives.
       if (dad.infected.length !== 0) {
         // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
-        if (Math.random() < evaluateToxinStatus(dad, mom)) {
+        if (Math.random() < toxinStatus) {
           // Sperm survives.
-          // Create a new infection from the mom's infection by getting a Wolbachia from each array in the twoDimensionalArrayOfInfections.
-          let mixedInfection = [];
-          for (let array of twoDimensionalArrayOfInfections) {
-            // Pop a random Wolbachia from the array.
-            let randomIndex = Math.floor(Math.random() * array.length);
-            mixedInfection.push(array[randomIndex]);
-            array.splice(randomIndex, 1);
-          }
-
-          // Create a new mosquito with the mixed infection and place it in the current cell.
-          let child = new Mosquito(mixedInfection, dad.fitness, mom.fitness);
+          let child = new Mosquito(
+            twoDimensionalArrayOfInfections[i],
+            dad,
+            mom
+          );
           world.map[currentCell.y][currentCell.x].push(child);
           child.position = currentCell;
         }
+      } else {
+        // Create a new mosquito with the mixed infection and place it in the current cell.
+        let child = new Mosquito(twoDimensionalArrayOfInfections[i], dad, mom);
+        world.map[currentCell.y][currentCell.x].push(child);
+        child.position = currentCell;
       }
     }
   }
