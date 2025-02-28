@@ -217,30 +217,6 @@ class Wolbachia {
         newWolbachia.plasmids.push(randomPlasmid);
       }
 
-      /* Randomly mutate a plasmid.
-      if (Math.random() < 0.01) {
-        let randomPlasmid =
-          newWolbachia.plasmids[
-            Math.floor(Math.random() * newWolbachia.plasmids.length)
-          ];
-        let randomIndex = Math.floor(Math.random() * 4);
-        randomPlasmid.chemical =
-          randomPlasmid.chemical.substring(0, randomIndex) +
-          (randomPlasmid.chemical[randomIndex] === "0" ? "1" : "0") +
-          randomPlasmid.chemical.substring(randomIndex + 1);
-      }
-
-      // If plasmid array is less than eight, slight chance to create a new plasmid.
-      if (newWolbachia.plasmids.length < 8 && Math.random() < 0.005) {
-        newWolbachia.plasmids.push(new Gene());
-      }
-
-      // If gene array is less than four, slight chance to integrate a plasmid into the genome.
-      if (newWolbachia.genome.length < 4 && Math.random() < 0.005) {
-        this.integrate();
-      }
-      */
-
       offspring.push(newWolbachia);
     }
 
