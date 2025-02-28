@@ -591,7 +591,7 @@ class World {
 }
 
 // Create world.
-let world = new World(24, 24);
+let world = new World(12, 12);
 let carryingCapacity = 64;
 
 function renderWorld() {
