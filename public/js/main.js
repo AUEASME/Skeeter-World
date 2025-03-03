@@ -49,32 +49,32 @@ function evaluateToxinStatus(dad, mom) {
   // Fill in the dad.toxin and mom.antitoxin arrays based on their respective infections.
   // For each Wolbachia in the dad, for each gene in the genome, if the gene is a toxin, add it to the dad's toxins.
   // For each Wolbachia in the dad, for each gene in the plasmids, if the gene is a toxin, add it to the dad's toxins.
-  if (dad.infected.length != 0) {
-    for (let w of dad.infected) {
-      for (let gene of w.genome) {
-        if (gene.type === 0) {
-          dad.toxins.push(gene);
+  if (dad.infected.length > 0) {
+    for (let i = 0; i < dad.infected.length; i++) {
+      for (let j = 0; j < dad.infected[i].genome.length; j++) {
+        if (dad.infected[i].genome[j].type === 0) {
+          dad.toxins.push(dad.infected[i].genome[j]);
         }
       }
-      for (let gene of w.plasmids) {
-        if (gene.type === 0) {
-          dad.toxins.push(gene);
+      for (let j = 0; j < dad.infected[i].plasmids.length; j++) {
+        if (dad.infected[i].plasmids[j].type === 0) {
+          dad.toxins.push(dad.infected[i].plasmids[j]);
         }
       }
     }
   }
   // For each Wolbachia in the mom, for each gene in the genome, if the gene is an antitoxin, add it to the mom's antitoxins.
   // For each Wolbachia in the mom, for each gene in the plasmids, if the gene is an antitoxin, add it to the mom's antitoxins.
-  if (mom.infected.length != 0) {
-    for (let w of mom.infected) {
-      for (let gene of w.genome) {
-        if (gene.type === 1) {
-          mom.antitoxins.push(gene);
+  if (mom.infected.length > 0) {
+    for (let i = 0; i < mom.infected.length; i++) {
+      for (let j = 0; j < mom.infected[i].genome.length; j++) {
+        if (mom.infected[i].genome[j].type === 1) {
+          mom.antitoxins.push(mom.infected[i].genome[j]);
         }
       }
-      for (let gene of w.plasmids) {
-        if (gene.type === 1) {
-          mom.antitoxins.push(gene);
+      for (let j = 0; j < mom.infected[i].plasmids.length; j++) {
+        if (mom.infected[i].plasmids[j].type === 1) {
+          mom.antitoxins.push(mom.infected[i].plasmids[j]);
         }
       }
     }
@@ -530,30 +530,26 @@ class World {
   getAverageToxinCountInMales() {
     // Get all males in the world.
     const males = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infected.length !== 0
+      (m) => m.sex === 1 && m.infected.length > 0
     );
 
     // Get all unique toxins produced inside that male.
     let lengths = [];
-    for (let m of males) {
-      if (m.infected.length == 0) {
-        lengths.push(0);
-      } else {
-        let toxins = new Set();
-        for (let w of m.infected) {
-          for (let g of w.genome) {
-            if (g.type === 0) {
-              toxins.add(g.chemical);
-            }
-          }
-          for (let g of w.plasmids) {
-            if (g.type === 0) {
-              toxins.add(g.chemical);
-            }
+    for (let i = 0; i < males.length; i++) {
+      let toxins = new Set();
+      for (let j = 0; j < males[i].infected.length; j++) {
+        for (let k = 0; k < males[i].infected[j].genome.length; k++) {
+          if (males[i].infected[j].genome[k].type === 0) {
+            toxins.add(males[i].infected[j].genome[k].chemical);
           }
         }
-        lengths.push(toxins.size);
+        for (let k = 0; k < males[i].infected[j].plasmids.length; k++) {
+          if (males[i].infected[j].plasmids[k].type === 0) {
+            toxins.add(males[i].infected[j].plasmids[k].chemical);
+          }
+        }
       }
+      lengths.push(toxins.size);
     }
 
     // Return the average number of unique toxins.
@@ -563,30 +559,26 @@ class World {
   getAverageAntitoxinCountInFemales() {
     // Get all females in the world.
     const females = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infected.length !== 0
+      (m) => m.sex === 0 && m.infected.length > 0
     );
 
     // Get all unique antitoxins produced inside each male.
     let lengths = [];
-    for (let f of females) {
-      if (f.infected.length == 0) {
-        lengths.push(0);
-      } else {
-        let antitoxins = new Set();
-        for (let w of f.infected) {
-          for (let g of w.genome) {
-            if (g.type === 1) {
-              antitoxins.add(g.chemical);
-            }
-          }
-          for (let g of w.plasmids) {
-            if (g.type === 1) {
-              antitoxins.add(g.chemical);
-            }
+    for (let i = 0; i < females.length; i++) {
+      let antitoxins = new Set();
+      for (let j = 0; j < females[i].infected.length; j++) {
+        for (let k = 0; k < females[i].infected[j].genome.length; k++) {
+          if (females[i].infected[j].genome[k].type === 0) {
+            antitoxins.add(females[i].infected[j].genome[k].chemical);
           }
         }
-        lengths.push(antitoxins.size);
+        for (let k = 0; k < females[i].infected[j].plasmids.length; k++) {
+          if (females[i].infected[j].plasmids[k].type === 0) {
+            antitoxins.add(females[i].infected[j].plasmids[k].chemical);
+          }
+        }
       }
+      lengths.push(antitoxins.size);
     }
 
     // Return the average number of unique antitoxins.
