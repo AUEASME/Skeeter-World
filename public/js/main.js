@@ -51,6 +51,10 @@ function evaluateToxinStatus(dad, mom) {
   // For each Wolbachia in the dad, for each gene in the plasmids, if the gene is a toxin, add it to the dad's toxins.
   if (dad.infected.length > 0) {
     for (let i = 0; i < dad.infected.length; i++) {
+      // If undefined, skip.
+      if (dad.infected[i] === undefined) {
+        continue;
+      }
       for (let j = 0; j < dad.infected[i].genome.length; j++) {
         if (dad.infected[i].genome[j].type === 0) {
           dad.toxins.push(dad.infected[i].genome[j]);
@@ -67,6 +71,10 @@ function evaluateToxinStatus(dad, mom) {
   // For each Wolbachia in the mom, for each gene in the plasmids, if the gene is an antitoxin, add it to the mom's antitoxins.
   if (mom.infected.length > 0) {
     for (let i = 0; i < mom.infected.length; i++) {
+      // If undefined, skip.
+      if (mom.infected[i] === undefined) {
+        continue;
+      }
       for (let j = 0; j < mom.infected[i].genome.length; j++) {
         if (mom.infected[i].genome[j].type === 1) {
           mom.antitoxins.push(mom.infected[i].genome[j]);
@@ -538,6 +546,10 @@ class World {
     for (let i = 0; i < males.length; i++) {
       let toxins = new Set();
       for (let j = 0; j < males[i].infected.length; j++) {
+        // If undefined, skip.
+        if (males[i].infected[j] === undefined) {
+          continue;
+        }
         for (let k = 0; k < males[i].infected[j].genome.length; k++) {
           if (males[i].infected[j].genome[k].type === 0) {
             toxins.add(males[i].infected[j].genome[k].chemical);
@@ -567,6 +579,10 @@ class World {
     for (let i = 0; i < females.length; i++) {
       let antitoxins = new Set();
       for (let j = 0; j < females[i].infected.length; j++) {
+        // If undefined, skip.
+        if (females[i].infected[j] === undefined) {
+          continue;
+        }
         for (let k = 0; k < females[i].infected[j].genome.length; k++) {
           if (females[i].infected[j].genome[k].type === 0) {
             antitoxins.add(females[i].infected[j].genome[k].chemical);
