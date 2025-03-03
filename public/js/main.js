@@ -49,7 +49,7 @@ function evaluateToxinStatus(dad, mom) {
   // Fill in the dad.toxin and mom.antitoxin arrays based on their respective infections.
   // For each Wolbachia in the dad, for each gene in the genome, if the gene is a toxin, add it to the dad's toxins.
   // For each Wolbachia in the dad, for each gene in the plasmids, if the gene is a toxin, add it to the dad's toxins.
-  if (dad.infected.length !== 0) {
+  if (dad.infected.length != 0) {
     for (let w of dad.infected) {
       for (let gene of w.genome) {
         if (gene.type === 0) {
@@ -65,7 +65,7 @@ function evaluateToxinStatus(dad, mom) {
   }
   // For each Wolbachia in the mom, for each gene in the genome, if the gene is an antitoxin, add it to the mom's antitoxins.
   // For each Wolbachia in the mom, for each gene in the plasmids, if the gene is an antitoxin, add it to the mom's antitoxins.
-  if (mom.infected.length !== 0) {
+  if (mom.infected.length != 0) {
     for (let w of mom.infected) {
       for (let gene of w.genome) {
         if (gene.type === 1) {
@@ -530,15 +530,14 @@ class World {
   getAverageToxinCountInMales() {
     // Get all males in the world.
     const males = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infected != []
+      (m) => m.sex === 1 && m.infected.length !== 0
     );
 
     // Get all unique toxins produced inside that male.
     let lengths = [];
     for (let m of males) {
-      if (m.infected == []) {
+      if (m.infected.length == 0) {
         lengths.push(0);
-        continue;
       } else {
         let toxins = new Set();
         for (let w of m.infected) {
@@ -564,15 +563,14 @@ class World {
   getAverageAntitoxinCountInFemales() {
     // Get all females in the world.
     const females = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infected != []
+      (m) => m.sex === 0 && m.infected.length !== 0
     );
 
     // Get all unique antitoxins produced inside each male.
     let lengths = [];
     for (let f of females) {
-      if (f.infected == []) {
+      if (f.infected.length == 0) {
         lengths.push(0);
-        continue;
       } else {
         let antitoxins = new Set();
         for (let w of f.infected) {
@@ -762,7 +760,8 @@ function updatePlot(generation) {
   Plotly.newPlot("toxin__plot", [trace3], layout2);
 
   // Update antitoxin plot.
-  let averageAntitoxinCountInFemales = world.getAverageAntitoxinCountInFemales();
+  let averageAntitoxinCountInFemales =
+    world.getAverageAntitoxinCountInFemales();
 
   trace4.x.push(generation);
   trace4.y.push(averageAntitoxinCountInFemales);
@@ -808,7 +807,7 @@ function updateWorld() {
 
   // Update the plot.
   updatePlot(generation + 1);
-  generation++;
+  generation += 1;
 
   if (shouldStopSimulation()) {
     stopSimulation();
