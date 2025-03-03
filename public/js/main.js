@@ -762,7 +762,7 @@ function updatePlot(generation) {
   Plotly.newPlot("toxin__plot", [trace3], layout2);
 
   // Update antitoxin plot.
-  let averageAntitoxinCountInFemales = world.getAverageAntitoxinCountInFemales;
+  let averageAntitoxinCountInFemales = world.getAverageAntitoxinCountInFemales();
 
   trace4.x.push(generation);
   trace4.y.push(averageAntitoxinCountInFemales);
