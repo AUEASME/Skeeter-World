@@ -26,20 +26,23 @@ function logAndMockConsole(text) {
   }
 }
 
-function lockAndKeyMatch(firstString = "0000", secondString = "0000") {
+function lockAndKeyMatch(
+  firstArray = [0, 0, 0, 0],
+  secondArray = [0, 0, 0, 0]
+) {
   // Ensure the strings are the same length.
-  if (firstString.length !== secondString.length) {
+  if (firstArray.length !== secondArray.length) {
     return 0;
   }
 
   // Return a value between 0 and 1, where 0 means the strings are completely different and 1 means they are identical.
   let matches = 0;
-  for (let i = 0; i < firstString.length; i++) {
-    if (firstString[i] === secondString[i]) {
+  for (let i = 0; i < firstArray.length; i++) {
+    if (firstArray[i] === secondArray[i]) {
       matches++;
     }
   }
-  return matches / firstString.length;
+  return matches / firstArray.length;
 }
 
 function evaluateToxinStatus(dad, mom) {
@@ -142,12 +145,11 @@ class Gene {
     this.type = Math.round(Math.random());
 
     // Set the chemical to a random binary string of length 4.
-    this.chemical = "0000";
+    this.chemical = [0, 0, 0, 0];
     for (let i = 0; i < 4; i++) {
       // Flip a coin. If heads, set the ith character to 1.
       if (Math.random() < 0.5) {
-        this.chemical =
-          this.chemical.substring(0, i) + "1" + this.chemical.substring(i + 1);
+        this.chemical[i] = 1;
       }
     }
   }
