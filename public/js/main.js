@@ -49,29 +49,33 @@ function evaluateToxinStatus(dad, mom) {
   // Fill in the dad.toxin and mom.antitoxin arrays based on their respective infections.
   // For each Wolbachia in the dad, for each gene in the genome, if the gene is a toxin, add it to the dad's toxins.
   // For each Wolbachia in the dad, for each gene in the plasmids, if the gene is a toxin, add it to the dad's toxins.
-  for (let w of dad.infected) {
-    for (let gene of w.genome) {
-      if (gene.type === 0) {
-        dad.toxins.push(gene);
+  if (dad.infected.length !== 0) {
+    for (let w of dad.infected) {
+      for (let gene of w.genome) {
+        if (gene.type === 0) {
+          dad.toxins.push(gene);
+        }
       }
-    }
-    for (let gene of w.plasmids) {
-      if (gene.type === 0) {
-        dad.toxins.push(gene);
+      for (let gene of w.plasmids) {
+        if (gene.type === 0) {
+          dad.toxins.push(gene);
+        }
       }
     }
   }
   // For each Wolbachia in the mom, for each gene in the genome, if the gene is an antitoxin, add it to the mom's antitoxins.
   // For each Wolbachia in the mom, for each gene in the plasmids, if the gene is an antitoxin, add it to the mom's antitoxins.
-  for (let w of mom.infected) {
-    for (let gene of w.genome) {
-      if (gene.type === 1) {
-        mom.antitoxins.push(gene);
+  if (mom.infected.length !== 0) {
+    for (let w of mom.infected) {
+      for (let gene of w.genome) {
+        if (gene.type === 1) {
+          mom.antitoxins.push(gene);
+        }
       }
-    }
-    for (let gene of w.plasmids) {
-      if (gene.type === 1) {
-        mom.antitoxins.push(gene);
+      for (let gene of w.plasmids) {
+        if (gene.type === 1) {
+          mom.antitoxins.push(gene);
+        }
       }
     }
   }
@@ -161,7 +165,7 @@ class Wolbachia {
     // The genome is copied from the parent when the bacteria reproduces.
     this.genome = [];
     // If random is true, generate a random genome.
-    if (random) {
+    if (random === true) {
       for (let i = 0; i < 2; i++) {
         this.genome.push(new Gene());
       }
@@ -557,7 +561,7 @@ class World {
     return lengths.reduce((acc, l) => acc + l, 0) / lengths.length;
   }
 
-  get AverageAntitoxinCountInFemales() {
+  getAverageAntitoxinCountInFemales() {
     // Get all females in the world.
     const females = allMosquitoes.filter(
       (m) => m.sex === 0 && m.infected.length > 0
@@ -758,7 +762,7 @@ function updatePlot(generation) {
   Plotly.newPlot("toxin__plot", [trace3], layout2);
 
   // Update antitoxin plot.
-  let averageAntitoxinCountInFemales = world.AverageAntitoxinCountInFemales;
+  let averageAntitoxinCountInFemales = world.getAverageAntitoxinCountInFemales;
 
   trace4.x.push(generation);
   trace4.y.push(averageAntitoxinCountInFemales);
