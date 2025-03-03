@@ -530,13 +530,13 @@ class World {
   getAverageToxinCountInMales() {
     // Get all males in the world.
     const males = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infected.length > 0
+      (m) => m.sex === 1 && m.infected != []
     );
 
     // Get all unique toxins produced inside that male.
     let lengths = [];
     for (let m of males) {
-      if (m.infected.length == 0) {
+      if (m.infected == []) {
         lengths.push(0);
         continue;
       } else {
@@ -564,13 +564,13 @@ class World {
   getAverageAntitoxinCountInFemales() {
     // Get all females in the world.
     const females = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infected.length > 0
+      (m) => m.sex === 0 && m.infected != []
     );
 
     // Get all unique antitoxins produced inside each male.
     let lengths = [];
     for (let f of females) {
-      if (f.infected.length == 0) {
+      if (f.infected == []) {
         lengths.push(0);
         continue;
       } else {
