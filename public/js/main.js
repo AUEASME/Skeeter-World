@@ -433,7 +433,7 @@ class Mosquito {
     let toxinStatus = evaluateToxinStatus(dad, mom);
     // First, create an appropriate number of new infections, one for each potential child.
     let twoDimensionalArrayOfInfections = [];
-    if (mom.infected.length !== 0) {
+    if (mom.infected.length > 0) {
       for (let j = 0; j < numberOfEggs; j++) {
         let randomIndex = Math.floor(Math.random() * mom.infected.length);
         twoDimensionalArrayOfInfections.push(
