@@ -189,7 +189,7 @@ class Wolbachia {
     }
   }
 
-  reproduce(num_offspring) {
+  wol_reproduce(num_offspring) {
     // When the bacteria reproduces, the plasmids are split between the two daughter cells.
     // Of course, most bacteria only have about ten plasmids each, so when the mosquitoes reproduce... most Wolbachia would be left with no plasmids.
     // So we'll somehow need to simulate plasmid reproduction...
@@ -437,7 +437,7 @@ class Mosquito {
       for (let j = 0; j < numberOfEggs; j++) {
         let randomIndex = Math.floor(Math.random() * mom.infected.length);
         twoDimensionalArrayOfInfections.push(
-          mom.infected[randomIndex].reproduce(numberOfEggs)
+          mom.infected[randomIndex].wol_reproduce(numberOfEggs)
         );
       }
     }
@@ -447,7 +447,7 @@ class Mosquito {
       if (dad.infected.length !== 0) {
         // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
         if (Math.random() < toxinStatus) {
-          let mixedInfection = dad.infected[0].reproduce(1);
+          let mixedInfection = dad.infected[0].wol_reproduce(1);
           // Merge the infections.
           mixedInfection = mixedInfection.concat(
             twoDimensionalArrayOfInfections[i]
