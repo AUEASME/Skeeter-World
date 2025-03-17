@@ -437,21 +437,22 @@ class Mosquito {
       for (let j = 0; j < numberOfEggs; j++) {
         let randomIndex = Math.floor(Math.random() * mom.infected.length);
         twoDimensionalArrayOfInfections.push(
-          mom.infected[randomIndex].wol_reproduce(numberOfEggs)
+          ...mom.infected[randomIndex].wol_reproduce(1) // Spread the array
         );
       }
     }
 
     for (let i = 0; i < numberOfEggs; i++) {
+      let infection = twoDimensionalArrayOfInfections[i]
+        ? [twoDimensionalArrayOfInfections[i]]
+        : [];
       // Second, if the father is infected, we need to determine if the sperm survives.
       if (dad.infected.length !== 0) {
         // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
         if (Math.random() < toxinStatus) {
           let mixedInfection = dad.infected[0].wol_reproduce(1);
           // Merge the infections.
-          mixedInfection = mixedInfection.concat(
-            twoDimensionalArrayOfInfections[i]
-          );
+          mixedInfection = mixedInfection.concat(infection);
 
           // Sperm survives.
           let child = new Mosquito(mixedInfection, dad, mom);
@@ -460,7 +461,7 @@ class Mosquito {
         }
       } else {
         // Create a new mosquito with the mixed infection and place it in the current cell.
-        let child = new Mosquito(twoDimensionalArrayOfInfections[i], dad, mom);
+        let child = new Mosquito(infection, dad, mom);
         world.map[currentCell.y][currentCell.x].push(child);
         child.position = currentCell;
       }
