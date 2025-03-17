@@ -30,23 +30,28 @@
   font-family: "JetBrains Mono", monospace;
 }
 
-code {
-  background-color: rgba(128, 128, 128, .5);
-  padding: .125rem;
-  border: 1px solid dimgray;
-  border-radius: .125rem;
-  font-size: .875rem;
-}
-
 body {
   font-family: "Courier New", Courier, monospace;
   background-color: lightgray;
 
-  nav {
+  nav,
+  main,
+  form,
+  div#mock__console,
+  div#key {
     display: flex;
-    flex-flow: row nowrap;
+  }
+
+  nav,
+  main,
+  form,
+  div#key {
     justify-content: center;
     align-items: center;
+  }
+
+  nav {
+    flex-flow: row nowrap;
     gap: 2rem;
     padding: 1rem;
     font-weight: 900;
@@ -70,10 +75,7 @@ body {
   }
 
   main {
-    display: flex;
     flex-flow: column nowrap;
-    justify-content: center;
-    align-items: center;
     gap: 1rem;
     margin: 0rem 2rem;
 
@@ -137,18 +139,42 @@ body {
       }
     }
 
+    code {
+      background-color: rgba(128, 128, 128, 0.425);
+      padding: 0.1875rem;
+      border: 1px solid dimgray;
+      border-radius: 0.125rem;
+      font-size: 0.875rem;
+
+      sup {
+        font-size: 0.5625rem;
+      }
+    }
+
     canvas {
       border: 2px solid black;
       padding: 0.5rem;
     }
 
+    div#mock__console,
+    button {
+      background-color: black;
+      color: white;
+    }
+
+    button {
+      max-width: 50%;
+      padding: 0.625rem 4rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.25rem;
+      cursor: pointer;
+    }
+
     form {
-      display: flex;
       flex-flow: row wrap;
       width: 36vw;
       gap: 1rem;
-      justify-content: center;
-      align-items: center;
 
       label {
         width: 66.66%;
@@ -163,28 +189,14 @@ body {
         padding: 0rem;
         min-height: 2rem;
       }
-
-      button {
-        width: 50%;
-        padding: .625rem;
-        background-color: black;
-        color: white;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 0.25rem;
-        cursor: pointer;
-      }
     }
 
     div#mock__console {
-      display: flex;
       flex-flow: column nowrap;
       gap: 0.25rem;
       width: 64vw;
       padding: 1rem;
       border: 2px solid white;
-      background-color: black;
-      color: white;
       overflow-y: auto;
 
       p {
@@ -193,16 +205,6 @@ body {
         letter-spacing: 0.125rem;
         font-size: 0.875rem;
       }
-    }
-
-    button#stop {
-      width: 50%;
-      padding: 0.5rem;
-      background-color: black;
-      color: white;
-      font-weight: 600;
-      text-transform: uppercase;
-      cursor: pointer;
     }
 
     div#plot,
@@ -215,11 +217,8 @@ body {
     }
 
     div#key {
-      display: flex;
       flex-flow: row nowrap;
       gap: 2rem;
-      justify-content: center;
-      align-items: center;
       width: 64vw;
 
       p {
