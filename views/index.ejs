@@ -53,16 +53,16 @@
         <label for="infected__males"
           >Number of males to infect at outset (default 16):</label
         >
-        <input type="number" id="infected__males" name="infected__males" />
+        <input type="number" id="infected__males" name="infected__males" pattern="[0-9]*" />
         <label for="infected__females"
           >Number of females to infect at outset (default 32):</label
         >
-        <input type="number" id="infected__females" name="infected__females" />
+        <input type="number" id="infected__females" name="infected__females" pattern="[0-9]*" />
         <!-- Wolbachia Parameters -->
         <label for="toxin__length">
           Toxin/antitoxin length (default 4 bits):
         </label>
-        <input type="number" id="toxin__length" name="toxin__length" />
+        <input type="number" id="toxin__length" name="toxin__length" pattern="[0-9]*" />
         <label for="kill__rate"
           >Initial CI rate for <em>Wolbachia</em> (0 to 1, .5 by
           default):</label
@@ -75,7 +75,7 @@
         <input type="number" id="rescue__rate" name="rescue__rate" />
         <!-- Simulation Parameters -->
         <label for="duration">Duration of simulation (default 365 days):</label>
-        <input type="number" id="duration" name="duration" />
+        <input type="number" id="duration" name="duration" pattern="[0-9]*" />
         <!-- Start -->
         <button id="start" onclick="startSimulation(event)">
           Start Simulation

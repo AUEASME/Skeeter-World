@@ -186,8 +186,17 @@ body {
 
       input {
         width: calc(33.33% - 1rem);
-        padding: 0rem;
+        padding: .125rem;
         min-height: 2rem;
+        outline: none;
+
+        &:focus {
+          border: 2px solid #202020;
+        }
+        
+        &:invalid {
+          border: 2px solid crimson;
+        }
       }
     }
 
