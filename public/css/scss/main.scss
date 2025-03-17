@@ -148,10 +148,12 @@ body {
       p {
         font-weight: 300;
         text-transform: uppercase;
+        user-select: auto;
       }
 
       label {
         width: 50%;
+        cursor: text;
       }
 
       p {
