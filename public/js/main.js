@@ -413,7 +413,7 @@ class Mosquito {
       return;
     }
 
-    // Ensure we haven't reproduced too recently..
+    // Ensure we haven't reproduced too recently.
     if (this.breedingCooldown > 0) {
       this.breedingCooldown--;
       return;
@@ -434,17 +434,13 @@ class Mosquito {
 
     for (let i = 0; i < numberOfEggs; i++) {
       // If the father is infected, we need to determine if the sperm survives.
-      if (dad.infected.length !== 0) {
-        // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
-        if (Math.random() > toxinStatus) {
-          // Sperm survives.
-          // Paternal infections AREN'T passed on in nature, according to Turelli '94, so we don't need to do a mixed infection.
-          let child = new Mosquito(mom.infected, dad, mom);
-          world.map[currentCell.y][currentCell.x].push(child);
-          child.position = currentCell;
-        }
-      } else {
-        // Create a new mosquito and place it in the current cell.
+      // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
+      if (
+        (dad.infected.length !== 0 && Math.random() < toxinStatus) ||
+        dad.infected.length === 0
+      ) {
+        // Sperm survives.
+        // Paternal infections AREN'T passed on in nature, according to Turelli '94, so we don't need to do a mixed infection.
         let child = new Mosquito(mom.infected, dad, mom);
         world.map[currentCell.y][currentCell.x].push(child);
         child.position = currentCell;
