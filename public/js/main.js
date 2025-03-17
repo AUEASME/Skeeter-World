@@ -450,12 +450,9 @@ class Mosquito {
       if (dad.infected.length !== 0) {
         // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
         if (Math.random() < toxinStatus) {
-          let mixedInfection = dad.infected[0].wol_reproduce(1);
-          // Merge the infections.
-          mixedInfection = mixedInfection.concat(infection);
-
           // Sperm survives.
-          let child = new Mosquito(mixedInfection, dad, mom);
+          // Paternal infections AREN'T passed on in nature, according to Turelli '94, so we don't need to do a mixed infection.
+          let child = new Mosquito(mom.infected, dad, mom);
           world.map[currentCell.y][currentCell.x].push(child);
           child.position = currentCell;
         }
