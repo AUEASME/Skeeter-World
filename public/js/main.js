@@ -431,25 +431,12 @@ class Mosquito {
       mom = this;
     let numberOfEggs = Math.floor(Math.random() * 100);
     let toxinStatus = evaluateToxinStatus(dad, mom);
-    // First, create an appropriate number of new infections, one for each potential child.
-    let twoDimensionalArrayOfInfections = [];
-    if (mom.infected.length > 0) {
-      for (let j = 0; j < numberOfEggs; j++) {
-        let randomIndex = Math.floor(Math.random() * mom.infected.length);
-        twoDimensionalArrayOfInfections.push(
-          ...mom.infected[randomIndex].wol_reproduce(1) // Spread the array
-        );
-      }
-    }
 
     for (let i = 0; i < numberOfEggs; i++) {
-      let infection = twoDimensionalArrayOfInfections[i]
-        ? [twoDimensionalArrayOfInfections[i]]
-        : [];
-      // Second, if the father is infected, we need to determine if the sperm survives.
+      // If the father is infected, we need to determine if the sperm survives.
       if (dad.infected.length !== 0) {
         // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
-        if (Math.random() < toxinStatus) {
+        if (Math.random() > toxinStatus) {
           // Sperm survives.
           // Paternal infections AREN'T passed on in nature, according to Turelli '94, so we don't need to do a mixed infection.
           let child = new Mosquito(mom.infected, dad, mom);
@@ -457,8 +444,8 @@ class Mosquito {
           child.position = currentCell;
         }
       } else {
-        // Create a new mosquito with the mixed infection and place it in the current cell.
-        let child = new Mosquito(infection, dad, mom);
+        // Create a new mosquito and place it in the current cell.
+        let child = new Mosquito(mom.infected, dad, mom);
         world.map[currentCell.y][currentCell.x].push(child);
         child.position = currentCell;
       }
