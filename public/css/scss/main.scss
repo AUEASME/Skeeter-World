@@ -139,41 +139,33 @@ body {
     form {
       display: flex;
       flex-flow: row wrap;
-      width: 64vw;
+      width: 36vw;
       gap: 1rem;
       justify-content: center;
       align-items: center;
 
-      label,
-      p {
+      label {
+        width: 66.66%;
         font-weight: 300;
         text-transform: uppercase;
         user-select: auto;
-      }
-
-      label {
-        width: 50%;
         cursor: text;
       }
 
-      p {
-        width: 100%;
-      }
-
       input {
-        width: calc(50% - 1rem);
+        width: calc(33.33% - 1rem);
         padding: 0rem;
         min-height: 2rem;
       }
 
       button {
         width: 50%;
-        padding: 0.5rem;
+        padding: .625rem;
         background-color: black;
         color: white;
-        font-weight: 600;
+        font-weight: 900;
         text-transform: uppercase;
-        letter-spacing: 0.125rem;
+        letter-spacing: 0.25rem;
         cursor: pointer;
       }
     }
@@ -288,7 +280,6 @@ body {
         flex-flow: column nowrap;
 
         label,
-        p,
         input {
           font-size: 0.875rem;
           width: 100%;
