@@ -63,6 +63,7 @@ body {
 
       &.nav__disabled {
         color: gray;
+        font-weight: lighter;
         pointer-events: none;
       }
     }
