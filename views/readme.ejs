@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- STANDARD -->
-    <meta
-      property="og:url"
-      content="https://skeeter.world/readme/"
-    />
+    <meta property="og:url" content="https://skeeter.world/readme/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Skeeter World" />
     <meta property="og:title" content="Readme | Skeeter World 🦟" />
@@ -15,10 +12,7 @@
       property="og:description"
       content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria."
     />
-    <meta
-      property="og:image"
-      content="https://skeeter.world/img/ogp.png"
-    />
+    <meta property="og:image" content="https://skeeter.world/img/ogp.png" />
     <meta property="og:image:alt" content="Skeeter World" />
     <meta name="theme-color" content="#1d4d39" />
     <!-- TWITTER -->
@@ -29,10 +23,7 @@
       name="twitter:description"
       content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria."
     />
-    <meta
-      name="twitter:image"
-      content="https://skeeter.world/img/ogp.png"
-    />
+    <meta name="twitter:image" content="https://skeeter.world/img/ogp.png" />
     <meta name="twitter:image:alt" content="Skeeter World" />
     <!-- END OF OGP DATA -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -51,15 +42,47 @@
       <h1>Readme</h1>
       <ol>
         <li>
-          The <strong>number of males to infect at outset</strong> determines how many males are given a random <em>Wolbachia</em> infection at the start of the simulation. Randomly-generated infections have two genes and five plasmids, with each being a random toxin or antitoxin (only the toxins are active in males).
+          The <strong>number of males to infect at outset</strong> determines
+          how many males are given a random <em>Wolbachia</em> infection at the
+          start of the simulation. Randomly-generated infections have two genes
+          and five plasmids, with each being a random toxin or antitoxin (only
+          the toxins are active in males).
         </li>
         <li>
-          The <strong>number of females to infect at outset</strong> determines how many females are given a random <em>Wolbachia</em> infection at the start of the simulation (only antitoxins are active in females).
+          The <strong>number of females to infect at outset</strong> determines
+          how many females are given a random <em>Wolbachia</em> infection at
+          the start of the simulation (only antitoxins are active in females).
         </li>
-        <li>The <strong>toxin/antitoxin length</strong> determines how long the binary strings for these simulated chemicals are. For example, if this is set to the default of <strong>4</strong>, a toxin might look like this: <strong>0110</strong>. If this toxin were produced in a male, it would be cancelled out by an antitoxin of the same string (<strong>0110</strong>) in a female.</li>
-        <li>The <strong>CI rate</strong> determines how potent toxins are — that is, how likely a non-neutralized toxin is to kill a given offspring. This is calculated as <code>(1 - CI_RATE)<sup>TOXIN_COUNT</sup></code>.</li>
-        <li>The <strong>CI rescue rate</strong> determines how likely a perfectly-matched antitoxin is to neutralize its toxin — if this is <strong>1</strong>, and the female parent has one antitoxin perfectly matching every toxin produced by her male mate, all their offspring will survive.</li>
-        <li>The <strong>duration</strong> determines the maximum length of the simulation in days. At the end of this duration (or at the point <em>Wolbachia</em> is eliminated entirely or infects everyone, whichever comes first), a JSON file containing data from the simulation will automatically be downloaded. Mosquitoes take 14 days to reach maturity.</li>
+        <li>
+          The <strong>toxin/antitoxin length</strong> determines how long the
+          binary strings for these simulated chemicals are. For example, if this
+          is set to the default of <strong>4</strong>, a toxin might look like
+          this: <strong>0110</strong>. If this toxin were produced in a male, it
+          would be cancelled out by an antitoxin of the same string
+          (<strong>0110</strong>) in a female.
+        </li>
+        <li>
+          The <strong>CI rate</strong> determines how potent toxins are — that
+          is, how likely a non-neutralized toxin is to kill a given offspring.
+          Survival odds are therefore equal to
+          <code>(1 - CI_RATE)<sup>TOXIN_COUNT</sup></code
+          >.
+        </li>
+        <li>
+          The <strong>CI rescue rate</strong> determines how likely a
+          perfectly-matched antitoxin is to neutralize its toxin — if this is
+          <strong>1</strong>, and the female parent has one antitoxin perfectly
+          matching every toxin produced by her male mate, all their offspring
+          will survive.
+        </li>
+        <li>
+          The <strong>duration</strong> determines the maximum length of the
+          simulation in days. At the end of this duration (or at the point
+          <em>Wolbachia</em> is eliminated entirely or infects everyone,
+          whichever comes first), a JSON file containing data from the
+          simulation will automatically be downloaded. Mosquitoes take 14 days
+          to reach maturity.
+        </li>
       </ol>
     </main>
     <script src="/js/main.js"></script>
