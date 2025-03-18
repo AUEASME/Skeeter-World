@@ -475,8 +475,6 @@ class Mosquito {
   }
 }
 
-let allMosquitoes = [];
-
 /***********************************
  * WORLD CLASS, METHODS, AND SETUP *
  ***********************************/
@@ -628,10 +626,6 @@ class World {
   }
 }
 
-// Create world.
-let world = new World(16, 16);
-let carryingCapacity = 96;
-
 function renderWorld() {
   // Get the canvas element.
   let canvas = document.getElementById("world");
@@ -713,8 +707,19 @@ function mosquitoDay(population) {
   }
 }
 
-let generation = 0;
+/********************
+ * GLOBAL VARIABLES *
+ ********************/
 
+// Create world.
+let world = new World(16, 16);
+let carryingCapacity = 96;
+
+// Populate world.
+let allMosquitoes = [];
+
+// Set up logging.
+let generation = 0;
 let trace1 = {
   x: [],
   y: [],
@@ -723,7 +728,6 @@ let trace1 = {
   mode: "lines",
   marker: { color: "red" },
 };
-
 let trace2 = {
   x: [],
   y: [],
@@ -732,7 +736,6 @@ let trace2 = {
   mode: "lines",
   marker: { color: "HotPink" },
 };
-
 let trace3 = {
   x: [],
   y: [],
@@ -741,7 +744,6 @@ let trace3 = {
   mode: "lines",
   marker: { color: "blue" },
 };
-
 let trace4 = {
   x: [],
   y: [],
@@ -827,7 +829,7 @@ function updateWorld() {
     } of whom are infected by Wolbachia.`
   );
 
-  // Migration phase.
+  // Mosquitoes do their thing.
   mosquitoDay(allMosquitoes);
 
   // Population control: sort mosquitoes by fitness and preserve only the best in each cell.
@@ -952,12 +954,12 @@ function startSimulation(event) {
   renderWorld();
 
   // Once per second, update the world.
-  simulationIntervalID = setInterval(updateWorld, 1000);
+  simulationIntervalID = setInterval(updateWorld, 500);
 }
-
 
 class Experiment {
   constructor() {
+    // Start data.
     this.startTime = new Date();
     this.infectedMalesAtStart = 16;
     this.infectedFemalesAtStart = 32;
@@ -965,5 +967,50 @@ class Experiment {
     this.killRate = 1;
     this.rescueRate = 1;
     this.maxDays = 365;
+    // Run data.
+    this.averageToxinCountInMales = [];
+    this.averageAntitoxinCountInFemales = [];
+  }
+
+  outputData() {
+    // Get gender, successes, toxin counts at reproduction, and antitoxin counts at reproduction for each mosquito.
+    let reproductiveData = [];
+    for (let mosquito of allMosquitoes) {
+      for (let reproductionEvent of mosquito.successes) {
+        reproductiveData.push({
+          sex: mosquito.sex,
+          date: reproductionEvent.date,
+          successRatio: reproductionEvent.count / 100,
+          toxinsAtReproduction: mosquito.toxinsAtReproduction,
+          antitoxinsAtReproduction: mosquito.antitoxinsAtReproduction,
+        });
+      }
+    }
+
+    let allData = {
+      startTime: this.startTime,
+      infectedMalesAtStart: this.infectedMalesAtStart,
+      infectedFemalesAtStart: this.infectedFemalesAtStart,
+      toxinAntitoxinLength: this.toxinAntitoxinLength,
+      killRate: this.killRate,
+      rescueRate: this.rescueRate,
+      maxDays: this.maxDays,
+      averageToxinCountInMales: this.averageToxinCountInMales,
+      averageAntitoxinCountInFemales: this.averageAntitoxinCountInFemales,
+      reproductiveData: reproductiveData,
+    };
+
+    // Download the data for the user as a JSON file.
+    let data =
+      "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
+    let a = document.createElement("a");
+    a.href = "data:" + data;
+    a.download = "mosquito_simulation_data.json";
+    a.innerHTML = "Download JSON";
+    a.click();
+    // Remove the anchor element.
+    a.remove();
+
+    return allData;
   }
 }
