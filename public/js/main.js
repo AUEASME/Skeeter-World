@@ -132,13 +132,13 @@ function evaluateToxinStatus(dad, mom) {
   // If the kill rate is .5, each toxin remaining has a 50% chance of killing... each offspring.
   // So if there are 3 toxins, the mosquito has a 12.5% chance of successfully reproducing.
   // Or rather, each offspring has a 12.5% chance of surviving.
-  let reproductiveSuccess = Math.pow(1 - killRate, dad.toxins.length);
+  let reproductiveSuccessOdds = Math.pow(1 - killRate, dad.toxins.length);
 
   // Clear the toxins and antitoxins arrays.
   dad.toxins = [];
   mom.antitoxins = [];
 
-  return reproductiveSuccess;
+  return reproductiveSuccessOdds;
 }
 
 /*********************
@@ -460,8 +460,14 @@ class Mosquito {
       }
     }
 
-    this.successes.push(successCount);
-    mate.successes.push(successCount);
+    this.successes.push({
+      date: generation,
+      count: successCount,
+    });
+    mate.successes.push({
+      date: generation,
+      count: successCount,
+    });
     this.toxinsAtReproduction.push(this.toxins);
     mate.toxinsAtReproduction.push(mate.toxins);
     this.antitoxinsAtReproduction.push(this.antitoxins);
@@ -901,7 +907,7 @@ function startSimulation(event) {
     );
     return;
   }
-  killRate = document.getElementById("kill__rate").value || 0.5;
+  killRate = document.getElementById("kill__rate").value || 1;
   if (killRate < 0 || killRate > 1) {
     alert("Kill rate must be between 0 and 1.");
     return;
@@ -947,4 +953,17 @@ function startSimulation(event) {
 
   // Once per second, update the world.
   simulationIntervalID = setInterval(updateWorld, 1000);
+}
+
+
+class Experiment {
+  constructor() {
+    this.startTime = new Date();
+    this.infectedMalesAtStart = 16;
+    this.infectedFemalesAtStart = 32;
+    this.toxinAntitoxinLength = 3;
+    this.killRate = 1;
+    this.rescueRate = 1;
+    this.maxDays = 365;
+  }
 }
