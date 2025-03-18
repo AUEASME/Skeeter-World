@@ -49,7 +49,8 @@ function evaluateToxinStatus(dad, mom) {
   // Fill in the dad.toxin and mom.antitoxin arrays based on their respective infections.
   // For each Wolbachia in the dad, for each gene in the genome, if the gene is a toxin, add it to the dad's toxins.
   // For each Wolbachia in the dad, for each gene in the plasmids, if the gene is a toxin, add it to the dad's toxins.
-  if (dad.infected.length > 0) {
+  if (dad.infected.length > 0 && dad.toxins === null) {
+    dad.toxins = [];
     for (let i = 0; i < dad.infected.length; i++) {
       // If undefined, skip.
       if (dad.infected[i] === undefined) {
@@ -66,10 +67,13 @@ function evaluateToxinStatus(dad, mom) {
         }
       }
     }
+  } else if (dad.toxins === null) {
+    dad.toxins = [];
   }
   // For each Wolbachia in the mom, for each gene in the genome, if the gene is an antitoxin, add it to the mom's antitoxins.
   // For each Wolbachia in the mom, for each gene in the plasmids, if the gene is an antitoxin, add it to the mom's antitoxins.
-  if (mom.infected.length > 0) {
+  if (mom.infected.length > 0 && mom.antitoxins === null) {
+    mom.antitoxins = [];
     for (let i = 0; i < mom.infected.length; i++) {
       // If undefined, skip.
       if (mom.infected[i] === undefined) {
@@ -86,6 +90,8 @@ function evaluateToxinStatus(dad, mom) {
         }
       }
     }
+  } else if (mom.antitoxins === null) {
+    mom.antitoxins = [];
   }
 
   // Okay, first off, for each toxin, we need to see if we have an EXACT MATCH antitoxin.
@@ -301,8 +307,13 @@ class Mosquito {
     // Wolbachia produces toxins and antidotes.
     // So each mosquito has a concentration of toxins and antidotes produced each day.
     // The proportion of those determines reproductive success.
-    this.toxins = [];
-    this.antitoxins = [];
+    this.toxins = null;
+    this.antitoxins = null;
+
+    // Keep track of how many children survived per reproductive event.
+    this.successes = [];
+    this.toxinsAtReproduction = [];
+    this.antitoxinsAtReproduction = [];
   }
 
   evaluateFitness() {
@@ -431,6 +442,7 @@ class Mosquito {
       mom = this;
     let numberOfEggs = Math.floor(Math.random() * 100);
     let toxinStatus = evaluateToxinStatus(dad, mom);
+    let successCount = 0;
 
     for (let i = 0; i < numberOfEggs; i++) {
       // If the father is infected, we need to determine if the sperm survives.
@@ -444,8 +456,16 @@ class Mosquito {
         let child = new Mosquito(mom.infected, dad, mom);
         world.map[currentCell.y][currentCell.x].push(child);
         child.position = currentCell;
+        successCount++;
       }
     }
+
+    this.successes.push(successCount);
+    mate.successes.push(successCount);
+    this.toxinsAtReproduction.push(this.toxins);
+    mate.toxinsAtReproduction.push(mate.toxins);
+    this.antitoxinsAtReproduction.push(this.antitoxins);
+    mate.antitoxinsAtReproduction.push(mate.antitoxins);
   }
 }
 
@@ -482,7 +502,6 @@ class World {
         shuffled.splice(index, 1);
       }
     }
-    console.log(this.binary_map);
   }
 
   populate() {
@@ -680,6 +699,11 @@ function mosquitoDay(population) {
 
     // Age mosquito.
     mosquito.ageUp();
+  }
+
+  for (let mosquito of population) {
+    mosquito.toxins = null;
+    mosquito.antitoxins = null;
   }
 }
 
