@@ -463,6 +463,26 @@ class World {
     this.map = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0).map(() => []));
+    // From left to right, top to bottom, fill map with four-digit binary numbers.
+    // 1. Generate an array of all possible four-digit binary numbers.
+    let binaryNumbers = [];
+    for (let i = 0; i < width; i++) {
+      binaryNumbers.push(i.toString(2).padStart(4, "0"));
+    }
+    // 2. Generate another empty map.
+    this.binary_map = new Array(height)
+      .fill(0)
+      .map(() => new Array(width).fill(0));
+    // 3. For each row, shuffle the array of binary numbers and assign them to the map.
+    for (let y = 0; y < height; y++) {
+      let shuffled = [...binaryNumbers];
+      for (let x = 0; x < width; x++) {
+        let index = Math.floor(Math.random() * shuffled.length);
+        this.binary_map[y][x] = shuffled[index];
+        shuffled.splice(index, 1);
+      }
+    }
+    console.log(this.binary_map);
   }
 
   populate() {
@@ -584,8 +604,8 @@ class World {
 }
 
 // Create world.
-let world = new World(12, 12);
-let carryingCapacity = 64;
+let world = new World(16, 16);
+let carryingCapacity = 96;
 
 function renderWorld() {
   // Get the canvas element.
