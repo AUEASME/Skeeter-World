@@ -302,6 +302,17 @@ class Mosquito {
       }
 
       // Extremely slim chance for a Wolbachia to duplicate or be lost.
+      if (Math.random() < 0.001) {
+        // Randomly choose a Wolbachia from the infection.
+        let randomWolbachia =
+          this.infection[Math.floor(Math.random() * this.infection.length)];
+        // Either make a copy of the Wolbachia or remove it.
+        if (Math.random() < 0.5) {
+          this.infection.push(randomWolbachia.wol_reproduce());
+        } else {
+          this.infection = this.infection.filter((w) => w !== randomWolbachia);
+        }
+      }
 
       // Extremely slim chance for one conjugation event.
       if (Math.random() < 0.001 && this.infection.length > 1) {
