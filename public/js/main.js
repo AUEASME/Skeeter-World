@@ -16,8 +16,6 @@ let repeatCount = 3;
 let mockConsole = document.getElementById("mock__console");
 
 function logAndMockConsole(text) {
-  console.log(text);
-
   // Create a new paragraph element.
   let p = document.createElement("p");
   // Set the text content of the paragraph element to the text passed in.
@@ -666,7 +664,6 @@ function renderWorld() {
 
 function mosquitoDay(population) {
   // Sort mosquitoes by fitness (lowest first).
-  // console.log("Sorting mosquitoes by fitness…");
   // population.sort((a, b) => a.fitness - b.fitness);
 
   // Make a 2D grid for all the males in the map.
@@ -675,7 +672,6 @@ function mosquitoDay(population) {
     .map(() => new Array(world.width).fill(0).map(() => []));
 
   // Assign each male to their cell.
-  console.log("Fetching males…");
   for (let mosquito of population) {
     if (mosquito.sex === 1) {
       let currentCell = mosquito.position;
@@ -683,7 +679,6 @@ function mosquitoDay(population) {
     }
   }
 
-  console.log("Migrating and breeding mosquitoes…");
   for (let mosquito of population) {
     // Migrate and reproduce.
     mosquito.migrate();
@@ -771,8 +766,6 @@ let trace4 = {
 };
 
 function updatePlot(generation) {
-  console.log("Updating plot…");
-
   // Update infection plot.
   let uninfectedCount = allMosquitoes.filter(
     (m) => m.infection.length === 0
@@ -956,7 +949,6 @@ function getInputValues(event) {
   let infectedMaleCountInDocument = document
     .getElementById("infected__males")
     .value.split(",");
-  console.log(infectedMaleCountInDocument);
   if (
     infectedMaleCountInDocument.length > 0 &&
     infectedMaleCountInDocument[0] !== ""
