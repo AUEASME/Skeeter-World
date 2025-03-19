@@ -202,51 +202,67 @@ class Wolbachia {
     }
   }
 
-  wol_reproduce(num_offspring) {
+  wol_reproduce() {
     // When the bacteria reproduces, the plasmids are split between the two daughter cells.
     // Of course, most bacteria only have about ten plasmids each, so when the mosquitoes reproduce... most Wolbachia would be left with no plasmids.
     // So we'll somehow need to simulate plasmid reproduction...
     // Okay, so reproduce() should take a number as an argument, that being the number of mosquitoes being produced.
     // Then it realistically simulates the cell divisions of Wolbachia to cover all the mosquito offspring.
+    let newWolbachia = new Wolbachia();
 
-    let offspring = [];
+    // Copy the genome.
+    newWolbachia.genome = this.genome.slice();
+    // Copy the plasmids.
+    newWolbachia.plasmids = this.plasmids.slice();
 
-    for (let i = 0; i < num_offspring; i++) {
-      let newWolbachia = new Wolbachia();
+    // Randomly remove half the plasmids.
+    newWolbachia.plasmids = newWolbachia.plasmids.filter(
+      () => Math.random() > 0.5
+    );
 
-      // Copy the genome.
-      newWolbachia.genome = this.genome.slice();
-      // Copy the plasmids.
-      newWolbachia.plasmids = this.plasmids.slice();
-
-      // Randomly remove half the plasmids.
-      newWolbachia.plasmids = newWolbachia.plasmids.filter(
-        () => Math.random() > 0.5
+    // If no plasmids are left, randomly add one from the parent.
+    if (newWolbachia.plasmids.length === 0) {
+      newWolbachia.plasmids.push(
+        structuredClone(
+          this.plasmids[Math.floor(Math.random() * this.plasmids.length)]
+        )
       );
-
-      // If no plasmids are left, randomly add one from the parent.
-      if (newWolbachia.plasmids.length === 0) {
-        newWolbachia.plasmids.push(
-          structuredClone(
-            this.plasmids[Math.floor(Math.random() * this.plasmids.length)]
-          )
-        );
-      }
-
-      // Randomly duplicate plasmids from the child until we're back to the original number.
-      while (newWolbachia.plasmids.length < this.plasmids.length) {
-        let randomPlasmid = structuredClone(
-          newWolbachia.plasmids[
-            Math.floor(Math.random() * newWolbachia.plasmids.length)
-          ]
-        );
-        newWolbachia.plasmids.push(randomPlasmid);
-      }
-
-      offspring.push(newWolbachia);
     }
 
-    return offspring;
+    // Randomly duplicate plasmids from the child until we're back to the original number.
+    while (newWolbachia.plasmids.length < this.plasmids.length) {
+      let randomPlasmid = structuredClone(
+        newWolbachia.plasmids[
+          Math.floor(Math.random() * newWolbachia.plasmids.length)
+        ]
+      );
+      newWolbachia.plasmids.push(randomPlasmid);
+    }
+
+    // Small chance to add or remove a gene (minimum of one gene must be present).
+    if (Math.random() < 0.001) {
+      if (Math.random() < 0.5 && newWolbachia.genome.length > 1) {
+        newWolbachia.genome.pop();
+      } else {
+        newWolbachia.genome.push(new Gene());
+      }
+    }
+
+    // Small chance to add or remove a plasmid (no minimum or maximum).
+    if (Math.random() < 0.001) {
+      if (Math.random() < 0.5 && newWolbachia.plasmids.length > 0) {
+        newWolbachia.plasmids.pop();
+      } else {
+        newWolbachia.plasmids.push(new Gene());
+      }
+    }
+
+    // Small chance to integrate a plasmid into the genome.
+    if (Math.random() < 0.0001) {
+      newWolbachia.integrate();
+    }
+
+    return newWolbachia;
   }
 
   conjugate(mate) {
@@ -282,7 +298,17 @@ class Mosquito {
     // If an infection is passed in, duplicate it for this mosquito.
     if (infection) {
       for (let i = 0; i < infection.length; i++) {
-        this.infection.push(structuredClone(infection[i]));
+        this.infection.push(infection[i].wol_reproduce());
+      }
+      // Extremely slim chance for one conjugation event.
+      if (Math.random() < 0.001) {
+        // Randomly choose a Wolbachia from the infection.
+        let randomWolbachia =
+          this.infection[Math.floor(Math.random() * this.infection.length)];
+        // Conjugate with a random Wolbachia from the infection.
+        randomWolbachia.conjugate(
+          this.infection[Math.floor(Math.random() * this.infection.length)]
+        );
       }
     }
 
