@@ -372,7 +372,7 @@ class Mosquito {
     }
 
     // Females, on the other hand, live about 40 days after reaching maturity, so... they have a 1/40 chance of dying each day.
-    if (this.sex === 0 && this.age > 54 && Math.random() < 0.025) {
+    if (this.sex === 0 && this.age > 14 && Math.random() < 0.025) {
       // Kill self.
       let currentCell = this.position;
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
