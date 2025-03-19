@@ -248,9 +248,9 @@ class Wolbachia {
       }
     }
 
-    // Small chance to add or remove a plasmid (no minimum or maximum).
+    // Small chance to add or remove a plasmid.
     if (Math.random() < 0.001) {
-      if (Math.random() < 0.5 && newWolbachia.plasmids.length > 0) {
+      if (Math.random() < 0.5 && newWolbachia.plasmids.length > 1) {
         newWolbachia.plasmids.pop();
       } else {
         newWolbachia.plasmids.push(new Gene());
@@ -290,18 +290,21 @@ class Wolbachia {
  **************************************/
 
 class Mosquito {
-  constructor(infection, dad, mom) {
+  constructor(maternalInfection, dad, mom) {
     // this.sex can be 0 (female) or 1 (male).
     this.sex = Math.round(Math.random());
     // this.infection is a (potentially empty) array of Wolbachia.
     this.infection = [];
     // If an infection is passed in, duplicate it for this mosquito.
-    if (infection) {
-      for (let i = 0; i < infection.length; i++) {
-        this.infection.push(infection[i].wol_reproduce());
+    if (maternalInfection !== undefined && maternalInfection.length > 0) {
+      for (let i = 0; i < maternalInfection.length; i++) {
+        this.infection.push(maternalInfection[i].wol_reproduce());
       }
+
+      // Extremely slim chance for a Wolbachia to duplicate or be lost.
+
       // Extremely slim chance for one conjugation event.
-      if (Math.random() < 0.001) {
+      if (Math.random() < 0.001 && this.infection.length > 1) {
         // Randomly choose a Wolbachia from the infection.
         let randomWolbachia =
           this.infection[Math.floor(Math.random() * this.infection.length)];
@@ -457,9 +460,6 @@ class Mosquito {
       }
     }
 
-    console.log(successCount);
-    console.log(numberOfEggs);
-    console.log(successCount / numberOfEggs);
     this.successes = successCount / numberOfEggs;
     mate.successes = successCount / numberOfEggs;
     this.fitness = (this.fitness + successCount / numberOfEggs) / 2;
