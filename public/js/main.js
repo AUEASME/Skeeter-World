@@ -190,7 +190,7 @@ class Wolbachia {
     // Plasmids are mutable — they can be lost during reproduction.
     this.plasmids = [];
     // If random is true, generate a random number of plasmids.
-    if (random) {
+    if (random === true) {
       // Generate a random int between 1 and 5.
       let numPlasmids = Math.floor(Math.random() * 5) + 1;
 
@@ -256,20 +256,11 @@ class Wolbachia {
     }
 
     // Small chance to integrate a plasmid into the genome.
-    if (Math.random() < 0.0001) {
+    if (Math.random() < 0.0001 && newWolbachia.plasmids.length > 1) {
       newWolbachia.integrate();
     }
 
     return newWolbachia;
-  }
-
-  conjugate(mate) {
-    // Choose a random plasmid.
-    let randomPlasmid =
-      this.plasmids[Math.floor(Math.random() * this.plasmids.length)];
-
-    // Duplicate that plasmid into the plasmid array of the mate.
-    mate.plasmids.push(structuredClone(randomPlasmid));
   }
 
   integrate() {
@@ -310,17 +301,6 @@ class Mosquito {
         } else {
           this.infection = this.infection.filter((w) => w !== randomWolbachia);
         }
-      }
-
-      // Extremely slim chance for one conjugation event.
-      if (Math.random() < 0.001 && this.infection.length > 1) {
-        // Randomly choose a Wolbachia from the infection.
-        let randomWolbachia =
-          this.infection[Math.floor(Math.random() * this.infection.length)];
-        // Conjugate with a random Wolbachia from the infection.
-        randomWolbachia.conjugate(
-          this.infection[Math.floor(Math.random() * this.infection.length)]
-        );
       }
     }
 
