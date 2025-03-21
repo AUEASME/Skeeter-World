@@ -22,6 +22,8 @@ let repeatCount = 3;
  * 10 years (3652 days).
  */
 
+// Make JSON downloads toggleable (checkbox on main menu).
+
 /********************
  * HELPER FUNCTIONS *
  ********************/
