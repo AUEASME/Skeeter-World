@@ -14,6 +14,13 @@ let repeatCount = 3;
 // antitoxin mutation rate
 // toxin/antitoxin length
 // female bite rate (maybe static?)
+// Change number to infect at outset to a PERCENTAGE.
+/*
+ * Good params for presentation:
+ * 2056 in each population.
+ * 1/1 rates.
+ * 10 years (3652 days).
+ */
 
 /********************
  * HELPER FUNCTIONS *
