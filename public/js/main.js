@@ -9,6 +9,12 @@ let rescueRate = [1.0];
 let duration = [730];
 let repeatCount = 3;
 
+// TO IMPLEMENT:
+// toxin mutation rate
+// antitoxin mutation rate
+// toxin/antitoxin length
+// female bite rate (maybe static?)
+
 /********************
  * HELPER FUNCTIONS *
  ********************/
@@ -493,9 +499,10 @@ class World {
     // Add up to twenty mosquitoes to each cell.
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        let numberOfMosquitoes = Math.floor(Math.random() * 20);
+        let numberOfMosquitoes = Math.floor(Math.random() * carryingCapacity);
         for (let i = 0; i < numberOfMosquitoes; i++) {
           let mosquito = new Mosquito();
+          mosquito.age = Math.floor(Math.random() * 14);
           this.map[y][x].push(mosquito);
           mosquito.birthplace = mosquito.position = { x, y };
           allMosquitoes.push(mosquito);
@@ -726,7 +733,7 @@ let trace2 = {
   name: "Infected",
   type: "scatter",
   mode: "lines",
-  marker: { color: "HotPink" },
+  marker: { color: "blue" },
 };
 let trace3 = {
   x: [],
@@ -734,7 +741,7 @@ let trace3 = {
   name: "Average Toxin Count in Each Male",
   type: "scatter",
   mode: "lines",
-  marker: { color: "blue" },
+  marker: { color: "DodgerBlue" },
 };
 let trace4 = {
   x: [],
@@ -742,7 +749,7 @@ let trace4 = {
   name: "Average Antitoxin Count in Each Female",
   type: "scatter",
   mode: "lines",
-  marker: { color: "green" },
+  marker: { color: "HotPink" },
 };
 
 function updatePlot(generation) {
@@ -762,7 +769,7 @@ function updatePlot(generation) {
   let layout = {
     title: "Mosquito Infection Status",
     xaxis: {
-      title: "Generation",
+      title: "Day",
     },
     yaxis: {
       title: "Mosquito Count",
@@ -781,7 +788,7 @@ function updatePlot(generation) {
   let layout2 = {
     title: "Average Toxin Count in Male Mosquitoes",
     xaxis: {
-      title: "Generation",
+      title: "Day",
     },
     yaxis: {
       title: "Average Toxin Count",
@@ -800,7 +807,7 @@ function updatePlot(generation) {
   let layout3 = {
     title: "Average Antitoxin Count in Female Mosquitoes",
     xaxis: {
-      title: "Generation",
+      title: "Day",
     },
     yaxis: {
       title: "Average Antitoxin Count",
@@ -879,7 +886,7 @@ function resetWorld() {
     name: "Infected",
     type: "scatter",
     mode: "lines",
-    marker: { color: "HotPink" },
+    marker: { color: "blue" },
   };
   trace3 = {
     x: [],
@@ -887,7 +894,7 @@ function resetWorld() {
     name: "Average Toxin Count in Each Male",
     type: "scatter",
     mode: "lines",
-    marker: { color: "blue" },
+    marker: { color: "DodgerBlue" },
   };
   trace4 = {
     x: [],
@@ -895,7 +902,7 @@ function resetWorld() {
     name: "Average Antitoxin Count in Each Female",
     type: "scatter",
     mode: "lines",
-    marker: { color: "green" },
+    marker: { color: "HotPink" },
   };
 }
 
