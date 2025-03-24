@@ -510,7 +510,7 @@ class World {
     // Add up to twenty mosquitoes to each cell.
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        let numberOfMosquitoes = Math.floor(Math.random() * carryingCapacity);
+        let numberOfMosquitoes = carryingCapacity;
         for (let i = 0; i < numberOfMosquitoes; i++) {
           let mosquito = new Mosquito();
           mosquito.age = Math.floor(Math.random() * 14);
@@ -1030,6 +1030,18 @@ function getInputValues(event) {
   } else if (repeatCount > 100) {
     alert("Repeat count must be less than 100.");
     return;
+  }
+
+  // TEMP: Change kill rate to 12 random values for testing.
+  killRate = [];
+  for (let i = 0; i < 12; i++) {
+    killRate.push(Math.random());
+  }
+
+  // TEMP: Change rescue rate to 12 random values for testing.
+  rescueRate = [];
+  for (let i = 0; i < 12; i++) {
+    rescueRate.push(Math.random());
   }
 }
 
