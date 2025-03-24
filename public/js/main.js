@@ -177,13 +177,15 @@ class Gene {
     this.type = Math.round(Math.random());
 
     // Set the chemical to a random binary string of length 3.
-    this.chemical = [0, 0, 0];
+    this.chemical = [0];
+    /*
     for (let i = 0; i < 3; i++) {
       // Flip a coin. If heads, set the ith character to 1.
       if (Math.random() < 0.5) {
         this.chemical[i] = 1;
       }
     }
+    */
   }
 }
 
