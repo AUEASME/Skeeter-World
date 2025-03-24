@@ -510,8 +510,7 @@ class World {
     // Add up to twenty mosquitoes to each cell.
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        let numberOfMosquitoes = carryingCapacity;
-        for (let i = 0; i < numberOfMosquitoes; i++) {
+        for (let i = 0; i < carryingCapacity; i++) {
           let mosquito = new Mosquito();
           mosquito.age = Math.floor(Math.random() * 14);
           this.map[y][x].push(mosquito);
@@ -1032,15 +1031,15 @@ function getInputValues(event) {
     return;
   }
 
-  // TEMP: Change kill rate to 12 random values for testing.
+  // TEMP: Change kill rate to 20 random values for testing.
   killRate = [];
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 20; i++) {
     killRate.push(Math.random());
   }
 
-  // TEMP: Change rescue rate to 12 random values for testing.
+  // TEMP: Change rescue rate to 20 random values for testing.
   rescueRate = [];
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 20; i++) {
     rescueRate.push(Math.random());
   }
 }
@@ -1106,7 +1105,7 @@ async function startExperiment(event) {
       // Update the world.
       updateWorld();
       // Sleep for a quarter of a second.
-      await new Promise((r) => setTimeout(r, 250));
+      await new Promise((r) => setTimeout(r, 5));
     }
 
     // Once the simulation is complete, output the data.
