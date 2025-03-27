@@ -1031,18 +1031,6 @@ function getInputValues(event) {
     alert("Repeat count must be less than 100.");
     return;
   }
-
-  // TEMP: Change kill rate to 12 random values for testing.
-  killRate = [];
-  for (let i = 0; i < 12; i++) {
-    killRate.push(Math.random());
-  }
-
-  // TEMP: Change rescue rate to 12 random values for testing.
-  rescueRate = [];
-  for (let i = 0; i < 12; i++) {
-    rescueRate.push(Math.random());
-  }
 }
 
 async function startExperiment(event) {
@@ -1106,7 +1094,7 @@ async function startExperiment(event) {
       // Update the world.
       updateWorld();
       // Sleep for a quarter of a second.
-      await new Promise((r) => setTimeout(r, 250));
+      await new Promise((r) => setTimeout(r, 50));
     }
 
     // Once the simulation is complete, output the data.
