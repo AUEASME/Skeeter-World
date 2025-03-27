@@ -510,8 +510,7 @@ class World {
     // Add up to twenty mosquitoes to each cell.
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        let numberOfMosquitoes = carryingCapacity;
-        for (let i = 0; i < numberOfMosquitoes; i++) {
+        for (let i = 0; i < carryingCapacity; i++) {
           let mosquito = new Mosquito();
           mosquito.age = Math.floor(Math.random() * 14);
           this.map[y][x].push(mosquito);
