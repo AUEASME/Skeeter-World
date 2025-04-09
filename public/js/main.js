@@ -323,6 +323,8 @@ class Mosquito {
 
     // Generate a random fitness value.
     this.fitness = 0.0;
+    // Generate a random rate for maternal transmission of Wolbachia.
+    this.imperfectTransmissionRate = Math.random() * 1.0;
 
     // Position is set by outside code.
     this.position = { x: 0, y: 0 };
@@ -459,8 +461,15 @@ class Mosquito {
       ) {
         // Sperm survives.
         // Paternal infections AREN'T passed on in nature, according to Turelli '94, so we don't need to do a mixed infection.
-        let child = new Mosquito(mom.infection, dad, mom);
+        let child;
+        if (Math.random() < mom.imperfectTransmissionRate) {
+          child = new Mosquito(mom.infection, dad, mom);
+        } else {
+          child = new Mosquito(dad, mom);
+        }
         world.map[currentCell.y][currentCell.x].push(child);
+        child.imperfectTransmissionRate =
+          (dad.imperfectTransmissionRate + mom.imperfectTransmissionRate) / 2;
         child.position = currentCell;
         successCount++;
       }
