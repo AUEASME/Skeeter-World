@@ -1012,7 +1012,7 @@ function rearrangePage() {
       waterContext.fillRect(x * 12, y * 12, 12, 12);
     }
   }
-  // Show key.
+  // Show keys.
   let key = document.getElementsByClassName("key");
   for (let i = 0; i < key.length; i++) {
     key[i].style.display = "flex";
