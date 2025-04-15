@@ -323,8 +323,8 @@ class Mosquito {
       }
     }
 
-    // Generate a random fitness value.
-    this.fitness = 0.0;
+    // Generate a random fitness value from 0 to 1.
+    this.fitness = Math.random();
     // Generate a random rate for maternal transmission of Wolbachia.
     this.imperfectTransmissionRate =
       Math.random() *
@@ -723,9 +723,6 @@ function renderWorld() {
  ************************/
 
 function mosquitoDay(population) {
-  // Sort mosquitoes by fitness (lowest first).
-  // population.sort((a, b) => a.fitness - b.fitness);
-
   // Make a 2D grid for all the males in the map.
   let males = new Array(world.height)
     .fill(0)
