@@ -1007,7 +1007,7 @@ function rearrangePage() {
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
       let cell = world.water_map[y][x];
-      let color = cell === 1 ? "blue" : "white";
+      let color = cell === 1 ? "CornflowerBlue" : "ForestGreen";
       waterContext.fillStyle = color;
       waterContext.fillRect(x * 12, y * 12, 12, 12);
     }
