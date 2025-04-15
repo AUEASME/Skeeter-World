@@ -1013,8 +1013,10 @@ function rearrangePage() {
     }
   }
   // Show key.
-  let key = document.getElementById("key");
-  key.style.display = "flex";
+  let key = document.getElementsByClassName("key");
+  for (let i = 0; i < key.length; i++) {
+    key[i].style.display = "flex";
+  }
 }
 
 function getInputValues(event) {

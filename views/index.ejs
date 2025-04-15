@@ -47,15 +47,21 @@
         Population dynamics simulation for mosquitoes infected with
         <em>Wolbachia</em> bacteria.
       </h2>
-      <div class="maps">
-        <canvas id="world" style="display: none"></canvas>
-        <canvas id="water" style="display: none"></canvas>
-      </div>
-      <div id="key" style="display: none">
-        <p style="color: red">Uninfected</p>
-        <p style="color: blue">Infected</p>
-        <p style="color: CornflowerBlue;">Water</p>
-        <p style="color: forestgreen">Dry Land</p>
+      <div id="maps">
+        <div class="map">
+          <canvas id="world" style="display: none"></canvas>
+          <div class="key" style="display: none">
+            <p style="color: red">Uninfected</p>
+            <p style="color: blue">Infected</p>
+          </div>
+        </div>
+        <div class="map">
+          <canvas id="water" style="display: none"></canvas>
+          <div class="key" style="display: none">
+            <p style="color: CornflowerBlue;">Water</p>
+            <p style="color: forestgreen">Dry Land</p>
+          </div>
+        </div>
       </div>
       <form id="start__params">
         <!-- World Parameters -->
