@@ -151,9 +151,19 @@ body {
       }
     }
 
-    canvas {
-      border: 2px solid black;
-      padding: 0.5rem;
+    div.maps {
+      display: flex;
+      flex-flow: row nowrap;
+      gap: 1rem;
+      width: 64vw;
+      padding: 0rem;
+      align-items: center;
+      justify-content: center;
+
+      canvas {
+        border: 2px solid black;
+        padding: 0.5rem;
+      }
     }
 
     div#mock__console,

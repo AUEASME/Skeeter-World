@@ -402,6 +402,60 @@ class Mosquito {
   }
 
   migrate() {
+    // If breeding cooldown is 0, and we're not in a water cell, migrate in the direction of the nearest water cell.
+    if (
+      this.breedingCooldown < 1 &&
+      world.water_map[this.position.y][this.position.x] === 0
+    ) {
+      // Find the nearest water cell.
+      let nearestWaterCell = null;
+      let nearestWaterDistance = Infinity;
+      for (let y = 0; y < world.height; y++) {
+        for (let x = 0; x < world.width; x++) {
+          if (world.water_map[y][x] === 1) {
+            let distance =
+              Math.abs(this.position.x - x) + Math.abs(this.position.y - y);
+            if (distance < nearestWaterDistance) {
+              nearestWaterDistance = distance;
+              nearestWaterCell = { x, y };
+            }
+          }
+        }
+      }
+
+      // Move towards the nearest water cell.
+      if (nearestWaterCell) {
+        let dx = nearestWaterCell.x - this.position.x;
+        let dy = nearestWaterCell.y - this.position.y;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          if (dx > 0) {
+            this.position.x++;
+          } else {
+            this.position.x--;
+          }
+        } else {
+          if (dy > 0) {
+            this.position.y++;
+          } else {
+            this.position.y--;
+          }
+        }
+      }
+
+      // If we moved, remove ourselves from the old cell and add ourselves to the new cell.
+      let currentCell = this.position;
+      let newCell = { x: this.position.x, y: this.position.y };
+      if (currentCell.x !== newCell.x || currentCell.y !== newCell.y) {
+        world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
+          currentCell.x
+        ].filter((m) => m !== this);
+        world.map[newCell.y][newCell.x].push(this);
+      }
+
+      this.position = newCell;
+      return;
+    }
+
     // Check if any neighboring cell has fewer mosquitoes. If it does, move there.
     let currentCell = this.position;
     let currentPopulation = world.map[currentCell.y][currentCell.x].length;
@@ -499,23 +553,18 @@ class World {
     this.map = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0).map(() => []));
-    // From left to right, top to bottom, fill map with four-digit binary numbers.
-    // 1. Generate an array of all possible four-digit binary numbers.
-    let binaryNumbers = [];
-    for (let i = 0; i < width; i++) {
-      binaryNumbers.push(i.toString(2).padStart(4, "0"));
-    }
-    // 2. Generate another empty map.
-    this.binary_map = new Array(height)
+    // 2. Generate another empty map, this time for water.
+    this.water_map = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0));
-    // 3. For each row, shuffle the array of binary numbers and assign them to the map.
+    // 3. Fill the map with random water cells.
     for (let y = 0; y < height; y++) {
-      let shuffled = [...binaryNumbers];
       for (let x = 0; x < width; x++) {
-        let index = Math.floor(Math.random() * shuffled.length);
-        this.binary_map[y][x] = shuffled[index];
-        shuffled.splice(index, 1);
+        if (Math.random() < 0.1) {
+          this.water_map[y][x] = 1;
+        } else {
+          this.water_map[y][x] = 0;
+        }
       }
     }
   }
@@ -699,7 +748,8 @@ function mosquitoDay(population) {
     if (
       mosquito.sex === 0 &&
       mosquito.breedingCooldown === 0 &&
-      mosquito.age > 14
+      mosquito.age > 14 &&
+      world.water_map[currentCell.y][currentCell.x] === 1
     ) {
       let eligibleMales = males[currentCell.y][currentCell.x].filter(
         (m) => m.age > 14
@@ -947,6 +997,21 @@ function rearrangePage() {
   // Show world.
   let worldCanvas = document.getElementById("world");
   worldCanvas.style.display = "block";
+  // Show water map.
+  let waterCanvas = document.getElementById("water");
+  waterCanvas.style.display = "block";
+  // Fill water map.
+  let waterContext = waterCanvas.getContext("2d");
+  waterCanvas.width = world.width * 12;
+  waterCanvas.height = world.height * 12;
+  for (let y = 0; y < world.height; y++) {
+    for (let x = 0; x < world.width; x++) {
+      let cell = world.water_map[y][x];
+      let color = cell === 1 ? "blue" : "white";
+      waterContext.fillStyle = color;
+      waterContext.fillRect(x * 12, y * 12, 12, 12);
+    }
+  }
   // Show key.
   let key = document.getElementById("key");
   key.style.display = "flex";
