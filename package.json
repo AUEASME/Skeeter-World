@@ -9,7 +9,7 @@
     "watch-scss": "sass --watch public/css/scss:public/css --style compressed"
   },
   "author": "JSLBrowning",
-  "license": "ISC",
+  "license": "GPL-3.0-only",
   "dependencies": {
     "concurrently": "^8.2.2",
     "ejs": "^3.1.10",
