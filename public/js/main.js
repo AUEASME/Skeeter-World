@@ -484,19 +484,8 @@ class Mosquito {
     }
   }
 
-  reproduce(mate) {
-    // Ensure we're an adult.
-    // "Mosquitoes begin breeding about 28 hours after they reach adulthood."
-    if (this.age < 14) {
-      return;
-    }
-
-    // Ensure we haven't reproduced too recently.
-    if (this.breedingCooldown > 0) {
-      this.breedingCooldown--;
-      return;
-    }
-
+  reproduce(mate) {    
+    // Reset breeding cooldown.
     this.breedingCooldown = 4;
 
     let currentCell = this.position;
