@@ -340,9 +340,6 @@ class Mosquito {
       this.position = mom.position;
     }
 
-    // Birthplace is IMMUTABLE — it is set when the mosquito is created and never changes.
-    this.birthplace = this.position;
-
     /**
      * Mosquito life cycle:
      * 1. Egg stage: approximately 2-3 days.
@@ -549,7 +546,7 @@ class World {
     // 3. Fill the map with random water cells.
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        if (Math.random() < 0.1) {
+        if (Math.random() < 0.25) {
           this.water_map[y][x] = 1;
         } else {
           this.water_map[y][x] = 0;
@@ -566,7 +563,6 @@ class World {
           let mosquito = new Mosquito();
           mosquito.age = Math.floor(Math.random() * 14);
           this.map[y][x].push(mosquito);
-          mosquito.birthplace = mosquito.position = { x, y };
           allMosquitoes.push(mosquito);
         }
       }
@@ -752,7 +748,7 @@ function mosquitoDay(population) {
 }
 
 function kTournamentWithReplacement(eligibleMales, k = 3) {
-  // Select three males at random.
+  // Select k males at random.
   let selected = [];
   for (let i = 0; i < k; i++) {
     let randomIndex = Math.floor(Math.random() * eligibleMales.length);
