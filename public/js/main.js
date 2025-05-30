@@ -7,7 +7,7 @@ let infectedFemaleCount = [32];
 let killRate = [1.0];
 let rescueRate = [1.0];
 let duration = [730];
-let repeatCount = 3;
+let repeatCount = 1;
 let minImperfectTransmissionRate = 0.0;
 let maxImperfectTransmissionRate = 1.0;
 
