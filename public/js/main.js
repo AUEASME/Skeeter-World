@@ -372,6 +372,9 @@ class Mosquito {
 
   ageUp() {
     this.age++;
+    if (this.age > 14 && this.breedingCooldown > 0) {
+      this.breedingCooldown--;
+    }
     // Male mosquitoes live for about eighteen days, and fourteen of those are spend growing, so for each subsequent day, they have a 1/4 chance of dying.
     // Actually no, see below.
     if (this.sex === 1 && this.age > 14 && Math.random() < 0.125) {
