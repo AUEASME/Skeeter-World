@@ -27,6 +27,11 @@ let maxImperfectTransmissionRate = 1.0;
 // Make JSON downloads toggleable (checkbox on main menu).
 // There's gotta be something wrong with distance calculation or migration somewhere, as reproduction seems to prefer the upper left corner of the map.
 // And why are water cells themselves often empty?
+// When allowed to run for decades, we get:
+// 1. 60% infection, fixated
+// 2. *Lone* water cells seem to often be empty, but the *surrounding* cells, even of contiguous water, are often full of infected mosquitoes.
+// 3. Reproduction seems to prefer the upper left corner of the map, stagnating at full capacity, while the rest of the map fluctuates more (notably, at a much lower infection rate).
+// 4. Reproductive success TANKS, at just 0.5% after a few months.
 
 /********************
  * HELPER FUNCTIONS *
@@ -41,7 +46,7 @@ function logAndMockConsole(text) {
   p.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
   // Append the paragraph element to the mock console.
   mockConsole.appendChild(p);
-  // If there are more than 32 children in the mock console, remove the first one.
+  // If there are more than 24 children in the mock console, remove the first one.
   while (mockConsole.children.length > 24) {
     mockConsole.removeChild(mockConsole.children[0]);
   }
@@ -848,7 +853,7 @@ function updatePlot(generation) {
     },
   };
 
-  Plotly.newPlot("toxin__plot", [trace3], layout2);
+  Plotly.newPlot("reproductive_success_plot", [trace3], layout2);
 }
 
 function updateWorld() {
@@ -942,7 +947,7 @@ function rearrangePage() {
   // Show plot.
   let plot = document.getElementById("plot");
   plot.style.display = "block";
-  let toxinPlot = document.getElementById("toxin__plot");
+  let toxinPlot = document.getElementById("reproductive_success_plot");
   toxinPlot.style.display = "block";
   // Show world.
   let worldCanvas = document.getElementById("world");
