@@ -25,6 +25,8 @@ let maxImperfectTransmissionRate = 1.0;
  */
 
 // Make JSON downloads toggleable (checkbox on main menu).
+// There's gotta be something wrong with distance calculation or migration somewhere, as reproduction seems to prefer the upper left corner of the map.
+// And why are water cells themselves often empty?
 
 /********************
  * HELPER FUNCTIONS *
@@ -358,7 +360,7 @@ class Mosquito {
     this.antitoxins = null;
 
     // Keep track of how many children survived per reproductive event.
-    this.successes = 0;
+    this.successes = 0.0;
   }
 
   ageUp() {
@@ -423,7 +425,7 @@ class Mosquito {
       }
 
       // Move towards the nearest water cell.
-      if (nearestWaterCell) {
+      if (nearestWaterCell && nearestWaterDistance > 0) {
         let dx = nearestWaterCell.x - this.position.x;
         let dy = nearestWaterCell.y - this.position.y;
         if (Math.abs(dx) > Math.abs(dy)) {
@@ -769,7 +771,7 @@ function kTournamentWithReplacement(eligibleMales, k = 3) {
  ********************/
 
 // Create world.
-let world = new World(16, 16);
+let world = new World(18, 18);
 let carryingCapacity = 96;
 
 // Populate world.
@@ -796,18 +798,10 @@ let trace2 = {
 let trace3 = {
   x: [],
   y: [],
-  name: "Average Toxin Count in Each Male",
+  name: "Reproductive Success Odds",
   type: "scatter",
   mode: "lines",
-  marker: { color: "DodgerBlue" },
-};
-let trace4 = {
-  x: [],
-  y: [],
-  name: "Average Antitoxin Count in Each Female",
-  type: "scatter",
-  mode: "lines",
-  marker: { color: "HotPink" },
+  marker: { color: "RebeccaPurple" },
 };
 
 function updatePlot(generation) {
@@ -837,42 +831,24 @@ function updatePlot(generation) {
 
   Plotly.newPlot("plot", [trace1, trace2], layout);
 
-  // Update toxin plot.
-  let averageToxinCountInMales = world.getAverageToxinCountInMales();
-
   trace3.x.push(generation);
-  trace3.y.push(averageToxinCountInMales);
+  trace3.y.push(
+    // Get the average reproductive success odds of all mosquitoes.
+    allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
+      allMosquitoes.length
+  );
 
   let layout2 = {
-    title: "Average Toxin Count in Male Mosquitoes",
+    title: "Reproductive Success Odds",
     xaxis: {
       title: "Day",
     },
     yaxis: {
-      title: "Average Toxin Count",
+      title: "Average Reproductive Success Odds",
     },
   };
 
   Plotly.newPlot("toxin__plot", [trace3], layout2);
-
-  // Update antitoxin plot.
-  let averageAntitoxinCountInFemales =
-    world.getAverageAntitoxinCountInFemales();
-
-  trace4.x.push(generation);
-  trace4.y.push(averageAntitoxinCountInFemales);
-
-  let layout3 = {
-    title: "Average Antitoxin Count in Female Mosquitoes",
-    xaxis: {
-      title: "Day",
-    },
-    yaxis: {
-      title: "Average Antitoxin Count",
-    },
-  };
-
-  Plotly.newPlot("antitoxin__plot", [trace4], layout3);
 }
 
 function updateWorld() {
@@ -926,7 +902,7 @@ function shouldStopSimulation() {
 
 function resetWorld() {
   // Reset all global variables.
-  world = new World(16, 16);
+  world = new World(18, 18);
   carryingCapacity = 96;
   allMosquitoes = [];
   generation = 0;
@@ -949,18 +925,10 @@ function resetWorld() {
   trace3 = {
     x: [],
     y: [],
-    name: "Average Toxin Count in Each Male",
+    name: "Reproductive Success Odds",
     type: "scatter",
     mode: "lines",
-    marker: { color: "DodgerBlue" },
-  };
-  trace4 = {
-    x: [],
-    y: [],
-    name: "Average Antitoxin Count in Each Female",
-    type: "scatter",
-    mode: "lines",
-    marker: { color: "HotPink" },
+    marker: { color: "RebeccaPurple" },
   };
 }
 
@@ -976,8 +944,6 @@ function rearrangePage() {
   plot.style.display = "block";
   let toxinPlot = document.getElementById("toxin__plot");
   toxinPlot.style.display = "block";
-  let antitoxinPlot = document.getElementById("antitoxin__plot");
-  antitoxinPlot.style.display = "block";
   // Show world.
   let worldCanvas = document.getElementById("world");
   worldCanvas.style.display = "block";
