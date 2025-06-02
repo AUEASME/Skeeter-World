@@ -33,6 +33,7 @@ let maxImperfectTransmissionRate = 1.0;
 // 3. Reproduction seems to prefer the upper left corner of the map, stagnating at full capacity, while the rest of the map fluctuates more (notably, at a much lower infection rate).
 // 4. Reproductive success TANKS, at just 0.5% after a few months.
 // Reproductive success seems to fixate at a much higher value (around 60%) if the infection is mostly eradicated...
+// If we increase the prevalence of water to 50%, we get much more clearly defined infected vs. uninfected populations, with the uninfected population dominating the wet cells. Reproductive success also plummets to almost zero.
 
 /********************
  * HELPER FUNCTIONS *
@@ -415,23 +416,25 @@ class Mosquito {
       world.water_map[this.position.y][this.position.x] === 0
     ) {
       // Find the nearest water cell.
-      let nearestWaterCell = null;
+      let nearestWaterCells = [];
       let nearestWaterDistance = Infinity;
       for (let y = 0; y < world.height; y++) {
         for (let x = 0; x < world.width; x++) {
           if (world.water_map[y][x] === 1) {
             let distance =
               Math.abs(this.position.x - x) + Math.abs(this.position.y - y);
-            if (distance < nearestWaterDistance) {
+            if (distance <= nearestWaterDistance) {
               nearestWaterDistance = distance;
-              nearestWaterCell = { x, y };
+              nearestWaterCells.push({ x, y });
             }
           }
         }
       }
 
       // Move towards the nearest water cell.
-      if (nearestWaterCell && nearestWaterDistance > 0) {
+      if (nearestWaterCells.length > 0) {
+        let nearestWaterCell =
+          nearestWaterCells[Math.floor(Math.random() * nearestWaterCells.length)];
         let dx = nearestWaterCell.x - this.position.x;
         let dy = nearestWaterCell.y - this.position.y;
         if (Math.abs(dx) > Math.abs(dy)) {
@@ -466,7 +469,7 @@ class Mosquito {
     // Check if any neighboring cell has fewer mosquitoes. If it does, move there.
     let currentCell = this.position;
     let currentPopulation = world.map[currentCell.y][currentCell.x].length;
-    let bestCell = currentCell;
+    let bestCell = null;
     let bestPopulation = currentPopulation;
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -1; dx <= 1; dx++) {
@@ -476,12 +479,11 @@ class Mosquito {
           let population = world.map[y][x].length;
           if (population < bestPopulation) {
             bestCell = { x, y };
-            bestPopulation = population;
           }
         }
       }
     }
-    if (bestCell !== currentCell) {
+    if (bestCell) {
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
         currentCell.x
       ].filter((m) => m !== this);
@@ -556,7 +558,7 @@ class World {
     // 3. Fill the map with random water cells.
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        if (Math.random() < 0.25) {
+        if (Math.random() < 0.175) {
           this.water_map[y][x] = 1;
         } else {
           this.water_map[y][x] = 0;
