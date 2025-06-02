@@ -32,6 +32,7 @@ let maxImperfectTransmissionRate = 1.0;
 // 2. *Lone* water cells seem to often be empty, but the *surrounding* cells, even of contiguous water, are often full of infected mosquitoes.
 // 3. Reproduction seems to prefer the upper left corner of the map, stagnating at full capacity, while the rest of the map fluctuates more (notably, at a much lower infection rate).
 // 4. Reproductive success TANKS, at just 0.5% after a few months.
+// Reproductive success seems to fixate at a much higher value (around 60%) if the infection is mostly eradicated...
 
 /********************
  * HELPER FUNCTIONS *
