@@ -399,17 +399,19 @@ class Mosquito {
   changeSex() {
     if (this.sex === 0) {
       this.sex = 1;
-    } else {
-      this.sex = 0;
+      return;
     }
+
+    this.sex = 0;
   }
 
   changeInfectionStatus() {
     if (this.infection.length === 0) {
       this.infection = [new Wolbachia(true)];
-    } else {
-      this.infection = [];
+      return;
     }
+
+    this.infection = [];
   }
 
   migrate() {
@@ -437,7 +439,9 @@ class Mosquito {
       // Move towards the nearest water cell.
       if (nearestWaterCells.length > 0) {
         let nearestWaterCell =
-          nearestWaterCells[Math.floor(Math.random() * nearestWaterCells.length)];
+          nearestWaterCells[
+            Math.floor(Math.random() * nearestWaterCells.length)
+          ];
         let dx = nearestWaterCell.x - this.position.x;
         let dy = nearestWaterCell.y - this.position.y;
         if (Math.abs(dx) > Math.abs(dy)) {
@@ -1135,7 +1139,8 @@ async function startExperiment(event) {
       // Update the world.
       updateWorld();
       // Sleep for a quarter of a second.
-      await new Promise((r) => setTimeout(r, 50));
+      // This allows the browser time to handle user requests, such as scrolling, which get laggy if the simulation never takes a break.
+      await new Promise((r) => setTimeout(r, 250));
     }
 
     // Once the simulation is complete, output the data.
