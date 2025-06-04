@@ -719,7 +719,7 @@ function renderWorld() {
       context.fillStyle = `rgb(${red}, ${green}, ${blue})`;
       context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
       // Add a black border around each cell.
-      context.strokeStyle = "black";
+      context.strokeStyle = "rgba(0, 0, 0, 0.125)";
       context.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
   }
@@ -978,6 +978,9 @@ function rearrangePage() {
       let color = cell === 1 ? "CornflowerBlue" : "ForestGreen";
       waterContext.fillStyle = color;
       waterContext.fillRect(x * 12, y * 12, 12, 12);
+      // Add a black border around each cell.
+      waterContext.strokeStyle = "rgba(0, 0, 0, 0.125)";
+      waterContext.strokeRect(x * 12, y * 12, 12, 12);
     }
   }
   // Show keys.
