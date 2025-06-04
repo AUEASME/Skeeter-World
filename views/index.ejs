@@ -38,7 +38,6 @@
   <body>
     <nav>
       <a href="/" class="nav__disabled">Simulation</a>
-      <a href="/experiments">Experiments</a>
       <a href="/readme">Readme</a>
       <a href="/about">About</a>
     </nav>
@@ -48,50 +47,55 @@
         Population dynamics simulation for mosquitoes infected with
         <em>Wolbachia</em> bacteria.
       </h2>
-      <canvas id="world" style="display: none"></canvas>
-      <div id="key" style="display: none">
-        <p style="color: red">Uninfected</p>
-        <p style="color: blue">Infected</p>
+      <div id="maps">
+        <div class="map">
+          <canvas id="world" style="display: none"></canvas>
+          <div class="key" style="display: none">
+            <p style="color: red">Uninfected</p>
+            <p style="color: blue">Infected</p>
+          </div>
+        </div>
+        <div class="map">
+          <canvas id="water" style="display: none"></canvas>
+          <div class="key" style="display: none">
+            <p style="color: cornflowerblue;">Water</p>
+            <p style="color: forestgreen">Dry Land</p>
+          </div>
+        </div>
       </div>
       <form id="start__params">
         <!-- World Parameters -->
         <label for="infected__males"
           >Number of males to infect at outset (default 16):</label
         >
-        <input type="number" id="infected__males" name="infected__males" pattern="[0-9]*" />
+        <input type="text" id="infected__males" name="infected__males" />
         <label for="infected__females"
           >Number of females to infect at outset (default 32):</label
         >
-        <input type="number" id="infected__females" name="infected__females" pattern="[0-9]*" />
+        <input type="text" id="infected__females" name="infected__females" />
         <!-- Wolbachia Parameters -->
-        <label for="toxin__length">
-          Toxin/antitoxin length (default 4 bits):
-        </label>
-        <input type="number" id="toxin__length" name="toxin__length" pattern="[0-9]*" />
         <label for="kill__rate"
-          >Initial CI rate for <em>Wolbachia</em> (0 to 1, .5 by
+          >Initial CI rate for <em>Wolbachia</em> (0 to 1, 1 by
           default):</label
         >
-        <input type="number" id="kill__rate" name="kill__rate" />
+        <input type="text" id="kill__rate" name="kill__rate" />
         <label for="rescue__rate"
           >Initial CI rescue rate for <em>Wolbachia</em> (0 to 1, 1 by
           default):</label
         >
-        <input type="number" id="rescue__rate" name="rescue__rate" />
+        <input type="text" id="rescue__rate" name="rescue__rate" />
         <!-- Simulation Parameters -->
-        <label for="duration">Duration of simulation (default 365 days):</label>
-        <input type="number" id="duration" name="duration" pattern="[0-9]*" />
+        <label for="duration">Duration of simulation (default 730 days):</label>
+        <input type="text" id="duration" name="duration" />
+        <label for="repeats">Number of times to run each simulation (default 1):</label>
+        <input type="number" id="repeats" name="repeats" />
         <!-- Start -->
-        <button id="start" onclick="startSimulation(event)">
+        <button id="start" onclick="startExperiment(event)">
           Start Simulation
         </button>
       </form>
-      <button id="stop" onclick="stopSimulation(true)" style="display: none">
-        Stop Simulation
-      </button>
       <div id="plot" style="display: none"></div>
-      <div id="toxin__plot" style="display: none"></div>
-      <div id="antitoxin__plot" style="display: none"></div>
+      <div id="reproductive_success_plot" style="display: none"></div>
       <div id="mock__console" style="display: none"></div>
     </main>
     <script src="/js/main.js"></script>
