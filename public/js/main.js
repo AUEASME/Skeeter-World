@@ -718,6 +718,9 @@ function renderWorld() {
       }
       context.fillStyle = `rgb(${red}, ${green}, ${blue})`;
       context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      // Add a black border around each cell.
+      context.strokeStyle = "black";
+      context.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
   }
 }
