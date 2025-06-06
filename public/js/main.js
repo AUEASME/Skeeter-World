@@ -189,14 +189,6 @@ class Gene {
 
     // Set the chemical to a random binary string of length 3.
     this.chemical = [0];
-    /*
-    for (let i = 0; i < 3; i++) {
-      // Flip a coin. If heads, set the ith character to 1.
-      if (Math.random() < 0.5) {
-        this.chemical[i] = 1;
-      }
-    }
-    */
   }
 }
 
@@ -575,7 +567,7 @@ class World {
   }
 
   populate() {
-    // Add up to twenty mosquitoes to each cell.
+    // Add mosquitoes to each cell of the map.
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         for (let i = 0; i < carryingCapacity; i++) {
@@ -838,12 +830,8 @@ function updatePlot(generation) {
 
   let layout = {
     title: "Mosquito Infection Status",
-    xaxis: {
-      title: "Day",
-    },
-    yaxis: {
-      title: "Mosquito Count",
-    },
+    xaxis: { title: "Day" },
+    yaxis: { title: "Mosquito Count" },
     barmode: "stack",
   };
 
@@ -858,24 +846,18 @@ function updatePlot(generation) {
 
   let layout2 = {
     title: "Reproductive Success Odds",
-    xaxis: {
-      title: "Day",
-    },
-    yaxis: {
-      title: "Average Reproductive Success Odds",
-    },
+    xaxis: { title: "Day" },
+    yaxis: { title: "Average Reproductive Success Odds" },
   };
 
   Plotly.newPlot("reproductive_success_plot", [trace3], layout2);
 }
 
 function updateWorld() {
-  logAndMockConsole(`Beginning day ${generation + 1}…`);
-
   logAndMockConsole(
-    `There are currently ${allMosquitoes.length} mosquitoes, ${
-      allMosquitoes.filter((m) => m.infection.length !== 0).length
-    } of whom are infected by Wolbachia.`
+    `Day ${generation + 1}: There are currently ${allMosquitoes.length.toLocaleString("en")} mosquitoes, ${allMosquitoes
+      .filter((m) => m.infection.length !== 0)
+      .length.toLocaleString("en")} of whom are infected by Wolbachia.`
   );
 
   // Mosquitoes do their thing.
@@ -896,9 +878,7 @@ function updateWorld() {
 
   renderWorld();
 
-  logAndMockConsole(`Day ${generation + 1} has ended.`);
-
-  // Update the plot.
+  // Update the plots.
   updatePlot(generation + 1);
   generation += 1;
 }
