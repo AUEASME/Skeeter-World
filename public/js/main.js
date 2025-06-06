@@ -509,7 +509,9 @@ function updateWorld() {
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
       // Sort mosquitoes by fitness.
-      world.map[y][x].sort((a, b) => a.fitness - b.fitness);
+      // world.map[y][x].sort((a, b) => a.fitness - b.fitness);
+      // Shuffle randomly instead.
+      world.map[y][x].sort(() => Math.random() - 0.5);
       // Keep the top carryingCapacity mosquitoes.
       world.map[y][x] = world.map[y][x].slice(0, carryingCapacity);
       // Add them to the global list.
