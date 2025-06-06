@@ -391,7 +391,8 @@ function mosquitoDay(population) {
         (m) => m.age > 14
       );
       if (eligibleMales.length > 0) {
-        let mate = kTournamentWithReplacement(eligibleMales);
+        // Get a random mate.
+        let mate = kTournamentWithReplacement(eligibleMales, 3);
         mosquito.reproduce(mate);
       }
     }
@@ -410,7 +411,7 @@ function kTournamentWithReplacement(eligibleMales, k = 3) {
   }
 
   // Sort the males by fitness (highest first).
-  selected.sort((a, b) => b.fitness - a.fitness);
+  // selected.sort((a, b) => b.fitness - a.fitness);
 
   // Return the most fit male.
   return selected[0];
