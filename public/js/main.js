@@ -257,9 +257,9 @@ class Mosquito {
       mom = this;
     let numberOfEggs = Math.floor(Math.random() * 100) + 1;
     if (dad.infected === true && mom.infected === true) {
-      numberOfEggs = Math.floor(numberOfEggs * rescueRate[0]);
+      numberOfEggs = Math.floor(numberOfEggs * rescueRate);
     } else if (dad.infected === true && mom.infected === false) {
-      numberOfEggs = Math.floor(numberOfEggs * (1 - killRate[0]));
+      numberOfEggs = Math.floor(numberOfEggs * (1 - killRate));
     }
 
     for (let i = 0; i < numberOfEggs; i++) {
@@ -320,108 +320,6 @@ class World {
         }
       }
     }
-  }
-
-  infectMale() {
-    // Find a random male and infect him.
-    let males = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infection.length === 0
-    );
-
-    if (males.length === 0) {
-      // Select a random mosquito and change its sex.
-      let randomMosquito =
-        allMosquitoes[Math.floor(Math.random() * allMosquitoes.length)];
-      randomMosquito.changeSex();
-      males = allMosquitoes.filter((m) => m.sex === 1);
-    }
-
-    let randomMosquito = males[Math.floor(Math.random() * males.length)];
-    randomMosquito.changeInfectionStatus();
-  }
-
-  infectFemale() {
-    // Find a random female and infect her.
-    let females = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infection.length === 0
-    );
-
-    if (females.length === 0) {
-      // Select a random mosquito and change its sex.
-      let randomMosquito =
-        allMosquitoes[Math.floor(Math.random() * allMosquitoes.length)];
-      randomMosquito.changeSex();
-      females = allMosquitoes.filter((m) => m.sex === 0);
-    }
-
-    let randomMosquito = females[Math.floor(Math.random() * females.length)];
-    randomMosquito.changeInfectionStatus();
-  }
-
-  getAverageToxinCountInMales() {
-    // Get all males in the world.
-    const males = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infection.length > 0
-    );
-
-    // Get all unique toxins produced inside that male.
-    let lengths = [];
-    for (let i = 0; i < males.length; i++) {
-      let toxins = new Set();
-      for (let j = 0; j < males[i].infection.length; j++) {
-        // If undefined, skip.
-        if (males[i].infection[j] === undefined) {
-          continue;
-        }
-        for (let k = 0; k < males[i].infection[j].genome.length; k++) {
-          if (males[i].infection[j].genome[k].type === 0) {
-            toxins.add(males[i].infection[j].genome[k].chemical);
-          }
-        }
-        for (let k = 0; k < males[i].infection[j].plasmids.length; k++) {
-          if (males[i].infection[j].plasmids[k].type === 0) {
-            toxins.add(males[i].infection[j].plasmids[k].chemical);
-          }
-        }
-      }
-      lengths.push(toxins.size);
-    }
-
-    // Return the average number of unique toxins.
-    return lengths.reduce((acc, l) => acc + l, 0) / lengths.length;
-  }
-
-  getAverageAntitoxinCountInFemales() {
-    // Get all females in the world.
-    const females = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infection.length > 0
-    );
-
-    // Get all unique antitoxins produced inside each male.
-    let lengths = [];
-    for (let i = 0; i < females.length; i++) {
-      let antitoxins = new Set();
-      for (let j = 0; j < females[i].infection.length; j++) {
-        // If undefined, skip.
-        if (females[i].infection[j] === undefined) {
-          continue;
-        }
-        for (let k = 0; k < females[i].infection[j].genome.length; k++) {
-          if (females[i].infection[j].genome[k].type === 0) {
-            antitoxins.add(females[i].infection[j].genome[k].chemical);
-          }
-        }
-        for (let k = 0; k < females[i].infection[j].plasmids.length; k++) {
-          if (females[i].infection[j].plasmids[k].type === 0) {
-            antitoxins.add(females[i].infection[j].plasmids[k].chemical);
-          }
-        }
-      }
-      lengths.push(antitoxins.size);
-    }
-
-    // Return the average number of unique antitoxins.
-    return lengths.reduce((acc, l) => acc + l, 0) / lengths.length;
   }
 }
 
@@ -725,12 +623,14 @@ function getInputValues(event) {
     infectedMaleCountInDocument[0] !== ""
   ) {
     infectedMaleCount = infectedMaleCountInDocument;
-    // Convert to integer.
-    infectedMaleCount = infectedMaleCount.map((c) => parseInt(c));
+    // Convert to float.
+    infectedMaleCount = infectedMaleCount.map((c) => parseFloat(c));
   }
   for (let i = 0; i < infectedMaleCount.length; i++) {
-    if (infectedMaleCount[i] < 0) {
-      alert("Infected male count cannot be less than zero.");
+    if (infectedMaleCount[i] < 0 || infectedMaleCount[i] > 1) {
+      alert(
+        "Infected male count cannot be less than zero or greater than one."
+      );
       return;
     }
   }
@@ -743,12 +643,14 @@ function getInputValues(event) {
     infectedFemaleCountInDocument[0] !== ""
   ) {
     infectedFemaleCount = infectedFemaleCountInDocument;
-    // Convert to integer.
-    infectedFemaleCount = infectedFemaleCount.map((c) => parseInt(c));
+    // Convert to float.
+    infectedFemaleCount = infectedFemaleCount.map((c) => parseFloat(c));
   }
   for (let i = 0; i < infectedFemaleCount.length; i++) {
-    if (infectedFemaleCount[i] < 0) {
-      alert("Infected male count cannot be less than zero.");
+    if (infectedFemaleCount[i] < 0 || infectedFemaleCount[i] > 1) {
+      alert(
+        "Infected male count cannot be less than zero or greater than one."
+      );
       return;
     }
   }
@@ -872,12 +774,6 @@ async function startExperiment(event) {
         allMosquitoes.filter((m) => m.infection.length !== 0).length /
           allMosquitoes.length
       );
-      experiment.averageToxinCountInMales.push(
-        world.getAverageToxinCountInMales()
-      );
-      experiment.averageAntitoxinCountInFemales.push(
-        world.getAverageAntitoxinCountInFemales()
-      );
       experiment.reproductiveSuccessOverTime.push(
         // Get the average reproductive success of all mosquitoes.
         allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
@@ -904,14 +800,11 @@ class Experiment {
     this.startTime = new Date();
     this.infectedMalesAtStart = 0.25;
     this.infectedFemalesAtStart = 0.25;
-    this.toxinAntitoxinLength = 3;
     this.killRate = 1;
     this.rescueRate = 1;
     this.maxDays = 730;
     // Run data.
     this.infectionRatio = [];
-    this.averageToxinCountInMales = [];
-    this.averageAntitoxinCountInFemales = [];
     this.reproductiveSuccessOverTime = [];
   }
 
@@ -920,13 +813,10 @@ class Experiment {
       startTime: this.startTime,
       infectedMalesAtStart: this.infectedMalesAtStart,
       infectedFemalesAtStart: this.infectedFemalesAtStart,
-      toxinAntitoxinLength: this.toxinAntitoxinLength,
       killRate: this.killRate,
       rescueRate: this.rescueRate,
       simulationLength: generation,
       infectionRatio: this.infectionRatio,
-      averageToxinCountInMales: this.averageToxinCountInMales,
-      averageAntitoxinCountInFemales: this.averageAntitoxinCountInFemales,
       reproductiveSuccessOverTime: this.reproductiveSuccessOverTime,
     };
 
