@@ -16,7 +16,6 @@ let maxImperfectTransmissionRate = 1.0;
 // antitoxin mutation rate
 // toxin/antitoxin length
 // female bite rate (maybe static?)
-// Change number to infect at outset to a PERCENTAGE.
 /*
  * Good params for presentation:
  * 2056 in each population.
