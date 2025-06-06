@@ -2,8 +2,8 @@
  * SIMULATION PARAMETERS *
  *************************/
 
-let infectedMaleCount = [16];
-let infectedFemaleCount = [32];
+let infectedMaleCount = [1024];
+let infectedFemaleCount = [1024];
 let killRate = [1.0];
 let rescueRate = [1.0];
 let duration = [730];
