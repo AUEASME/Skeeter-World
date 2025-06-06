@@ -11,16 +11,13 @@ app
   .set("views", path.join(__dirname, "views"))
   .set("view engine", "ejs");
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.render("index", { title: "Skeeter World" });
 });
-app.get("/experiments", (req, res) => {
-  res.render("experiments", { title: "Experiments" });
-});
-app.get("/readme", (req, res) => {
+app.get("/readme", (_req, res) => {
   res.render("readme", { title: "Readme" });
 });
-app.get("/about", (req, res) => {
+app.get("/about", (_req, res) => {
   res.render("about", { title: "About" });
 });
 
