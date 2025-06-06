@@ -2,8 +2,8 @@
  * SIMULATION PARAMETERS *
  *************************/
 
-let infectedMaleCount = [1024];
-let infectedFemaleCount = [1024];
+let infectedMaleCount = [0.25];
+let infectedFemaleCount = [0.25];
 let killRate = [1.0];
 let rescueRate = [1.0];
 let duration = [730];
@@ -54,118 +54,6 @@ function logAndMockConsole(text) {
   }
 }
 
-function lockAndKeyMatch(firstArray = [0, 0, 0], secondArray = [0, 0, 0]) {
-  // Ensure the strings are the same length.
-  if (firstArray.length !== secondArray.length) {
-    return 0;
-  }
-
-  // Return a value between 0 and 1, where 0 means the strings are completely different and 1 means they are identical.
-  let matches = 0;
-  for (let i = 0; i < firstArray.length; i++) {
-    if (firstArray[i] === secondArray[i]) {
-      matches++;
-    }
-  }
-  return matches / firstArray.length;
-}
-
-function evaluateToxinStatus(dad, mom) {
-  // Fill in the dad.toxin and mom.antitoxin arrays based on their respective infections.
-  // For each Wolbachia in the dad, for each gene in the genome, if the gene is a toxin, add it to the dad's toxins.
-  // For each Wolbachia in the dad, for each gene in the plasmids, if the gene is a toxin, add it to the dad's toxins.
-  if (dad.infection.length > 0 && dad.toxins === null) {
-    dad.toxins = [];
-    for (let i = 0; i < dad.infection.length; i++) {
-      // If undefined, skip.
-      if (dad.infection[i] === undefined) {
-        continue;
-      }
-      for (let j = 0; j < dad.infection[i].genome.length; j++) {
-        if (dad.infection[i].genome[j].type === 0) {
-          dad.toxins.push(dad.infection[i].genome[j]);
-        }
-      }
-      for (let j = 0; j < dad.infection[i].plasmids.length; j++) {
-        if (dad.infection[i].plasmids[j].type === 0) {
-          dad.toxins.push(dad.infection[i].plasmids[j]);
-        }
-      }
-    }
-  } else if (dad.infection.length === 0) {
-    dad.toxins = [];
-  }
-  // For each Wolbachia in the mom, for each gene in the genome, if the gene is an antitoxin, add it to the mom's antitoxins.
-  // For each Wolbachia in the mom, for each gene in the plasmids, if the gene is an antitoxin, add it to the mom's antitoxins.
-  if (mom.infection.length > 0 && mom.antitoxins === null) {
-    mom.antitoxins = [];
-    for (let i = 0; i < mom.infection.length; i++) {
-      // If undefined, skip.
-      if (mom.infection[i] === undefined) {
-        continue;
-      }
-      for (let j = 0; j < mom.infection[i].genome.length; j++) {
-        if (mom.infection[i].genome[j].type === 1) {
-          mom.antitoxins.push(mom.infection[i].genome[j]);
-        }
-      }
-      for (let j = 0; j < mom.infection[i].plasmids.length; j++) {
-        if (mom.infection[i].plasmids[j].type === 1) {
-          mom.antitoxins.push(mom.infection[i].plasmids[j]);
-        }
-      }
-    }
-  } else if (mom.infection.length === 0) {
-    mom.antitoxins = [];
-  }
-
-  // Okay, first off, for each toxin, we need to see if we have an EXACT MATCH antitoxin.
-  // If so, they cancel each other out, and are removed.
-  // Chance of neutralization is determined by the rescue rate.
-  let dadToxins = dad.toxins;
-  let momAntitoxins = mom.antitoxins;
-  for (let toxin of dadToxins) {
-    for (let antitoxin of momAntitoxins) {
-      if (toxin.chemical === antitoxin.chemical) {
-        if (Math.random() < rescueRate) {
-          dadToxins = dadToxins.filter((t) => t !== toxin);
-          momAntitoxins = momAntitoxins.filter((a) => a !== antitoxin);
-        }
-      }
-    }
-  }
-
-  // For each remaining toxin, find the closest antitoxin match, and have a [LOCK AND KEY MATCH * RESCUE RATE] chance of neutralizing it.
-  for (let toxin of dadToxins) {
-    let bestMatch = 0;
-    let bestAntitoxin = null;
-    for (let antitoxin of momAntitoxins) {
-      let match = lockAndKeyMatch(toxin.chemical, antitoxin.chemical);
-      if (match > bestMatch) {
-        bestMatch = match;
-        bestAntitoxin = antitoxin;
-      }
-    }
-    if (Math.random() < bestMatch * rescueRate) {
-      dadToxins = dadToxins.filter((t) => t !== toxin);
-      momAntitoxins = momAntitoxins.filter((a) => a !== bestAntitoxin);
-    }
-  }
-
-  // If any toxins are left... the mosquito has a... reduced chance of reproducing.
-  // How do we calculate that value? Should it be user-determined? Kill rate?
-  // If the kill rate is .5, each toxin remaining has a 50% chance of killing... each offspring.
-  // So if there are 3 toxins, the mosquito has a 12.5% chance of successfully reproducing.
-  // Or rather, each offspring has a 12.5% chance of surviving.
-  let reproductiveSuccessOdds = Math.pow(1 - killRate, dad.toxins.length);
-
-  // Clear the toxins and antitoxins arrays.
-  dad.toxins = null;
-  mom.antitoxins = null;
-
-  return reproductiveSuccessOdds;
-}
-
 /*********************
  * WOLBACHIA CLASSES *
  *********************/
@@ -182,147 +70,16 @@ function evaluateToxinStatus(dad, mom) {
  * "but deleterious when a toxic analogue is also present. In both cases, toxicity is an environment-dependent side-effect of an otherwise adaptive trait."
  */
 
-class Gene {
-  constructor() {
-    // Randomly choose a type (0 for toxin, 1 for antitoxin).
-    this.type = Math.round(Math.random());
-
-    // Set the chemical to a random binary string of length 3.
-    this.chemical = [0];
-  }
-}
-
-class Wolbachia {
-  constructor(random = false) {
-    // The genome is mostly IMMUTABLE — once a gene is added to it, it cannot be removed.
-    // The genome is copied from the parent when the bacteria reproduces.
-    this.genome = [];
-    // If random is true, generate a random genome.
-    if (random === true) {
-      // Generate a random number of genes between 1 and 3.
-      let numGenes = Math.floor(Math.random() * 3) + 1;
-
-      for (let i = 0; i < numGenes; i++) {
-        this.genome.push(new Gene());
-      }
-    }
-
-    // Plasmids are mutable — they can be lost during reproduction.
-    this.plasmids = [];
-    // If random is true, generate a random number of plasmids.
-    if (random === true) {
-      // Generate a random int between 1 and 5.
-      let numPlasmids = Math.floor(Math.random() * 5) + 1;
-
-      for (let i = 0; i < numPlasmids; i++) {
-        this.plasmids.push(new Gene());
-      }
-    }
-  }
-
-  wol_reproduce() {
-    // When the bacteria reproduces, the plasmids are split between the two daughter cells.
-    // Of course, most bacteria only have about ten plasmids each, so when the mosquitoes reproduce... most Wolbachia would be left with no plasmids.
-    // So we'll somehow need to simulate plasmid reproduction...
-    // Okay, so reproduce() should take a number as an argument, that being the number of mosquitoes being produced.
-    // Then it realistically simulates the cell divisions of Wolbachia to cover all the mosquito offspring.
-    let newWolbachia = new Wolbachia();
-
-    // Copy the genome.
-    newWolbachia.genome = this.genome.slice();
-    // Copy the plasmids.
-    newWolbachia.plasmids = this.plasmids.slice();
-
-    // Randomly remove half the plasmids.
-    newWolbachia.plasmids = newWolbachia.plasmids.filter(
-      () => Math.random() > 0.5
-    );
-
-    // If no plasmids are left, randomly add one from the parent.
-    if (newWolbachia.plasmids.length === 0) {
-      newWolbachia.plasmids.push(
-        structuredClone(
-          this.plasmids[Math.floor(Math.random() * this.plasmids.length)]
-        )
-      );
-    }
-
-    // Randomly duplicate plasmids from the child until we're back to the original number.
-    while (newWolbachia.plasmids.length < this.plasmids.length) {
-      let randomPlasmid = structuredClone(
-        newWolbachia.plasmids[
-          Math.floor(Math.random() * newWolbachia.plasmids.length)
-        ]
-      );
-      newWolbachia.plasmids.push(randomPlasmid);
-    }
-
-    // Small chance to add or remove a gene (minimum of one gene must be present).
-    if (Math.random() < 0.001) {
-      if (Math.random() < 0.5 && newWolbachia.genome.length > 1) {
-        newWolbachia.genome.pop();
-      } else {
-        newWolbachia.genome.push(new Gene());
-      }
-    }
-
-    // Small chance to add or remove a plasmid.
-    if (Math.random() < 0.001) {
-      if (Math.random() < 0.5 && newWolbachia.plasmids.length > 1) {
-        newWolbachia.plasmids.pop();
-      } else {
-        newWolbachia.plasmids.push(new Gene());
-      }
-    }
-
-    // Small chance to integrate a plasmid into the genome.
-    if (Math.random() < 0.0001 && newWolbachia.plasmids.length > 1) {
-      newWolbachia.integrate();
-    }
-
-    return newWolbachia;
-  }
-
-  integrate() {
-    // Choose a random plasmid.
-    let randomPlasmid =
-      this.plasmids[Math.floor(Math.random() * this.plasmids.length)];
-
-    // Move it from the plasmid array to the genome array.
-    this.genome.push(structuredClone(randomPlasmid));
-    this.plasmids = this.plasmids.filter((p) => p !== randomPlasmid);
-  }
-}
-
 /**************************************
  * MOSQUITO CLASS, METHODS, AND SETUP *
  **************************************/
 
 class Mosquito {
-  constructor(maternalInfection, dad, mom) {
+  constructor(dad, mom) {
     // this.sex can be 0 (female) or 1 (male).
     this.sex = Math.round(Math.random());
-    // this.infection is a (potentially empty) array of Wolbachia.
-    this.infection = [];
-    // If an infection is passed in, duplicate it for this mosquito.
-    if (maternalInfection !== undefined && maternalInfection.length > 0) {
-      for (let i = 0; i < maternalInfection.length; i++) {
-        this.infection.push(maternalInfection[i].wol_reproduce());
-      }
-
-      // Extremely slim chance for a Wolbachia to duplicate or be lost.
-      if (Math.random() < 0.001) {
-        // Randomly choose a Wolbachia from the infection.
-        let randomWolbachia =
-          this.infection[Math.floor(Math.random() * this.infection.length)];
-        // Either make a copy of the Wolbachia or remove it.
-        if (Math.random() < 0.5) {
-          this.infection.push(randomWolbachia.wol_reproduce());
-        } else {
-          this.infection = this.infection.filter((w) => w !== randomWolbachia);
-        }
-      }
-    }
+    // this.infected is a boolean that indicates whether the mosquito is infected with Wolbachia.
+    this.infected = false;
 
     // Generate a random fitness value from 0 to 1.
     this.fitness = Math.random();
@@ -351,12 +108,6 @@ class Mosquito {
     this.age = 0;
     // "but a single female mosquito may produce up to 10 broods throughout her life."
     this.breedingCooldown = 0;
-
-    // Wolbachia produces toxins and antidotes.
-    // So each mosquito has a concentration of toxins and antidotes produced each day.
-    // The proportion of those determines reproductive success.
-    this.toxins = null;
-    this.antitoxins = null;
 
     // Keep track of how many children survived per reproductive event.
     this.successes = 0.0;
@@ -398,12 +149,12 @@ class Mosquito {
   }
 
   changeInfectionStatus() {
-    if (this.infection.length === 0) {
-      this.infection = [new Wolbachia(true)];
+    if (this.infection === false) {
+      this.infection = true;
       return;
     }
 
-    this.infection = [];
+    this.infection = false;
   }
 
   migrate() {
@@ -505,34 +256,25 @@ class Mosquito {
     let dad = mate,
       mom = this;
     let numberOfEggs = Math.floor(Math.random() * 100) + 1;
-    let toxinStatus = evaluateToxinStatus(dad, mom);
-    let successCount = 0;
-
-    for (let i = 0; i < numberOfEggs; i++) {
-      // If the father is infected, we need to determine if the sperm survives.
-      // Need to match the toxins in the dad with the antitoxins in the mom and determine if the sperm survives.
-      if (
-        (dad.infection.length !== 0 && Math.random() < toxinStatus) ||
-        dad.infection.length === 0
-      ) {
-        // Sperm survives.
-        // Paternal infections AREN'T passed on in nature, according to Turelli '94, so we don't need to do a mixed infection.
-        let child;
-        if (Math.random() < mom.imperfectTransmissionRate) {
-          child = new Mosquito(mom.infection, dad, mom);
-        } else {
-          child = new Mosquito(dad, mom);
-        }
-        world.map[currentCell.y][currentCell.x].push(child);
-        child.imperfectTransmissionRate =
-          (dad.imperfectTransmissionRate + mom.imperfectTransmissionRate) / 2;
-        child.position = currentCell;
-        successCount++;
-      }
+    if (dad.infected === true && mom.infected === true) {
+      numberOfEggs = Math.floor(numberOfEggs * rescueRate[0]);
+    } else if (dad.infected === true && mom.infected === false) {
+      numberOfEggs = Math.floor(numberOfEggs * (1 - killRate[0]));
     }
 
-    this.successes = successCount / numberOfEggs;
-    mate.successes = successCount / numberOfEggs;
+    for (let i = 0; i < numberOfEggs; i++) {
+      let child = new Mosquito();
+      if (Math.random() < mom.imperfectTransmissionRate) {
+        child.infected = true;
+      }
+      world.map[currentCell.y][currentCell.x].push(child);
+      child.imperfectTransmissionRate =
+        (dad.imperfectTransmissionRate + mom.imperfectTransmissionRate) / 2;
+      child.position = currentCell;
+    }
+
+    this.successes = numberOfEggs;
+    mate.successes = numberOfEggs;
     this.fitness = (this.fitness + this.successes) / 2;
     mate.fitness = (mate.fitness + mate.successes) / 2;
   }
@@ -1094,12 +836,31 @@ async function startExperiment(event) {
   for (let experiment of experiments) {
     // Set up the world.
     world.populate();
-    for (let i = 0; i < experiment.infectedMalesAtStart; i++) {
-      world.infectMale();
+
+    let allMosquitoes = [];
+    for (let y = 0; y < world.height; y++) {
+      for (let x = 0; x < world.width; x++) {
+        allMosquitoes = allMosquitoes.concat(world.map[y][x]);
+      }
     }
-    for (let i = 0; i < experiment.infectedFemalesAtStart; i++) {
-      world.infectFemale();
-    }
+    // Infect the specified number of males and females.
+    let allMales = allMosquitoes.filter(
+      (m) => m.sex === 1 && m.infection.length === 0
+    );
+    let allFemales = allMosquitoes.filter(
+      (m) => m.sex === 0 && m.infection.length === 0
+    );
+    allMales.forEach((male) => {
+      if (Math.random() < experiment.infectedMalesAtStart) {
+        male.changeInfectionStatus();
+      }
+    });
+    allFemales.forEach((female) => {
+      if (Math.random() < experiment.infectedFemalesAtStart) {
+        female.changeInfectionStatus();
+      }
+    });
+
     killRate = experiment.killRate;
     rescueRate = experiment.rescueRate;
     renderWorld();
@@ -1141,8 +902,8 @@ class Experiment {
   constructor() {
     // Start data.
     this.startTime = new Date();
-    this.infectedMalesAtStart = 16;
-    this.infectedFemalesAtStart = 32;
+    this.infectedMalesAtStart = 0.25;
+    this.infectedFemalesAtStart = 0.25;
     this.toxinAntitoxinLength = 3;
     this.killRate = 1;
     this.rescueRate = 1;
