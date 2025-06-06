@@ -120,7 +120,7 @@ class Mosquito {
     }
     // Male mosquitoes live for about eighteen days, and fourteen of those are spend growing, so for each subsequent day, they have a 1/4 chance of dying.
     // Actually no, see below.
-    if (this.sex === 1 && this.age > 14 && Math.random() < 0.125) {
+    if (this.sex === 1 && this.age > 14 && Math.random() < 0.25) {
       // Kill self.
       let currentCell = this.position;
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
@@ -130,7 +130,7 @@ class Mosquito {
 
     // Females, on the other hand, live about 40 days after reaching maturity, so... they have a 1/40 chance of dying each day.
     // Actually no that shouldn't be how that works, it should be a distribution CENTERED around 40.
-    if (this.sex === 0 && this.age > 14 && Math.random() < 0.0125) {
+    if (this.sex === 0 && this.age > 14 && Math.random() < 0.025) {
       // Kill self.
       let currentCell = this.position;
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
