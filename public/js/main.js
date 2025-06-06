@@ -264,7 +264,7 @@ class Mosquito {
 
     for (let i = 0; i < numberOfEggs; i++) {
       let child = new Mosquito();
-      if (Math.random() < mom.imperfectTransmissionRate) {
+      if (Math.random() < mom.imperfectTransmissionRate && mom.infected === true) {
         child.infected = true;
       }
       world.map[currentCell.y][currentCell.x].push(child);
