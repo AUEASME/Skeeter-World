@@ -149,12 +149,12 @@ class Mosquito {
   }
 
   changeInfectionStatus() {
-    if (this.infection === false) {
-      this.infection = true;
+    if (this.infected === false) {
+      this.infected = true;
       return;
     }
 
-    this.infection = false;
+    this.infected = false;
   }
 
   migrate() {
@@ -248,8 +248,8 @@ class Mosquito {
     this.breedingCooldown = 4;
 
     let currentCell = this.position;
-    // If both parents are infected, the child has a mom.infection.rescueRate chance of surviving, in which case it inherits one of the parents' infections.
-    // If the dad is infected but the mom is not, the child has a dad.infection.killRate chance of immediately dying, otherwise it inherits the dad's infection.
+    // If both parents are infected, the child has a rescueRate chance of surviving, in which case it inherits one of the parents' infections.
+    // If the dad is infected but the mom is not, the child has a killRate chance of immediately dying, otherwise it inherits the dad's infection.
     // If the mom is infected but the dad is not, the child survives, but inherits the mom's infection.
     // If neither parent is infected, the child survives no matter what.
     // Child fitness is the average of the parents' fitness.
@@ -340,7 +340,7 @@ function renderWorld() {
       let green = 255;
       let blue = 255;
       for (let mosquito of cell) {
-        if (mosquito.infection.length === 0) {
+        if (mosquito.infected === false) {
           green -= 255 / carryingCapacity;
           blue -= 255 / carryingCapacity;
         } else {
@@ -383,7 +383,7 @@ function mosquitoDay(population) {
     // If mosquito is female, reproduce.
     if (
       mosquito.sex === 0 &&
-      mosquito.breedingCooldown === 0 &&
+      mosquito.breedingCooldown < 1 &&
       mosquito.age > 14 &&
       world.water_map[currentCell.y][currentCell.x] === 1
     ) {
@@ -448,7 +448,7 @@ let trace2 = {
 let trace3 = {
   x: [],
   y: [],
-  name: "Reproductive Success Odds",
+  name: "Reproductive Success Rate",
   type: "scatter",
   mode: "lines",
   marker: { color: "RebeccaPurple" },
@@ -457,10 +457,10 @@ let trace3 = {
 function updatePlot(generation) {
   // Update infection plot.
   let uninfectedCount = allMosquitoes.filter(
-    (m) => m.infection.length === 0
+    (m) => m.infected === false
   ).length;
   let infectedCount = allMosquitoes.filter(
-    (m) => m.infection.length !== 0
+    (m) => m.infected === true
   ).length;
 
   trace1.x.push(generation);
@@ -485,9 +485,9 @@ function updatePlot(generation) {
   );
 
   let layout2 = {
-    title: "Reproductive Success Odds",
+    title: "Reproductive Success Rate Over Time",
     xaxis: { title: "Day" },
-    yaxis: { title: "Average Reproductive Success Odds" },
+    yaxis: { title: "Average Reproductive Success Rate" },
   };
 
   Plotly.newPlot("reproductive_success_plot", [trace3], layout2);
@@ -496,7 +496,7 @@ function updatePlot(generation) {
 function updateWorld() {
   logAndMockConsole(
     `Day ${generation + 1}: There are currently ${allMosquitoes.length.toLocaleString("en")} mosquitoes, ${allMosquitoes
-      .filter((m) => m.infection.length !== 0)
+      .filter((m) => m.infected === true)
       .length.toLocaleString("en")} of whom are infected by Wolbachia.`
   );
 
@@ -525,7 +525,7 @@ function updateWorld() {
 
 function shouldStopSimulation() {
   // Check if infection has been eradicated.
-  let infectedMosquitoes = allMosquitoes.filter((m) => m.infection.length > 0);
+  let infectedMosquitoes = allMosquitoes.filter((m) => m.infected === true);
   if (infectedMosquitoes.length === 0) {
     logAndMockConsole("Infection has been eradicated.");
     return true;
@@ -747,10 +747,10 @@ async function startExperiment(event) {
     }
     // Infect the specified number of males and females.
     let allMales = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infection.length === 0
+      (m) => m.sex === 1 && m.infected === false
     );
     let allFemales = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infection.length === 0
+      (m) => m.sex === 0 && m.infected === false
     );
     allMales.forEach((male) => {
       if (Math.random() < experiment.infectedMalesAtStart) {
@@ -771,7 +771,7 @@ async function startExperiment(event) {
     while (!shouldStopSimulation() && generation < experiment.maxDays) {
       // Update the experiment data.
       experiment.infectionRatio.push(
-        allMosquitoes.filter((m) => m.infection.length !== 0).length /
+        allMosquitoes.filter((m) => m.infected === true).length /
           allMosquitoes.length
       );
       experiment.reproductiveSuccessOverTime.push(
