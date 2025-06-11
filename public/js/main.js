@@ -8,7 +8,7 @@ let killRate = [1.0];
 let rescueRate = [1.0];
 let duration = [3652];
 let repeatCount = 1;
-let minImperfectTransmissionRate = 0.0;
+let minImperfectTransmissionRate = 1.0;
 let maxImperfectTransmissionRate = 1.0;
 
 // TO IMPLEMENT:
@@ -254,7 +254,7 @@ class Mosquito {
     // Child fitness is the average of the parents' fitness.
     let dad = mate,
       mom = this;
-    let numberOfEggs = Math.floor(Math.random() * 100) + 1;
+    let numberOfEggs = 100;
     if (dad.infected === true && mom.infected === true) {
       numberOfEggs = Math.floor(numberOfEggs * rescueRate);
     } else if (dad.infected === true && mom.infected === false) {
@@ -263,12 +263,13 @@ class Mosquito {
 
     for (let i = 0; i < numberOfEggs; i++) {
       let child = new Mosquito();
-      if (Math.random() < mom.imperfectTransmissionRate && mom.infected === true) {
+      if (
+        mom.infected === true
+      ) {
         child.infected = true;
       }
       world.map[currentCell.y][currentCell.x].push(child);
-      child.imperfectTransmissionRate =
-        (dad.imperfectTransmissionRate + mom.imperfectTransmissionRate) / 2;
+      child.imperfectTransmissionRate = 1.0;
       child.position = currentCell;
     }
 
@@ -459,9 +460,7 @@ function updatePlot(generation) {
   let uninfectedCount = allMosquitoes.filter(
     (m) => m.infected === false
   ).length;
-  let infectedCount = allMosquitoes.filter(
-    (m) => m.infected === true
-  ).length;
+  let infectedCount = allMosquitoes.filter((m) => m.infected === true).length;
 
   trace1.x.push(generation);
   trace1.y.push(uninfectedCount);
