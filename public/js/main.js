@@ -8,8 +8,6 @@ let killRate = [1.0];
 let rescueRate = [1.0];
 let duration = [3652];
 let repeatCount = 1;
-let minImperfectTransmissionRate = 1.0;
-let maxImperfectTransmissionRate = 1.0;
 
 // TO IMPLEMENT:
 // toxin mutation rate
@@ -82,11 +80,6 @@ class Mosquito {
 
     // Generate a random fitness value from 0 to 1.
     this.fitness = Math.random();
-    // Generate a random rate for maternal transmission of Wolbachia.
-    this.imperfectTransmissionRate =
-      Math.random() *
-        (maxImperfectTransmissionRate - minImperfectTransmissionRate) +
-      minImperfectTransmissionRate;
 
     // Position is set by outside code.
     this.position = { x: 0, y: 0 };
@@ -269,7 +262,6 @@ class Mosquito {
         child.infected = true;
       }
       world.map[currentCell.y][currentCell.x].push(child);
-      child.imperfectTransmissionRate = 1.0;
       child.position = currentCell;
     }
 
