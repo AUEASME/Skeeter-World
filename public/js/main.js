@@ -6,7 +6,7 @@ let infectedMaleCount = [0.25];
 let infectedFemaleCount = [0.25];
 let killRate = [1.0];
 let rescueRate = [1.0];
-let duration = [730];
+let duration = [3652];
 let repeatCount = 1;
 let minImperfectTransmissionRate = 0.0;
 let maxImperfectTransmissionRate = 1.0;
@@ -804,7 +804,7 @@ class Experiment {
     this.infectedFemalesAtStart = 0.25;
     this.killRate = 1;
     this.rescueRate = 1;
-    this.maxDays = 730;
+    this.maxDays = 3652;
     // Run data.
     this.infectionRatio = [];
     this.reproductiveSuccessOverTime = [];
