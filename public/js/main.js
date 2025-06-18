@@ -291,7 +291,7 @@ class World {
     // 3. Fill the map with random water cells.
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        if (Math.random() < 0.048) {
+        if (Math.random() < 0.125) {
           this.water_map[y][x] = 1;
         } else {
           this.water_map[y][x] = 0;
