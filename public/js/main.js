@@ -118,6 +118,7 @@ class Mosquito {
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
         currentCell.x
       ].filter((m) => m !== this);
+      return;
     }
 
     // Females, on the other hand, live about 40 days after reaching maturity, so... they have a 1/40 chance of dying each day.
@@ -128,6 +129,7 @@ class Mosquito {
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
         currentCell.x
       ].filter((m) => m !== this);
+      return;
     }
   }
 
@@ -255,10 +257,8 @@ class Mosquito {
     }
 
     for (let i = 0; i < numberOfEggs; i++) {
-      let child = new Mosquito();
-      if (
-        mom.infected === true
-      ) {
+      let child = new Mosquito(dad, mom);
+      if (mom.infected === true) {
         child.infected = true;
       }
       world.map[currentCell.y][currentCell.x].push(child);
@@ -307,6 +307,7 @@ class World {
         for (let i = 0; i < carryingCapacity; i++) {
           let mosquito = new Mosquito();
           mosquito.age = Math.floor(Math.random() * 14);
+          mosquito.breedingCooldown = Math.floor(Math.random() * 4);
           this.map[y][x].push(mosquito);
           allMosquitoes.push(mosquito);
         }
@@ -403,7 +404,7 @@ function kTournamentWithReplacement(eligibleMales, k = 3) {
   }
 
   // Sort the males by fitness (highest first).
-  // selected.sort((a, b) => b.fitness - a.fitness);
+  selected.sort((a, b) => b.fitness - a.fitness);
 
   // Return the most fit male.
   return selected[0];
@@ -499,9 +500,7 @@ function updateWorld() {
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
       // Sort mosquitoes by fitness.
-      // world.map[y][x].sort((a, b) => a.fitness - b.fitness);
-      // Shuffle randomly instead.
-      world.map[y][x].sort(() => Math.random() - 0.5);
+      world.map[y][x].sort((a, b) => a.fitness - b.fitness);
       // Keep the top carryingCapacity mosquitoes.
       world.map[y][x] = world.map[y][x].slice(0, carryingCapacity);
       // Add them to the global list.
@@ -774,9 +773,9 @@ async function startExperiment(event) {
       );
       // Update the world.
       updateWorld();
-      // Sleep for a quarter of a second.
+      // Sleep for a fifth of a second.
       // This allows the browser time to handle user requests, such as scrolling, which get laggy if the simulation never takes a break.
-      await new Promise((r) => setTimeout(r, 250));
+      await new Promise((r) => setTimeout(r, 200));
     }
 
     // Once the simulation is complete, output the data.
