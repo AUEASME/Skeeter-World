@@ -795,6 +795,12 @@ class Experiment {
     this.killRate = 1;
     this.rescueRate = 1;
     this.maxDays = 3652;
+    // Unused start data (to implement).
+    this.waterRatio = 0.125;
+    this.minMaternalTransmissionRate = 0.5;
+    this.maxMaternalTransmissionRate = 0.75;
+    this.minFitnessModifier = -1.0;
+    this.maxFitnessModifier = 1.0;
     // Run data.
     this.infectionRatio = [];
     this.reproductiveSuccessOverTime = [];
