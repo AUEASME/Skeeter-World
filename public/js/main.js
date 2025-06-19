@@ -690,7 +690,7 @@ function getInputValues(event) {
     }
   }
 
-  repeatCount = document.getElementById("repeats").value || 3;
+  repeatCount = document.getElementById("repeats").value || 1;
   if (repeatCount < 1) {
     alert("Repeat count must be at least 1.");
     return;
