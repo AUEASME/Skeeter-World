@@ -2,11 +2,19 @@
  * SIMULATION PARAMETERS *
  *************************/
 
-let infectedMaleCount = [0.25];
-let infectedFemaleCount = [0.25];
-let killRate = [1.0];
-let rescueRate = [1.0];
-let duration = [3652];
+// Immutable parameters.
+let duration = 730;
+// Initial infection parameters.
+let infectedMaleCounts = [0.25];
+let infectedFemaleCounts = [0.25];
+let killRates = [1.0];
+let rescueRates = [1.0];
+// New parameters.
+let waterRatios = [0.0625, 0.125, 0.25];
+let minMaternalTransmissionRates = [0.333, 0.666, 1.0];
+let maxMaternalTransmissionRates = [1.0];
+let minFitnessModifiers = [0.0, 0.333, 0.666];
+let maxFitnessModifiers = [1.333, 1.666, 2.0];
 let repeatCount = 1;
 
 // TO IMPLEMENT:
@@ -67,6 +75,14 @@ function logAndMockConsole(text) {
  * "but deleterious when a toxic analogue is also present. In both cases, toxicity is an environment-dependent side-effect of an otherwise adaptive trait."
  */
 
+class Wolbachia {
+  constructor(fitnessModifier = 0.0) {
+    // Fitness modifier is a value between -1 and 1 that modifies the fitness of the host mosquito.
+    // A value of 0 means no change, a value of -1 means the host mosquito is twice as likely to die, and a value of 1 means the host mosquito is twice as likely to survive.
+    this.fitnessModifier = fitnessModifier;
+  }
+}
+
 /**************************************
  * MOSQUITO CLASS, METHODS, AND SETUP *
  **************************************/
@@ -76,7 +92,7 @@ class Mosquito {
     // this.sex can be 0 (female) or 1 (male).
     this.sex = Math.round(Math.random());
     // this.infected is a boolean that indicates whether the mosquito is infected with Wolbachia.
-    this.infected = false;
+    this.infected = null;
 
     // Generate a random fitness value from 0 to 1.
     this.fitness = Math.random();
@@ -143,12 +159,15 @@ class Mosquito {
   }
 
   changeInfectionStatus() {
-    if (this.infected === false) {
-      this.infected = true;
+    if (this.infected === null) {
+      this.infected = new Wolbachia(
+        Math.random() * (maxFitnessModifiers[0] - minFitnessModifiers[0]) +
+          minFitnessModifiers[0]
+      );
       return;
     }
 
-    this.infected = false;
+    this.infected = null;
   }
 
   migrate() {
@@ -250,16 +269,34 @@ class Mosquito {
     let dad = mate,
       mom = this;
     let numberOfEggs = 100;
-    if (dad.infected === true && mom.infected === true) {
-      numberOfEggs = Math.floor(numberOfEggs * rescueRate);
-    } else if (dad.infected === true && mom.infected === false) {
-      numberOfEggs = Math.floor(numberOfEggs * (1 - killRate));
+    if (dad.infected !== null && mom.infected !== null) {
+      numberOfEggs = Math.floor(
+        numberOfEggs *
+          rescueRates *
+          ((dad.infected.fitnessModifier + mom.infected.fitnessModifier) / 2)
+      );
+    } else if (dad.infected !== null && mom.infected === null) {
+      numberOfEggs = Math.floor(
+        numberOfEggs * (1 - killRates) * dad.infected.fitnessModifier
+      );
     }
 
     for (let i = 0; i < numberOfEggs; i++) {
       let child = new Mosquito(dad, mom);
-      if (mom.infected === true) {
-        child.infected = true;
+      if (mom.infected !== null) {
+        child.infected = new Wolbachia(mom.infected.fitnessModifier);
+        // Extremely slim chance to mutate the fitness modifier, up to 5% in either direction towards the min or max fitness modifier.
+        if (Math.random() < 0.05) {
+          // Choose a new value between [mom.infected.fitnessModifier - 0.05, mom.infected.fitnessModifier + 0.05], clamped to the min and max fitness modifiers.
+          child.infected.fitnessModifier = Math.max(
+            minFitnessModifiers[0],
+            Math.min(
+              maxFitnessModifiers[maxFitnessModifiers.length - 1],
+              mom.infected.fitnessModifier +
+                (Math.random() < 0.5 ? -0.05 : 0.05)
+            )
+          );
+        }
       }
       world.map[currentCell.y][currentCell.x].push(child);
       child.position = currentCell;
@@ -277,21 +314,50 @@ class Mosquito {
  ***********************************/
 
 class World {
-  constructor(width, height) {
-    // Generate an empty map of the given width and height.
+  constructor(width, height, water_ratio = 0.125) {
+    // 1. Generate an empty map of the given width and height.
     this.width = width;
     this.height = height;
     this.map = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0).map(() => []));
     // 2. Generate another empty map, this time for water.
-    this.water_map = new Array(height)
+    this.water_map = new Array(this.height)
       .fill(0)
-      .map(() => new Array(width).fill(0));
-    // 3. Fill the map with random water cells.
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        if (Math.random() < 0.125) {
+      .map(() => new Array(this.width).fill(0));
+    this.setWaterCells(water_ratio);
+    // 3. Set up history.
+    this.traceUninfected = {
+      x: [],
+      y: [],
+      name: "Uninfected",
+      type: "scatter",
+      mode: "lines",
+      marker: { color: "red" },
+    };
+    this.traceInfected = {
+      x: [],
+      y: [],
+      name: "Infected",
+      type: "scatter",
+      mode: "lines",
+      marker: { color: "blue" },
+    };
+    this.traceReproduction = {
+      x: [],
+      y: [],
+      name: "Reproductive Success Rate",
+      type: "scatter",
+      mode: "lines",
+      marker: { color: "RebeccaPurple" },
+    };
+  }
+
+  setWaterCells(waterRatio) {
+    // Set the water cells to the given ratio.
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        if (Math.random() < waterRatio) {
           this.water_map[y][x] = 1;
         } else {
           this.water_map[y][x] = 0;
@@ -333,7 +399,7 @@ function renderWorld() {
       let green = 255;
       let blue = 255;
       for (let mosquito of cell) {
-        if (mosquito.infected === false) {
+        if (mosquito.infected !== null) {
           green -= 255 / carryingCapacity;
           blue -= 255 / carryingCapacity;
         } else {
@@ -415,7 +481,7 @@ function kTournamentWithReplacement(eligibleMales, k = 3) {
  ********************/
 
 // Create world.
-let world = new World(16, 16);
+let world = new World(16, 16, 0.125);
 let carryingCapacity = 96;
 
 // Populate world.
@@ -423,42 +489,16 @@ let allMosquitoes = [];
 
 // Set up logging.
 let generation = 0;
-let trace1 = {
-  x: [],
-  y: [],
-  name: "Uninfected",
-  type: "scatter",
-  mode: "lines",
-  marker: { color: "red" },
-};
-let trace2 = {
-  x: [],
-  y: [],
-  name: "Infected",
-  type: "scatter",
-  mode: "lines",
-  marker: { color: "blue" },
-};
-let trace3 = {
-  x: [],
-  y: [],
-  name: "Reproductive Success Rate",
-  type: "scatter",
-  mode: "lines",
-  marker: { color: "RebeccaPurple" },
-};
 
-function updatePlot(generation) {
+function updatePlots(generation) {
   // Update infection plot.
-  let uninfectedCount = allMosquitoes.filter(
-    (m) => m.infected === false
-  ).length;
-  let infectedCount = allMosquitoes.filter((m) => m.infected === true).length;
+  let uninfectedCount = allMosquitoes.filter((m) => m.infected === null).length;
+  let infectedCount = allMosquitoes.filter((m) => m.infected !== null).length;
 
-  trace1.x.push(generation);
-  trace1.y.push(uninfectedCount);
-  trace2.x.push(generation);
-  trace2.y.push(infectedCount);
+  world.traceUninfected.x.push(generation);
+  world.traceUninfected.y.push(uninfectedCount);
+  world.traceInfected.x.push(generation);
+  world.traceInfected.y.push(infectedCount);
 
   let layout = {
     title: "Mosquito Infection Status",
@@ -467,10 +507,10 @@ function updatePlot(generation) {
     barmode: "stack",
   };
 
-  Plotly.newPlot("plot", [trace1, trace2], layout);
+  Plotly.newPlot("plot", [world.traceUninfected, world.traceInfected], layout);
 
-  trace3.x.push(generation);
-  trace3.y.push(
+  world.traceReproduction.x.push(generation);
+  world.traceReproduction.y.push(
     // Get the average reproductive success odds of all mosquitoes.
     allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
       allMosquitoes.length
@@ -482,15 +522,15 @@ function updatePlot(generation) {
     yaxis: { title: "Average Reproductive Success Rate" },
   };
 
-  Plotly.newPlot("reproductive_success_plot", [trace3], layout2);
+  Plotly.newPlot(
+    "reproductive_success_plot",
+    [world.traceReproduction],
+    layout2
+  );
 }
 
 function updateWorld() {
-  logAndMockConsole(
-    `Day ${generation + 1}: There are currently ${allMosquitoes.length.toLocaleString("en")} mosquitoes, ${allMosquitoes
-      .filter((m) => m.infected === true)
-      .length.toLocaleString("en")} of whom are infected by Wolbachia.`
-  );
+  logAndMockConsole(`Day ${generation + 1}.`);
 
   // Mosquitoes do their thing.
   mosquitoDay(allMosquitoes);
@@ -511,13 +551,13 @@ function updateWorld() {
   renderWorld();
 
   // Update the plots.
-  updatePlot(generation + 1);
+  updatePlots(generation + 1);
   generation += 1;
 }
 
 function shouldStopSimulation() {
   // Check if infection has been eradicated.
-  let infectedMosquitoes = allMosquitoes.filter((m) => m.infected === true);
+  let infectedMosquitoes = allMosquitoes.filter((m) => m.infected !== null);
   if (infectedMosquitoes.length === 0) {
     logAndMockConsole("Infection has been eradicated.");
     return true;
@@ -530,36 +570,12 @@ function shouldStopSimulation() {
   }
 }
 
-function resetWorld() {
+function resetWorld(waterRatio = 0.125) {
   // Reset all global variables.
-  world = new World(16, 16);
+  world = new World(16, 16, waterRatio);
   carryingCapacity = 96;
   allMosquitoes = [];
   generation = 0;
-  trace1 = {
-    x: [],
-    y: [],
-    name: "Uninfected",
-    type: "scatter",
-    mode: "lines",
-    marker: { color: "red" },
-  };
-  trace2 = {
-    x: [],
-    y: [],
-    name: "Infected",
-    type: "scatter",
-    mode: "lines",
-    marker: { color: "blue" },
-  };
-  trace3 = {
-    x: [],
-    y: [],
-    name: "Reproductive Success Odds",
-    type: "scatter",
-    mode: "lines",
-    marker: { color: "RebeccaPurple" },
-  };
 }
 
 function rearrangePage() {
@@ -614,12 +630,12 @@ function getInputValues(event) {
     infectedMaleCountInDocument.length > 0 &&
     infectedMaleCountInDocument[0] !== ""
   ) {
-    infectedMaleCount = infectedMaleCountInDocument;
+    infectedMaleCounts = infectedMaleCountInDocument;
     // Convert to float.
-    infectedMaleCount = infectedMaleCount.map((c) => parseFloat(c));
+    infectedMaleCounts = infectedMaleCounts.map((c) => parseFloat(c));
   }
-  for (let i = 0; i < infectedMaleCount.length; i++) {
-    if (infectedMaleCount[i] < 0 || infectedMaleCount[i] > 1) {
+  for (let i = 0; i < infectedMaleCounts.length; i++) {
+    if (infectedMaleCounts[i] < 0 || infectedMaleCounts[i] > 1) {
       alert(
         "Infected male count cannot be less than zero or greater than one."
       );
@@ -634,12 +650,12 @@ function getInputValues(event) {
     infectedFemaleCountInDocument.length > 0 &&
     infectedFemaleCountInDocument[0] !== ""
   ) {
-    infectedFemaleCount = infectedFemaleCountInDocument;
+    infectedFemaleCounts = infectedFemaleCountInDocument;
     // Convert to float.
-    infectedFemaleCount = infectedFemaleCount.map((c) => parseFloat(c));
+    infectedFemaleCounts = infectedFemaleCounts.map((c) => parseFloat(c));
   }
-  for (let i = 0; i < infectedFemaleCount.length; i++) {
-    if (infectedFemaleCount[i] < 0 || infectedFemaleCount[i] > 1) {
+  for (let i = 0; i < infectedFemaleCounts.length; i++) {
+    if (infectedFemaleCounts[i] < 0 || infectedFemaleCounts[i] > 1) {
       alert(
         "Infected male count cannot be less than zero or greater than one."
       );
@@ -651,12 +667,12 @@ function getInputValues(event) {
     .getElementById("kill__rate")
     .value.split(",");
   if (killRateInDocument.length > 0 && killRateInDocument[0] !== "") {
-    killRate = killRateInDocument;
+    killRates = killRateInDocument;
     // Convert to float.
-    killRate = killRate.map((r) => parseFloat(r));
+    killRates = killRates.map((r) => parseFloat(r));
   }
-  for (let i = 0; i < killRate.length; i++) {
-    if (killRate[i] < 0 || killRate[i] > 1) {
+  for (let i = 0; i < killRates.length; i++) {
+    if (killRates[i] < 0 || killRates[i] > 1) {
       alert("Kill rate must be between 0 and 1.");
       return;
     }
@@ -666,26 +682,13 @@ function getInputValues(event) {
     .getElementById("rescue__rate")
     .value.split(",");
   if (rescueRateInDocument.length > 0 && rescueRateInDocument[0] !== "") {
-    rescueRate = rescueRateInDocument;
+    rescueRates = rescueRateInDocument;
     // Convert to float.
-    rescueRate = rescueRate.map((r) => parseFloat(r));
+    rescueRates = rescueRates.map((r) => parseFloat(r));
   }
-  for (let i = 0; i < rescueRate.length; i++) {
-    if (rescueRate[i] < 0 || rescueRate[i] > 1) {
+  for (let i = 0; i < rescueRates.length; i++) {
+    if (rescueRates[i] < 0 || rescueRates[i] > 1) {
       alert("Rescue rate must be between 0 and 1.");
-      return;
-    }
-  }
-
-  let durationInDocument = document.getElementById("duration").value.split(",");
-  if (durationInDocument.length > 0 && durationInDocument[0] !== "") {
-    duration = durationInDocument;
-    // Convert to integer.
-    duration = duration.map((d) => parseInt(d));
-  }
-  for (let i = 0; i < duration.length; i++) {
-    if (duration[i] < 0) {
-      alert("Duration cannot be less than zero.");
       return;
     }
   }
@@ -706,19 +709,33 @@ async function startExperiment(event) {
 
   // Create an experiment object for each combination of parameters.
   let experiments = [];
-  for (let h = 0; h < repeatCount; h++) {
-    for (let i = 0; i < infectedMaleCount.length; i++) {
-      for (let j = 0; j < infectedFemaleCount.length; j++) {
-        for (let k = 0; k < killRate.length; k++) {
-          for (let l = 0; l < rescueRate.length; l++) {
-            for (let m = 0; m < duration.length; m++) {
-              let experiment = new Experiment();
-              experiment.infectedMalesAtStart = infectedMaleCount[i];
-              experiment.infectedFemalesAtStart = infectedFemaleCount[j];
-              experiment.killRate = killRate[k];
-              experiment.rescueRate = rescueRate[l];
-              experiment.maxDays = duration[m];
-              experiments.push(experiment);
+  for (let r = 0; r < repeatCount; r++) {
+    for (let infectedMaleCount of infectedMaleCounts) {
+      for (let infectedFemaleCount of infectedFemaleCounts) {
+        for (let killRate of killRates) {
+          for (let rescueRate of rescueRates) {
+            for (let waterRatio of waterRatios) {
+              for (let minMaternalTransRate of minMaternalTransmissionRates) {
+                for (let maxMaternalTransRate of maxMaternalTransmissionRates) {
+                  for (let minFitnessModifier of minFitnessModifiers) {
+                    for (let maxFitnessModifier of maxFitnessModifiers) {
+                      let experiment = new Experiment();
+                      experiment.infectedMalesAtStart = infectedMaleCount;
+                      experiment.infectedFemalesAtStart = infectedFemaleCount;
+                      experiment.killRate = killRate;
+                      experiment.rescueRate = rescueRate;
+                      experiment.waterRatio = waterRatio;
+                      experiment.minMaternalTransmissionRate =
+                        minMaternalTransRate;
+                      experiment.maxMaternalTransmissionRate =
+                        maxMaternalTransRate;
+                      experiment.minFitnessModifier = minFitnessModifier;
+                      experiment.maxFitnessModifier = maxFitnessModifier;
+                      experiments.push(experiment);
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -729,6 +746,7 @@ async function startExperiment(event) {
   // Run each experiment.
   for (let experiment of experiments) {
     // Set up the world.
+    world.setWaterCells(experiment.waterRatio);
     world.populate();
 
     let allMosquitoes = [];
@@ -739,10 +757,10 @@ async function startExperiment(event) {
     }
     // Infect the specified number of males and females.
     let allMales = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infected === false
+      (m) => m.sex === 1 && m.infected !== null
     );
     let allFemales = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infected === false
+      (m) => m.sex === 0 && m.infected !== null
     );
     allMales.forEach((male) => {
       if (Math.random() < experiment.infectedMalesAtStart) {
@@ -755,21 +773,32 @@ async function startExperiment(event) {
       }
     });
 
-    killRate = experiment.killRate;
-    rescueRate = experiment.rescueRate;
+    killRates = experiment.killRate;
+    rescueRates = experiment.rescueRate;
+    minMaternalTransmissionRates = experiment.minMaternalTransmissionRate;
+    maxMaternalTransmissionRates = experiment.maxMaternalTransmissionRate;
+    minFitnessModifiers = experiment.minFitnessModifier;
+    maxFitnessModifiers = experiment.maxFitnessModifier;
     renderWorld();
 
     // Run the simulation.
-    while (!shouldStopSimulation() && generation < experiment.maxDays) {
+    while (!shouldStopSimulation() && generation < duration) {
       // Update the experiment data.
       experiment.infectionRatio.push(
-        allMosquitoes.filter((m) => m.infected === true).length /
+        allMosquitoes.filter((m) => m.infected !== null).length /
           allMosquitoes.length
       );
       experiment.reproductiveSuccessOverTime.push(
         // Get the average reproductive success of all mosquitoes.
         allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
           allMosquitoes.length
+      );
+      experiment.averageFitnessModificationOverTime.push(
+        // Get the average fitness modification of all mosquitoes.
+        allMosquitoes.reduce(
+          (acc, m) => acc + m.infected?.fitnessModifier || 0,
+          0
+        ) / allMosquitoes.length
       );
       // Update the world.
       updateWorld();
@@ -794,8 +823,7 @@ class Experiment {
     this.infectedFemalesAtStart = 0.25;
     this.killRate = 1;
     this.rescueRate = 1;
-    this.maxDays = 3652;
-    // Unused start data (to implement).
+    // New data.
     this.waterRatio = 0.125;
     this.minMaternalTransmissionRate = 0.5;
     this.maxMaternalTransmissionRate = 0.75;
@@ -804,18 +832,29 @@ class Experiment {
     // Run data.
     this.infectionRatio = [];
     this.reproductiveSuccessOverTime = [];
+    this.averageFitnessModificationOverTime = [];
   }
 
   outputData() {
     let allData = {
+      // Start data.
       startTime: this.startTime,
       infectedMalesAtStart: this.infectedMalesAtStart,
       infectedFemalesAtStart: this.infectedFemalesAtStart,
       killRate: this.killRate,
       rescueRate: this.rescueRate,
+      // New data.
+      waterRatio: this.waterRatio,
+      minMaternalTransmissionRate: this.minMaternalTransmissionRate,
+      maxMaternalTransmissionRate: this.maxMaternalTransmissionRate,
+      minFitnessModifier: this.minFitnessModifier,
+      maxFitnessModifier: this.maxFitnessModifier,
+      // Run data.
       simulationLength: generation,
       infectionRatio: this.infectionRatio,
       reproductiveSuccessOverTime: this.reproductiveSuccessOverTime,
+      averageFitnessModificationOverTime:
+        this.averageFitnessModificationOverTime,
     };
 
     // Download the data for the user as a JSON file.
