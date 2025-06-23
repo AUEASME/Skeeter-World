@@ -4,41 +4,38 @@
 
 // Immutable parameters.
 let duration = 730;
-// Initial infection parameters.
+// World initialization parameters.
 let infectedMaleCounts = [0.25];
 let infectedFemaleCounts = [0.25];
-let killRates = [1.0];
-let rescueRates = [1.0];
-// New parameters.
 let waterRatios = [0.0625, 0.125, 0.25];
-let minMaternalTransmissionRates = [0.333, 0.666, 1.0];
-let maxMaternalTransmissionRates = [1.0];
-let minFitnessModifiers = [0.0, 0.333, 0.666];
-let maxFitnessModifiers = [1.333, 1.666, 2.0];
+let currentWaterRatio = null;
+// Infection parameters.
+let killRates = [1.0];
+let currentKillRate = null;
+let rescueRates = [1.0];
+let currentRescueRate = null;
+let minFitnessModifiers = [-1.0];
+let maxFitnessModifiers = [1.0];
+let currentFitnessModifierRange = null;
+let minInfectionDensities = [0.0];
+let maxInfectionDensities = [1.0];
+let currentInfectionDensityRange = null;
 let repeatCount = 1;
 
-// TO IMPLEMENT:
-// toxin mutation rate
-// antitoxin mutation rate
-// toxin/antitoxin length
-// female bite rate (maybe static?)
-/*
- * Good params for presentation:
- * 2056 in each population.
- * 1/1 rates.
- * 10 years (3652 days).
- */
+// Maternal transmission rates *and* fitness modifiers are an emergent property of endosymbiont densitites in host tissues.
+// Density may be a factor that EXACERBATES positive OR negative fitness effects.
+// Spectrum between:
+//   parasitism                    <-->                    mutualism
+//   fitness decrease              <-->             fitness increase
+//   wol. fitness increase         <-->        wol. fitness decrease
+//   high rep. manipulation        <-->        low rep. manipulation
+//   short evolutionary time scale <--> long evolutionary time scale
+// Fitness modifiers:
+//   reproductive output (negative)
+//   nutrition for host (longevity-boosting)
+// Maybe a female should have to bite a human over land, THEN move to water to lay the eggs.
 
 // Make JSON downloads toggleable (checkbox on main menu).
-// There's gotta be something wrong with distance calculation or migration somewhere, as reproduction seems to prefer the upper left corner of the map.
-// And why are water cells themselves often empty?
-// When allowed to run for decades, we get:
-// 1. 60% infection, fixated
-// 2. *Lone* water cells seem to often be empty, but the *surrounding* cells, even of contiguous water, are often full of infected mosquitoes.
-// 3. Reproduction seems to prefer the upper left corner of the map, stagnating at full capacity, while the rest of the map fluctuates more (notably, at a much lower infection rate).
-// 4. Reproductive success TANKS, at just 0.5% after a few months.
-// Reproductive success seems to fixate at a much higher value (around 60%) if the infection is mostly eradicated...
-// If we increase the prevalence of water to 50%, we get much more clearly defined infected vs. uninfected populations, with the uninfected population dominating the wet cells. Reproductive success also plummets to almost zero.
 
 /********************
  * HELPER FUNCTIONS *
@@ -76,10 +73,64 @@ function logAndMockConsole(text) {
  */
 
 class Wolbachia {
-  constructor(fitnessModifier = 0.0) {
-    // Fitness modifier is a value between -1 and 1 that modifies the fitness of the host mosquito.
-    // A value of 0 means no change, a value of -1 means the host mosquito is twice as likely to die, and a value of 1 means the host mosquito is twice as likely to survive.
-    this.fitnessModifier = fitnessModifier;
+  constructor() {
+    // Wolbachia are defined by a scalar value, currentFitnessModifierRange[0] (probably -1.0) to currentFitnessModifierRange[1] (probably 1.0).
+    // this.parasitismMutualismFactor = Math.random() * 2 - 1; // Random value between -1.0 and 1.0.
+    this.parasitismMutualismFactor =
+      Math.random() * (currentFitnessModifierRange[1] - currentFitnessModifierRange[0]) +
+      currentFitnessModifierRange[0];
+    // Infection density primarily controls the maternal transmission rate of the infection.
+    // This is a value between 0.0 and 1.0, first calculated as a random value between minInfectionDensity and maxInfectionDensity.
+    this.infectionDensity =
+      Math.random() * (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
+      currentInfectionDensityRange[0];
+    // Set killRate and rescueRate to the current values.
+    this.killRate = currentKillRate || killRates[0];
+    this.rescueRate = currentRescueRate || rescueRates[0];
+  }
+
+  clone() {
+    // Create a new Wolbachia with the same parasitismMutualismFactor.
+    let clone = new Wolbachia();
+    clone.parasitismMutualismFactor = this.parasitismMutualismFactor;
+
+    // 1/1000 chance to mutate the parasitismMutualismFactor by up to 0.05 in either direction.
+    if (Math.random() < 0.001) {
+      clone.parasitismMutualismFactor +=
+        (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
+      // Clamp the value to the range [-1.0, 1.0].
+      clone.parasitismMutualismFactor = Math.max(
+        -1.0,
+        Math.min(1.0, clone.parasitismMutualismFactor)
+      );
+    }
+
+    // 1/1000 chance to mutate the infection density by up to 0.05 in either direction.
+    if (Math.random() < 0.001) {
+      clone.infectionDensity +=
+        (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
+      // Clamp the value to the range [0.0, 1.0].
+      clone.infectionDensity = Math.max(
+        0.0,
+        Math.min(1.0, clone.infectionDensity)
+      );
+    }
+
+    // 1/1000 chance to mutate the killRate by up to 0.05 in either direction.
+    if (Math.random() < 0.001) {
+      clone.killRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
+      // Clamp the value to the range [0.0, 1.0].
+      clone.killRate = Math.max(0.0, Math.min(1.0, clone.killRate));
+    }
+
+    // 1/1000 chance to mutate the rescueRate by up to 0.05 in either direction.
+    if (Math.random() < 0.001) {
+      clone.rescueRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
+      // Clamp the value to the range [0.0, 1.0].
+      clone.rescueRate = Math.max(0.0, Math.min(1.0, clone.rescueRate));
+    }
+
+    return clone;
   }
 }
 
@@ -93,13 +144,20 @@ class Mosquito {
     this.sex = Math.round(Math.random());
     // this.infected is a boolean that indicates whether the mosquito is infected with Wolbachia.
     this.infected = null;
+    // If the mother is infected, the child has a chance to inherit the infection.
+    if (mom && mom.infected !== null) {
+      // Get the infection density of the mother to determine the chance of inheriting the infection.
+      let infectionDensity = mom.infected.infectionDensity;
+      // Chance of inheriting the infection is proportional to the infection density.
+      if (Math.random() < infectionDensity) {
+        this.infected = mom.infected.clone();
+      }
+    }
 
     // Generate a random fitness value from 0 to 1.
     this.fitness = Math.random();
-
     // Position is set by outside code.
     this.position = { x: 0, y: 0 };
-
     // If this mosquito is the child of two other mosquitoes, override the random values.
     if (dad && mom) {
       this.fitness = (dad.fitness + mom.fitness) / 2;
@@ -127,8 +185,10 @@ class Mosquito {
       this.breedingCooldown--;
     }
     // Male mosquitoes live for about eighteen days, and fourteen of those are spend growing, so for each subsequent day, they have a 1/4 chance of dying.
-    // Actually no, see below.
-    if (this.sex === 1 && this.age > 14 && Math.random() < 0.25) {
+    // Longevity can be influenced by the fitness effect of a Wolbachia infection, however.
+    // A fitness modifier of -1.0 decreases survival odds to 0.125, while a fitness modifier of 1.0 increases survival odds to 0.375.
+    let survivalOdds = 0.25 + this.infected?.parasitismMutualismFactor / 2;
+    if (this.sex === 1 && this.age > 14 && Math.random() < survivalOdds) {
       // Kill self.
       let currentCell = this.position;
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
@@ -138,8 +198,9 @@ class Mosquito {
     }
 
     // Females, on the other hand, live about 40 days after reaching maturity, so... they have a 1/40 chance of dying each day.
-    // Actually no that shouldn't be how that works, it should be a distribution CENTERED around 40.
-    if (this.sex === 0 && this.age > 14 && Math.random() < 0.025) {
+    // Longevity can be influenced by the fitness effect of a Wolbachia infection, however.
+    survivalOdds = 0.025 + this.infected?.parasitismMutualismFactor / 40;
+    if (this.sex === 0 && this.age > 14 && Math.random() < survivalOdds) {
       // Kill self.
       let currentCell = this.position;
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
@@ -160,10 +221,7 @@ class Mosquito {
 
   changeInfectionStatus() {
     if (this.infected === null) {
-      this.infected = new Wolbachia(
-        Math.random() * (maxFitnessModifiers[0] - minFitnessModifiers[0]) +
-          minFitnessModifiers[0]
-      );
+      this.infected = new Wolbachia();
       return;
     }
 
@@ -272,30 +330,25 @@ class Mosquito {
     if (dad.infected !== null && mom.infected !== null) {
       numberOfEggs = Math.floor(
         numberOfEggs *
-          rescueRates *
-          ((dad.infected.fitnessModifier + mom.infected.fitnessModifier) / 2)
+          mom.infected.rescueRate *
+          ((dad.infected.parasitismMutualismFactor +
+            mom.infected.parasitismMutualismFactor) /
+            2)
       );
     } else if (dad.infected !== null && mom.infected === null) {
       numberOfEggs = Math.floor(
-        numberOfEggs * (1 - killRates) * dad.infected.fitnessModifier
+        numberOfEggs *
+          (1 - dad.infected.killRate) *
+          dad.infected.parasitismMutualismFactor
       );
     }
 
     for (let i = 0; i < numberOfEggs; i++) {
       let child = new Mosquito(dad, mom);
       if (mom.infected !== null) {
-        child.infected = new Wolbachia(mom.infected.fitnessModifier);
-        // Extremely slim chance to mutate the fitness modifier, up to 5% in either direction towards the min or max fitness modifier.
-        if (Math.random() < 0.05) {
-          // Choose a new value between [mom.infected.fitnessModifier - 0.05, mom.infected.fitnessModifier + 0.05], clamped to the min and max fitness modifiers.
-          child.infected.fitnessModifier = Math.max(
-            minFitnessModifiers[0],
-            Math.min(
-              maxFitnessModifiers[maxFitnessModifiers.length - 1],
-              mom.infected.fitnessModifier +
-                (Math.random() < 0.5 ? -0.05 : 0.05)
-            )
-          );
+        // Use the mother's infection density to determine the chance of inheriting the infection.
+        if (Math.random() < mom.infected.infectionDensity) {
+          child.infected = mom.infected.clone();
         }
       }
       world.map[currentCell.y][currentCell.x].push(child);
@@ -304,8 +357,6 @@ class Mosquito {
 
     this.successes = numberOfEggs;
     mate.successes = numberOfEggs;
-    this.fitness = (this.fitness + this.successes) / 2;
-    mate.fitness = (mate.fitness + mate.successes) / 2;
   }
 }
 
@@ -314,7 +365,7 @@ class Mosquito {
  ***********************************/
 
 class World {
-  constructor(width, height, water_ratio = 0.125) {
+  constructor(width, height, waterRatio = 0.125) {
     // 1. Generate an empty map of the given width and height.
     this.width = width;
     this.height = height;
@@ -325,7 +376,7 @@ class World {
     this.water_map = new Array(this.height)
       .fill(0)
       .map(() => new Array(this.width).fill(0));
-    this.setWaterCells(water_ratio);
+    this.setWaterCells(waterRatio);
     // 3. Set up history.
     this.traceUninfected = {
       x: [],
@@ -399,7 +450,7 @@ function renderWorld() {
       let green = 255;
       let blue = 255;
       for (let mosquito of cell) {
-        if (mosquito.infected !== null) {
+        if (mosquito.infected === null) {
           green -= 255 / carryingCapacity;
           blue -= 255 / carryingCapacity;
         } else {
@@ -623,6 +674,7 @@ function getInputValues(event) {
   event.preventDefault();
 
   // Get initial infection parameters and split on commas.
+  // Get infected__males (0.0 to 1.0).
   let infectedMaleCountInDocument = document
     .getElementById("infected__males")
     .value.split(",");
@@ -643,6 +695,7 @@ function getInputValues(event) {
     }
   }
 
+  // Get infected females (0.0 to 1.0).
   let infectedFemaleCountInDocument = document
     .getElementById("infected__females")
     .value.split(",");
@@ -663,6 +716,23 @@ function getInputValues(event) {
     }
   }
 
+  // Get water__percent (0.0 to 1.0).
+  let waterRatioInDocument = document
+    .getElementById("water__percent")
+    .value.split(",");
+  if (waterRatioInDocument.length > 0 && waterRatioInDocument[0] !== "") {
+    waterRatios = waterRatioInDocument;
+    // Convert to float.
+    waterRatios = waterRatios.map((r) => parseFloat(r));
+  }
+  for (let i = 0; i < waterRatios.length; i++) {
+    if (waterRatios[i] < 0 || waterRatios[i] > 1) {
+      alert("Water ratio must be between 0 and 1.");
+      return;
+    }
+  }
+
+  // Get kill__rate (0.0 to 1.0).
   let killRateInDocument = document
     .getElementById("kill__rate")
     .value.split(",");
@@ -678,6 +748,7 @@ function getInputValues(event) {
     }
   }
 
+  // Get rescue__rate (0.0 to 1.0).
   let rescueRateInDocument = document
     .getElementById("rescue__rate")
     .value.split(",");
@@ -693,6 +764,83 @@ function getInputValues(event) {
     }
   }
 
+  // Get maximum__fitness__detriment (-1.0 to 0.0).
+  let minFitnessModifierInDocument = document
+    .getElementById("maximum__fitness__detriment")
+    .value.split(",");
+  if (
+    minFitnessModifierInDocument.length > 0 &&
+    minFitnessModifierInDocument[0] !== ""
+  ) {
+    minFitnessModifiers = minFitnessModifierInDocument;
+    // Convert to float.
+    minFitnessModifiers = minFitnessModifiers.map((r) => parseFloat(r));
+  }
+  for (let i = 0; i < minFitnessModifiers.length; i++) {
+    if (minFitnessModifiers[i] < -1.0 || minFitnessModifiers[i] > 0.0) {
+      alert("Minimum fitness modifier must be between -1.0 and 0.0.");
+      return;
+    }
+  }
+
+  // Get maximum__fitness__benefit (0.0 to 1.0).
+  let maxFitnessModifierInDocument = document
+    .getElementById("maximum__fitness__benefit")
+    .value.split(",");
+  if (
+    maxFitnessModifierInDocument.length > 0 &&
+    maxFitnessModifierInDocument[0] !== ""
+  ) {
+    maxFitnessModifiers = maxFitnessModifierInDocument;
+    // Convert to float.
+    maxFitnessModifiers = maxFitnessModifiers.map((r) => parseFloat(r));
+  }
+  for (let i = 0; i < maxFitnessModifiers.length; i++) {
+    if (maxFitnessModifiers[i] < 0.0 || maxFitnessModifiers[i] > 1.0) {
+      alert("Maximum fitness modifier must be between 0.0 and 1.0.");
+      return;
+    }
+  }
+
+  // Get minimum__infection__density (0.0 to 1.0).
+  let minInfectionDensityInDocument = document
+    .getElementById("minimum__infection__density")
+    .value.split(",");
+  if (
+    minInfectionDensityInDocument.length > 0 &&
+    minInfectionDensityInDocument[0] !== ""
+  ) {
+    minInfectionDensities = minInfectionDensityInDocument;
+    // Convert to float.
+    minInfectionDensities = minInfectionDensities.map((r) => parseFloat(r));
+  }
+  for (let i = 0; i < minInfectionDensities.length; i++) {
+    if (minInfectionDensities[i] < 0.0 || minInfectionDensities[i] > 1.0) {
+      alert("Minimum infection density must be between 0.0 and 1.0.");
+      return;
+    }
+  }
+
+  // Get maximum__infection__density (0.0 to 1.0).
+  let maxInfectionDensityInDocument = document
+    .getElementById("maximum__infection__density")
+    .value.split(",");
+  if (
+    maxInfectionDensityInDocument.length > 0 &&
+    maxInfectionDensityInDocument[0] !== ""
+  ) {
+    maxInfectionDensities = maxInfectionDensityInDocument;
+    // Convert to float.
+    maxInfectionDensities = maxInfectionDensities.map((r) => parseFloat(r));
+  }
+  for (let i = 0; i < maxInfectionDensities.length; i++) {
+    if (maxInfectionDensities[i] < 0.0 || maxInfectionDensities[i] > 1.0) {
+      alert("Maximum infection density must be between 0.0 and 1.0.");
+      return;
+    }
+  }
+
+  // Get repeats (1 to 100).
   repeatCount = document.getElementById("repeats").value || 1;
   if (repeatCount < 1) {
     alert("Repeat count must be at least 1.");
@@ -712,25 +860,25 @@ async function startExperiment(event) {
   for (let r = 0; r < repeatCount; r++) {
     for (let infectedMaleCount of infectedMaleCounts) {
       for (let infectedFemaleCount of infectedFemaleCounts) {
-        for (let killRate of killRates) {
-          for (let rescueRate of rescueRates) {
-            for (let waterRatio of waterRatios) {
-              for (let minMaternalTransRate of minMaternalTransmissionRates) {
-                for (let maxMaternalTransRate of maxMaternalTransmissionRates) {
-                  for (let minFitnessModifier of minFitnessModifiers) {
-                    for (let maxFitnessModifier of maxFitnessModifiers) {
+        for (let waterRatio of waterRatios) {
+          for (let killRate of killRates) {
+            for (let rescueRate of rescueRates) {
+              for (let minFitnessModifier of minFitnessModifiers) {
+                for (let maxFitnessModifier of maxFitnessModifiers) {
+                  for (let minInfectionDensity of minInfectionDensities) {
+                    for (let maxInfectionDensity of maxInfectionDensities) {
+                      // Create a new experiment.
                       let experiment = new Experiment();
                       experiment.infectedMalesAtStart = infectedMaleCount;
                       experiment.infectedFemalesAtStart = infectedFemaleCount;
+                      experiment.waterRatio = waterRatio;
                       experiment.killRate = killRate;
                       experiment.rescueRate = rescueRate;
-                      experiment.waterRatio = waterRatio;
-                      experiment.minMaternalTransmissionRate =
-                        minMaternalTransRate;
-                      experiment.maxMaternalTransmissionRate =
-                        maxMaternalTransRate;
                       experiment.minFitnessModifier = minFitnessModifier;
                       experiment.maxFitnessModifier = maxFitnessModifier;
+                      experiment.minInfectionDensity = minInfectionDensity;
+                      experiment.maxInfectionDensity = maxInfectionDensity;
+
                       experiments.push(experiment);
                     }
                   }
@@ -755,12 +903,26 @@ async function startExperiment(event) {
         allMosquitoes = allMosquitoes.concat(world.map[y][x]);
       }
     }
+
+    // Set up simulation parameters.
+    currentKillRate = experiment.killRate;
+    currentRescueRate = experiment.rescueRate;
+    currentFitnessModifierRange = [
+      experiment.minFitnessModifier,
+      experiment.maxFitnessModifier,
+    ];
+    currentInfectionDensityRange = [
+      experiment.minInfectionDensity,
+      experiment.maxInfectionDensity,
+    ];
+    renderWorld();
+
     // Infect the specified number of males and females.
     let allMales = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infected !== null
+      (m) => m.sex === 1 && m.infected === null
     );
     let allFemales = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infected !== null
+      (m) => m.sex === 0 && m.infected === null
     );
     allMales.forEach((male) => {
       if (Math.random() < experiment.infectedMalesAtStart) {
@@ -772,14 +934,6 @@ async function startExperiment(event) {
         female.changeInfectionStatus();
       }
     });
-
-    killRates = experiment.killRate;
-    rescueRates = experiment.rescueRate;
-    minMaternalTransmissionRates = experiment.minMaternalTransmissionRate;
-    maxMaternalTransmissionRates = experiment.maxMaternalTransmissionRate;
-    minFitnessModifiers = experiment.minFitnessModifier;
-    maxFitnessModifiers = experiment.maxFitnessModifier;
-    renderWorld();
 
     // Run the simulation.
     while (!shouldStopSimulation() && generation < duration) {
@@ -796,7 +950,7 @@ async function startExperiment(event) {
       experiment.averageFitnessModificationOverTime.push(
         // Get the average fitness modification of all mosquitoes.
         allMosquitoes.reduce(
-          (acc, m) => acc + m.infected?.fitnessModifier || 0,
+          (acc, m) => acc + m.infected?.parasitismMutualismFactor || 0,
           0
         ) / allMosquitoes.length
       );
@@ -821,14 +975,14 @@ class Experiment {
     this.startTime = new Date();
     this.infectedMalesAtStart = 0.25;
     this.infectedFemalesAtStart = 0.25;
-    this.killRate = 1;
-    this.rescueRate = 1;
-    // New data.
     this.waterRatio = 0.125;
-    this.minMaternalTransmissionRate = 0.5;
-    this.maxMaternalTransmissionRate = 0.75;
-    this.minFitnessModifier = -1.0;
-    this.maxFitnessModifier = 1.0;
+    // Infection data.
+    this.killRate = 1.0;
+    this.rescueRate = 1.0;
+    this.maxFitnessDetriment = -1.0;
+    this.maxFitnessBenefit = 1.0;
+    this.minInfectionDensity = 0.0;
+    this.maxInfectionDensity = 1.0;
     // Run data.
     this.infectionRatio = [];
     this.reproductiveSuccessOverTime = [];
