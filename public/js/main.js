@@ -77,12 +77,14 @@ class Wolbachia {
     // Wolbachia are defined by a scalar value, currentFitnessModifierRange[0] (probably -1.0) to currentFitnessModifierRange[1] (probably 1.0).
     // this.parasitismMutualismFactor = Math.random() * 2 - 1; // Random value between -1.0 and 1.0.
     this.parasitismMutualismFactor =
-      Math.random() * (currentFitnessModifierRange[1] - currentFitnessModifierRange[0]) +
+      Math.random() *
+        (currentFitnessModifierRange[1] - currentFitnessModifierRange[0]) +
       currentFitnessModifierRange[0];
     // Infection density primarily controls the maternal transmission rate of the infection.
     // This is a value between 0.0 and 1.0, first calculated as a random value between minInfectionDensity and maxInfectionDensity.
     this.infectionDensity =
-      Math.random() * (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
+      Math.random() *
+        (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
       currentInfectionDensityRange[0];
     // Set killRate and rescueRate to the current values.
     this.killRate = currentKillRate || killRates[0];
@@ -162,6 +164,11 @@ class Mosquito {
     if (dad && mom) {
       this.fitness = (dad.fitness + mom.fitness) / 2;
       this.position = mom.position;
+    }
+
+    if (this.infected !== null) {
+      this.fitness +=
+        this.infected.parasitismMutualismFactor * this.infected.infectionDensity;
     }
 
     /**
@@ -328,19 +335,9 @@ class Mosquito {
       mom = this;
     let numberOfEggs = 100;
     if (dad.infected !== null && mom.infected !== null) {
-      numberOfEggs = Math.floor(
-        numberOfEggs *
-          mom.infected.rescueRate *
-          ((dad.infected.parasitismMutualismFactor +
-            mom.infected.parasitismMutualismFactor) /
-            2)
-      );
+      numberOfEggs = Math.floor(numberOfEggs * mom.infected.rescueRate);
     } else if (dad.infected !== null && mom.infected === null) {
-      numberOfEggs = Math.floor(
-        numberOfEggs *
-          (1 - dad.infected.killRate) *
-          dad.infected.parasitismMutualismFactor
-      );
+      numberOfEggs = Math.floor(numberOfEggs * (1 - dad.infected.killRate));
     }
 
     for (let i = 0; i < numberOfEggs; i++) {
@@ -927,11 +924,15 @@ async function startExperiment(event) {
     allMales.forEach((male) => {
       if (Math.random() < experiment.infectedMalesAtStart) {
         male.changeInfectionStatus();
+        male.fitness +=
+          male.infected.parasitismMutualismFactor * male.infected.infectionDensity;
       }
     });
     allFemales.forEach((female) => {
       if (Math.random() < experiment.infectedFemalesAtStart) {
         female.changeInfectionStatus();
+        female.fitness +=
+          female.infected.parasitismMutualismFactor * female.infected.infectionDensity;
       }
     });
 
@@ -1019,7 +1020,7 @@ class Experiment {
     let currentTime = new Date().toISOString();
     a.download = `experiment_${currentTime}.json`;
     a.innerHTML = "Download JSON";
-    a.click();
+    // a.click();
     // Remove the anchor element.
     a.remove();
   }
