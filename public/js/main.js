@@ -36,6 +36,7 @@ let repeatCount = 1;
 // Maybe a female should have to bite a human over land, THEN move to water to lay the eggs.
 
 // Make JSON downloads toggleable (checkbox on main menu).
+// Add simulation speed tracking -- why do simulations with less infected mosquitoes seem to run slower?
 
 /********************
  * HELPER FUNCTIONS *
