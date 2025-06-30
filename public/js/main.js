@@ -3,7 +3,7 @@
  *************************/
 
 // Immutable parameters.
-let duration = 730;
+let duration = 3652;
 // World initialization parameters.
 let infectedMaleCounts = [0.25];
 let infectedFemaleCounts = [0.25];
@@ -354,6 +354,8 @@ class Mosquito {
 
     this.successes = numberOfEggs;
     mate.successes = numberOfEggs;
+    this.fitness = (this.fitness + (this.successes / 100)) / 2;
+    mate.fitness = (mate.fitness + (mate.successes / 100)) / 2;
   }
 }
 
