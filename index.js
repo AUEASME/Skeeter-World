@@ -22,5 +22,5 @@ app.get("/about", (_req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log("Skeeter World is running at http://localhost:3000/.");
+  console.log("🦟 SKEETER WORLD 🦟 is now running at http://localhost:3000/.");
 });
