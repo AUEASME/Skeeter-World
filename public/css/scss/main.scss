@@ -42,6 +42,17 @@ body {
     display: flex;
   }
 
+  > h4 {
+    width: 100%;
+    text-align: center;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.125rem;
+    margin: 0.5rem;
+    color: #202020;
+    font-size: 0.875rem;
+  }
+
   nav,
   main,
   form,
@@ -80,10 +91,21 @@ body {
     margin: 0rem 2rem;
 
     h1,
-    h2 {
+    h2,
+    h3,
+    h4,
+    h4 a {
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.125rem;
+    }
+
+    h4 {
+      width: 100%;
+      text-align: center;
+      color: #202020;
+      font-weight: 300;
+      font-size: 0.875rem;
     }
 
     > p {
@@ -282,7 +304,10 @@ body {
       margin: 0.5rem;
 
       h1,
-      h2 {
+      h2,
+      h3,
+      h4,
+      h4 a {
         text-align: center;
       }
 
