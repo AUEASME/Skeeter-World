@@ -3,16 +3,16 @@
  *************************/
 
 // Immutable parameters.
-let duration = 3652;
+let duration = 365;
 // World initialization parameters.
-let infectedMaleCounts = [0.25];
-let infectedFemaleCounts = [0.25];
-let waterRatios = [0.0625, 0.125, 0.25];
+let infectedMaleCounts = Math.random();
+let infectedFemaleCounts = Math.random();
+let waterRatios = [Math.random()];
 let currentWaterRatio = null;
 // Infection parameters.
-let killRates = [1.0];
+let killRates = [Math.random()];
 let currentKillRate = null;
-let rescueRates = [1.0];
+let rescueRates = [Math.random()];
 let currentRescueRate = null;
 let minFitnessModifiers = [-1.0];
 let maxFitnessModifiers = [1.0];
@@ -38,25 +38,6 @@ let repeatCount = 1;
 // Make JSON downloads toggleable (checkbox on main menu).
 // Add simulation speed tracking -- why do simulations with less infected mosquitoes seem to run slower?
 
-/********************
- * HELPER FUNCTIONS *
- ********************/
-
-let mockConsole = document.getElementById("mock__console");
-
-function logAndMockConsole(text) {
-  // Create a new paragraph element.
-  let p = document.createElement("p");
-  // Set the text content of the paragraph element to the text passed in.
-  p.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
-  // Append the paragraph element to the mock console.
-  mockConsole.appendChild(p);
-  // If there are more than 24 children in the mock console, remove the first one.
-  while (mockConsole.children.length > 24) {
-    mockConsole.removeChild(mockConsole.children[0]);
-  }
-}
-
 /*********************
  * WOLBACHIA CLASSES *
  *********************/
@@ -81,12 +62,23 @@ class Wolbachia {
       Math.random() *
         (currentFitnessModifierRange[1] - currentFitnessModifierRange[0]) +
       currentFitnessModifierRange[0];
+    console.log("PM stats:");
+    console.log(this.parasitismMutualismFactor);
     // Infection density primarily controls the maternal transmission rate of the infection.
     // This is a value between 0.0 and 1.0, first calculated as a random value between minInfectionDensity and maxInfectionDensity.
     this.infectionDensity =
       Math.random() *
         (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
       currentInfectionDensityRange[0];
+    // If parasite, increase density.
+    if (this.parasitismMutualismFactor < 0) {
+      this.infectionDensity = Math.min(
+        1.0,
+        this.infectionDensity + Math.abs(this.parasitismMutualismFactor) * 0.5
+      );
+    }
+    console.log(this.infectionDensity);
+    console.log(this.parasitismMutualismFactor * this.infectionDensity);
     // Set killRate and rescueRate to the current values.
     this.killRate = currentKillRate || killRates[0];
     this.rescueRate = currentRescueRate || rescueRates[0];
@@ -97,8 +89,8 @@ class Wolbachia {
     let clone = new Wolbachia();
     clone.parasitismMutualismFactor = this.parasitismMutualismFactor;
 
-    // 1/1000 chance to mutate the parasitismMutualismFactor by up to 0.05 in either direction.
-    if (Math.random() < 0.001) {
+    // 1/100 chance to mutate the parasitismMutualismFactor.
+    if (Math.random() < 0.01) {
       clone.parasitismMutualismFactor +=
         (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [-1.0, 1.0].
@@ -108,8 +100,8 @@ class Wolbachia {
       );
     }
 
-    // 1/1000 chance to mutate the infection density by up to 0.05 in either direction.
-    if (Math.random() < 0.001) {
+    // 1/100 chance to mutate the infection density by up to 0.05 in either direction.
+    if (Math.random() < 0.01) {
       clone.infectionDensity +=
         (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
@@ -119,15 +111,15 @@ class Wolbachia {
       );
     }
 
-    // 1/1000 chance to mutate the killRate by up to 0.05 in either direction.
-    if (Math.random() < 0.001) {
+    // 1/100 chance to mutate the killRate by up to 0.05 in either direction.
+    if (Math.random() < 0.01) {
       clone.killRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
       clone.killRate = Math.max(0.0, Math.min(1.0, clone.killRate));
     }
 
-    // 1/1000 chance to mutate the rescueRate by up to 0.05 in either direction.
-    if (Math.random() < 0.001) {
+    // 1/100 chance to mutate the rescueRate by up to 0.05 in either direction.
+    if (Math.random() < 0.01) {
       clone.rescueRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
       clone.rescueRate = Math.max(0.0, Math.min(1.0, clone.rescueRate));
@@ -169,7 +161,8 @@ class Mosquito {
 
     if (this.infected !== null) {
       this.fitness +=
-        this.infected.parasitismMutualismFactor * this.infected.infectionDensity;
+        this.infected.parasitismMutualismFactor *
+        this.infected.infectionDensity;
     }
 
     /**
@@ -334,7 +327,7 @@ class Mosquito {
     // Child fitness is the average of the parents' fitness.
     let dad = mate,
       mom = this;
-    let numberOfEggs = 100;
+    let numberOfEggs = Math.round(100 * mom.fitness);
     if (dad.infected !== null && mom.infected !== null) {
       numberOfEggs = Math.floor(numberOfEggs * mom.infected.rescueRate);
     } else if (dad.infected !== null && mom.infected === null) {
@@ -355,8 +348,8 @@ class Mosquito {
 
     this.successes = numberOfEggs;
     mate.successes = numberOfEggs;
-    this.fitness = (this.fitness + (this.successes / 100)) / 2;
-    mate.fitness = (mate.fitness + (mate.successes / 100)) / 2;
+    this.fitness = (this.fitness + this.successes / 100) / 2;
+    mate.fitness = (mate.fitness + mate.successes / 100) / 2;
   }
 }
 
@@ -581,8 +574,6 @@ function updatePlots(generation) {
 }
 
 function updateWorld() {
-  logAndMockConsole(`Day ${generation + 1}.`);
-
   // Mosquitoes do their thing.
   mosquitoDay(allMosquitoes);
 
@@ -610,13 +601,11 @@ function shouldStopSimulation() {
   // Check if infection has been eradicated.
   let infectedMosquitoes = allMosquitoes.filter((m) => m.infected !== null);
   if (infectedMosquitoes.length === 0) {
-    logAndMockConsole("Infection has been eradicated.");
     return true;
   }
 
   // Check if all mosquitoes are infected.
   if (infectedMosquitoes.length === allMosquitoes.length) {
-    logAndMockConsole("All mosquitoes are infected.");
     return true;
   }
 }
@@ -634,8 +623,6 @@ function rearrangePage() {
   let form = document.getElementById("start__params");
   form.remove();
 
-  // Show mock console.
-  mockConsole.style.display = "flex";
   // Show plot.
   let plot = document.getElementById("plot");
   plot.style.display = "block";
@@ -928,19 +915,27 @@ async function startExperiment(event) {
       if (Math.random() < experiment.infectedMalesAtStart) {
         male.changeInfectionStatus();
         male.fitness +=
-          male.infected.parasitismMutualismFactor * male.infected.infectionDensity;
+          male.infected.parasitismMutualismFactor *
+          male.infected.infectionDensity;
       }
     });
     allFemales.forEach((female) => {
       if (Math.random() < experiment.infectedFemalesAtStart) {
         female.changeInfectionStatus();
         female.fitness +=
-          female.infected.parasitismMutualismFactor * female.infected.infectionDensity;
+          female.infected.parasitismMutualismFactor *
+          female.infected.infectionDensity;
       }
     });
 
     // Run the simulation.
     while (!shouldStopSimulation() && generation < duration) {
+      allMosquitoes = [];
+      for (let y = 0; y < world.height; y++) {
+        for (let x = 0; x < world.width; x++) {
+          allMosquitoes = allMosquitoes.concat(world.map[y][x]);
+        }
+      }
       // Update the experiment data.
       experiment.infectionRatio.push(
         allMosquitoes.filter((m) => m.infected !== null).length /
@@ -952,11 +947,23 @@ async function startExperiment(event) {
           allMosquitoes.length
       );
       experiment.averageFitnessModificationOverTime.push(
-        // Get the average fitness modification of all mosquitoes.
-        allMosquitoes.reduce(
-          (acc, m) => acc + m.infected?.parasitismMutualismFactor || 0,
-          0
-        ) / allMosquitoes.length
+        // Get the average fitness modification of all infected mosquitoes.
+        allMosquitoes
+          .filter((m) => m.infected !== null)
+          .reduce(
+            (acc, m) =>
+              acc +
+              m.infected.parasitismMutualismFactor *
+                m.infected.infectionDensity,
+            0
+          ) / allMosquitoes.filter((m) => m.infected !== null).length
+      );
+      experiment.averageParasitismMutualismOverTime.push(
+        // Get the average parasitism/mutualism factor of all infected mosquitoes.
+        allMosquitoes
+          .filter((m) => m.infected !== null)
+          .reduce((acc, m) => acc + m.infected.parasitismMutualismFactor, 0) /
+          allMosquitoes.filter((m) => m.infected !== null).length
       );
       // Update the world.
       updateWorld();
@@ -990,6 +997,7 @@ class Experiment {
     // Run data.
     this.infectionRatio = [];
     this.reproductiveSuccessOverTime = [];
+    this.averageParasitismMutualismOverTime = [];
     this.averageFitnessModificationOverTime = [];
   }
 
@@ -1011,6 +1019,8 @@ class Experiment {
       simulationLength: generation,
       infectionRatio: this.infectionRatio,
       reproductiveSuccessOverTime: this.reproductiveSuccessOverTime,
+      averageParasitismMutualismOverTime:
+        this.averageParasitismMutualismOverTime,
       averageFitnessModificationOverTime:
         this.averageFitnessModificationOverTime,
     };
@@ -1023,7 +1033,7 @@ class Experiment {
     let currentTime = new Date().toISOString();
     a.download = `experiment_${currentTime}.json`;
     a.innerHTML = "Download JSON";
-    // a.click();
+    a.click();
     // Remove the anchor element.
     a.remove();
   }
