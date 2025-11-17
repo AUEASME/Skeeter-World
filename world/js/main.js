@@ -3,7 +3,7 @@
  *************************/
 
 // Immutable parameters.
-let duration = 365;
+let duration = 730;
 // World initialization parameters.
 let infectedMaleCounts = [0.25];
 let infectedFemaleCounts = [0.25];
