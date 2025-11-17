@@ -5,14 +5,14 @@
 // Immutable parameters.
 let duration = 365;
 // World initialization parameters.
-let infectedMaleCounts = Math.random();
-let infectedFemaleCounts = Math.random();
-let waterRatios = [Math.random()];
+let infectedMaleCounts = [0.25];
+let infectedFemaleCounts = [0.25];
+let waterRatios = [0.0625, 0.125, 0.25];
 let currentWaterRatio = null;
 // Infection parameters.
-let killRates = [Math.random()];
+let killRates = [1.0];
 let currentKillRate = null;
-let rescueRates = [Math.random()];
+let rescueRates = [1.0];
 let currentRescueRate = null;
 let minFitnessModifiers = [-1.0];
 let maxFitnessModifiers = [1.0];
@@ -89,8 +89,8 @@ class Wolbachia {
     let clone = new Wolbachia();
     clone.parasitismMutualismFactor = this.parasitismMutualismFactor;
 
-    // 1/100 chance to mutate the parasitismMutualismFactor.
-    if (Math.random() < 0.01) {
+    // 1/20 chance to mutate the parasitismMutualismFactor.
+    if (Math.random() < 0.05) {
       clone.parasitismMutualismFactor +=
         (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [-1.0, 1.0].
@@ -100,8 +100,8 @@ class Wolbachia {
       );
     }
 
-    // 1/100 chance to mutate the infection density by up to 0.05 in either direction.
-    if (Math.random() < 0.01) {
+    // 1/20 chance to mutate the infection density by up to 0.05 in either direction.
+    if (Math.random() < 0.05) {
       clone.infectionDensity +=
         (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
@@ -111,15 +111,15 @@ class Wolbachia {
       );
     }
 
-    // 1/100 chance to mutate the killRate by up to 0.05 in either direction.
-    if (Math.random() < 0.01) {
+    // 1/20 chance to mutate the killRate by up to 0.05 in either direction.
+    if (Math.random() < 0.05) {
       clone.killRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
       clone.killRate = Math.max(0.0, Math.min(1.0, clone.killRate));
     }
 
-    // 1/100 chance to mutate the rescueRate by up to 0.05 in either direction.
-    if (Math.random() < 0.01) {
+    // 1/20 chance to mutate the rescueRate by up to 0.05 in either direction.
+    if (Math.random() < 0.05) {
       clone.rescueRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
       clone.rescueRate = Math.max(0.0, Math.min(1.0, clone.rescueRate));
