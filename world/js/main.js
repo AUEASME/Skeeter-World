@@ -62,8 +62,6 @@ class Wolbachia {
       Math.random() *
         (currentFitnessModifierRange[1] - currentFitnessModifierRange[0]) +
       currentFitnessModifierRange[0];
-    console.log("PM stats:");
-    console.log(this.parasitismMutualismFactor);
     // Infection density primarily controls the maternal transmission rate of the infection.
     // This is a value between 0.0 and 1.0, first calculated as a random value between minInfectionDensity and maxInfectionDensity.
     this.infectionDensity =
@@ -77,8 +75,6 @@ class Wolbachia {
         this.infectionDensity + Math.abs(this.parasitismMutualismFactor) * 0.5
       );
     }
-    console.log(this.infectionDensity);
-    console.log(this.parasitismMutualismFactor * this.infectionDensity);
     // Set killRate and rescueRate to the current values.
     this.killRate = currentKillRate || killRates[0];
     this.rescueRate = currentRescueRate || rescueRates[0];
@@ -525,7 +521,7 @@ function kTournamentWithReplacement(eligibleMales, k = 3) {
  ********************/
 
 // Create world.
-let world = new World(16, 16, 0.125);
+let world = new World(12, 12, 0.125);
 let carryingCapacity = 96;
 
 // Populate world.
@@ -612,7 +608,7 @@ function shouldStopSimulation() {
 
 function resetWorld(waterRatio = 0.125) {
   // Reset all global variables.
-  world = new World(16, 16, waterRatio);
+  world = new World(12, 12, waterRatio);
   carryingCapacity = 96;
   allMosquitoes = [];
   generation = 0;
