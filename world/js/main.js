@@ -316,8 +316,8 @@ class Mosquito {
     this.breedingCooldown = 4;
 
     let currentCell = this.position;
-    // If both parents are infected, the child has a rescueRate chance of surviving, in which case it inherits one of the parents' infections.
-    // If the dad is infected but the mom is not, the child has a killRate chance of immediately dying, otherwise it inherits the dad's infection.
+    // If both parents are infected, the child has a rescueRate chance of surviving, in which case it inherits mother's infections.
+    // If the dad is infected but the mom is not, the child has a killRate chance of immediately dying.
     // If the mom is infected but the dad is not, the child survives, but inherits the mom's infection.
     // If neither parent is infected, the child survives no matter what.
     // Child fitness is the average of the parents' fitness.
@@ -344,6 +344,7 @@ class Mosquito {
 
     this.successes = numberOfEggs;
     mate.successes = numberOfEggs;
+    // Need to update this to not incorporate potentially negative fitness values.
     this.fitness = (this.fitness + this.successes / 100) / 2;
     mate.fitness = (mate.fitness + mate.successes / 100) / 2;
   }

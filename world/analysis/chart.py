@@ -20,8 +20,6 @@ s = []
 colors = []
 max_size = 0
 for experiment in data:
-    if max(experiment["infectionRatio"]) < 0.125:
-        continue
     x.append(experiment["killRate"])
     y.append(experiment["rescueRate"])
     s.append(max(experiment["infectionRatio"]))
