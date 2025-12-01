@@ -38,17 +38,6 @@ let repeatCount = 1;
 // Make JSON downloads toggleable (checkbox on main menu).
 // Add simulation speed tracking -- why do simulations with less infected mosquitoes seem to run slower?
 
-/********************
- * HELPER FUNCTIONS *
- ********************/
-
-
-function generatePerlinNoise(width, height, scale=[0,1]) {
-  console.log("Still working on it.");
-  // https://eev.ee/blog/2016/05/29/perlin-noise/
-}
-
-
 /*********************
  * WOLBACHIA CLASSES *
  *********************/
