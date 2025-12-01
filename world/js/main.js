@@ -883,6 +883,7 @@ async function startExperiment(event) {
 
   // Run each experiment.
   for (let experiment of experiments) {
+    console.log("Starting new experiment...");
     // Set up the world.
     world.setWaterCells(experiment.waterRatio);
     world.populate();
@@ -1039,5 +1040,6 @@ class Experiment {
     a.click();
     // Remove the anchor element.
     a.remove();
+    console.log("Experiment data downloaded.");
   }
 }
