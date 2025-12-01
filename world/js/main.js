@@ -522,8 +522,8 @@ function kTournamentWithReplacement(eligibleMales, k = 3) {
  ********************/
 
 // Create world.
-let world = new World(12, 12, 0.125);
-let carryingCapacity = 96;
+let world = new World(36, 36, 0.125);
+let carryingCapacity = 16;
 
 // Populate world.
 let allMosquitoes = [];
@@ -609,8 +609,8 @@ function shouldStopSimulation() {
 
 function resetWorld(waterRatio = 0.125) {
   // Reset all global variables.
-  world = new World(12, 12, waterRatio);
-  carryingCapacity = 96;
+  world = new World(36, 36, waterRatio);
+  carryingCapacity = 16;
   allMosquitoes = [];
   generation = 0;
 }
