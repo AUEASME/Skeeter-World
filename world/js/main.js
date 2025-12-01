@@ -325,9 +325,15 @@ class Mosquito {
       mom = this;
     let numberOfEggs = Math.round(100 * mom.fitness);
     if (dad.infected !== null && mom.infected !== null) {
-      numberOfEggs = Math.floor(numberOfEggs * mom.infected.rescueRate);
+      numberOfEggs = Math.max(
+        Math.floor(numberOfEggs * mom.infected.rescueRate),
+        0
+      );
     } else if (dad.infected !== null && mom.infected === null) {
-      numberOfEggs = Math.floor(numberOfEggs * (1 - dad.infected.killRate));
+      numberOfEggs = Math.max(
+        Math.floor(numberOfEggs * (1 - dad.infected.killRate)),
+        0
+      );
     }
 
     for (let i = 0; i < numberOfEggs; i++) {
