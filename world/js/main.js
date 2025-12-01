@@ -38,6 +38,17 @@ let repeatCount = 1;
 // Make JSON downloads toggleable (checkbox on main menu).
 // Add simulation speed tracking -- why do simulations with less infected mosquitoes seem to run slower?
 
+/********************
+ * HELPER FUNCTIONS *
+ ********************/
+
+
+function generatePerlinNoise(width, height, scale=[0,1]) {
+  console.log("Still working on it.");
+  // https://eev.ee/blog/2016/05/29/perlin-noise/
+}
+
+
 /*********************
  * WOLBACHIA CLASSES *
  *********************/
@@ -884,6 +895,8 @@ async function startExperiment(event) {
   // Run each experiment.
   for (let experiment of experiments) {
     console.log("Starting new experiment...");
+    // Log start time.
+    console.log(`Start time: ${new Date().toLocaleString()}`);
     // Set up the world.
     world.setWaterCells(experiment.waterRatio);
     world.populate();
@@ -1041,5 +1054,7 @@ class Experiment {
     // Remove the anchor element.
     a.remove();
     console.log("Experiment data downloaded.");
+    // Log finish time.
+    console.log(`Finish time: ${new Date().toLocaleString()}`);
   }
 }
