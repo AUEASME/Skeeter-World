@@ -841,7 +841,70 @@ function getInputValues(event) {
   }
 }
 
-async function startExperiment(event) {
+class Experiment {
+  constructor() {
+    // Start data.
+    this.startTime = new Date();
+    this.infectedMalesAtStart = 0.25;
+    this.infectedFemalesAtStart = 0.25;
+    this.waterRatio = 0.125;
+    // Infection data.
+    this.killRate = 1.0;
+    this.rescueRate = 1.0;
+    this.maxFitnessDetriment = -1.0;
+    this.maxFitnessBenefit = 1.0;
+    this.minInfectionDensity = 0.0;
+    this.maxInfectionDensity = 1.0;
+    // Run data.
+    this.infectionRatio = [];
+    this.reproductiveSuccessOverTime = [];
+    this.averageParasitismMutualismOverTime = [];
+    this.averageFitnessModificationOverTime = [];
+  }
+
+  outputData() {
+    let allData = {
+      // Start data.
+      startTime: this.startTime,
+      infectedMalesAtStart: this.infectedMalesAtStart,
+      infectedFemalesAtStart: this.infectedFemalesAtStart,
+      killRate: this.killRate,
+      rescueRate: this.rescueRate,
+      // New data.
+      waterRatio: this.waterRatio,
+      minMaternalTransmissionRate: this.minMaternalTransmissionRate,
+      maxMaternalTransmissionRate: this.maxMaternalTransmissionRate,
+      minFitnessModifier: this.minFitnessModifier,
+      maxFitnessModifier: this.maxFitnessModifier,
+      // Run data.
+      simulationLength: generation,
+      infectionRatio: this.infectionRatio,
+      reproductiveSuccessOverTime: this.reproductiveSuccessOverTime,
+      averageParasitismMutualismOverTime:
+        this.averageParasitismMutualismOverTime,
+      averageFitnessModificationOverTime:
+        this.averageFitnessModificationOverTime,
+    };
+
+    // Download the data for the user as a JSON file.
+    let data =
+      "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
+    let a = document.createElement("a");
+    a.href = "data:" + data;
+    let currentTime = new Date().toISOString();
+    a.download = `experiment_${currentTime}.json`;
+    a.innerHTML = "Download JSON";
+    a.click();
+    // Remove the anchor element.
+    a.remove();
+    console.log("Experiment data downloaded.");
+    // Log finish time.
+    console.log(`Finish time: ${new Date().toLocaleString()}`);
+  }
+}
+
+async function runExperiments(event) {
+  // Digest input values and rearrange page.
   getInputValues(event);
   rearrangePage();
 
@@ -868,7 +931,6 @@ async function startExperiment(event) {
                       experiment.maxFitnessModifier = maxFitnessModifier;
                       experiment.minInfectionDensity = minInfectionDensity;
                       experiment.maxInfectionDensity = maxInfectionDensity;
-
                       experiments.push(experiment);
                     }
                   }
@@ -983,67 +1045,5 @@ async function startExperiment(event) {
 
     // Reset the world.
     resetWorld();
-  }
-}
-
-class Experiment {
-  constructor() {
-    // Start data.
-    this.startTime = new Date();
-    this.infectedMalesAtStart = 0.25;
-    this.infectedFemalesAtStart = 0.25;
-    this.waterRatio = 0.125;
-    // Infection data.
-    this.killRate = 1.0;
-    this.rescueRate = 1.0;
-    this.maxFitnessDetriment = -1.0;
-    this.maxFitnessBenefit = 1.0;
-    this.minInfectionDensity = 0.0;
-    this.maxInfectionDensity = 1.0;
-    // Run data.
-    this.infectionRatio = [];
-    this.reproductiveSuccessOverTime = [];
-    this.averageParasitismMutualismOverTime = [];
-    this.averageFitnessModificationOverTime = [];
-  }
-
-  outputData() {
-    let allData = {
-      // Start data.
-      startTime: this.startTime,
-      infectedMalesAtStart: this.infectedMalesAtStart,
-      infectedFemalesAtStart: this.infectedFemalesAtStart,
-      killRate: this.killRate,
-      rescueRate: this.rescueRate,
-      // New data.
-      waterRatio: this.waterRatio,
-      minMaternalTransmissionRate: this.minMaternalTransmissionRate,
-      maxMaternalTransmissionRate: this.maxMaternalTransmissionRate,
-      minFitnessModifier: this.minFitnessModifier,
-      maxFitnessModifier: this.maxFitnessModifier,
-      // Run data.
-      simulationLength: generation,
-      infectionRatio: this.infectionRatio,
-      reproductiveSuccessOverTime: this.reproductiveSuccessOverTime,
-      averageParasitismMutualismOverTime:
-        this.averageParasitismMutualismOverTime,
-      averageFitnessModificationOverTime:
-        this.averageFitnessModificationOverTime,
-    };
-
-    // Download the data for the user as a JSON file.
-    let data =
-      "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
-    let a = document.createElement("a");
-    a.href = "data:" + data;
-    let currentTime = new Date().toISOString();
-    a.download = `experiment_${currentTime}.json`;
-    a.innerHTML = "Download JSON";
-    a.click();
-    // Remove the anchor element.
-    a.remove();
-    console.log("Experiment data downloaded.");
-    // Log finish time.
-    console.log(`Finish time: ${new Date().toLocaleString()}`);
   }
 }
