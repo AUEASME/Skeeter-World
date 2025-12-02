@@ -40,6 +40,7 @@ let repeatCount = 1;
 
 /**
  * TO-DO FOR PUBLISHING:
+ * 0. Why are infections always beginning in the upper left corner of the map AGAIN?
  * 1. Re-implement lock-and-key mechanism for compatibility between different Wolbachia strains.
  * 2. Implement some form of migration logging, so we can determine if different regions of fixation have unique properties.
  *    i. Maybe it would be easier to group similar Wolbachia strains into species, and track species proportion.
