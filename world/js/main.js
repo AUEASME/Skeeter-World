@@ -38,6 +38,15 @@ let repeatCount = 1;
 // Make JSON downloads toggleable (checkbox on main menu).
 // Add simulation speed tracking -- why do simulations with less infected mosquitoes seem to run slower?
 
+/**
+ * TO-DO FOR PUBLISHING:
+ * 1. Re-implement lock-and-key mechanism for compatibility between different Wolbachia strains.
+ * 2. Implement some form of migration logging, so we can determine if different regions of fixation have unique properties.
+ *    i. Maybe it would be easier to group similar Wolbachia strains into species, and track species proportion.
+ *    ii. But what would be the cutoff for species differentiation?
+ *    iii. It's a high-dimensional space, so we could just log ALL the properties of each Wolbachia strain in the population at each time step. But that's a LOT of data.
+ */
+
 /*********************
  * WOLBACHIA CLASSES *
  *********************/
@@ -1070,4 +1079,7 @@ async function runExperiments(event) {
     // Reset the world.
     resetWorld();
   }
+
+  // Reload the page.
+  window.location.reload();
 }
