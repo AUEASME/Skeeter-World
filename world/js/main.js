@@ -3,7 +3,7 @@
  *************************/
 
 // Immutable parameters.
-let duration = 730;
+let duration = 365;
 // World initialization parameters.
 let infectedMaleCounts = [0.25];
 let infectedFemaleCounts = [0.25];
@@ -68,6 +68,8 @@ class Wolbachia {
       Math.random() *
         (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
       currentInfectionDensityRange[0];
+    // Dr. Beckmann is of the opinion there is a maternal transmission rate independent of infection density.
+    this.maternalTransmissionSkill = Math.random();
     // If parasite, increase density.
     if (this.parasitismMutualismFactor < 0) {
       this.infectionDensity = Math.min(
@@ -104,6 +106,17 @@ class Wolbachia {
       clone.infectionDensity = Math.max(
         0.0,
         Math.min(1.0, clone.infectionDensity)
+      );
+    }
+
+    // 1/20 chance to mutate the maternalTransmissionSkill by up to 0.05 in either direction.
+    if (Math.random() < 0.05) {
+      clone.maternalTransmissionSkill +=
+        (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
+      // Clamp the value to the range [0.0, 1.0].
+      clone.maternalTransmissionSkill = Math.max(
+        0.0,
+        Math.min(1.0, clone.maternalTransmissionSkill)
       );
     }
 
@@ -340,7 +353,10 @@ class Mosquito {
       let child = new Mosquito(dad, mom);
       if (mom.infected !== null) {
         // Use the mother's infection density to determine the chance of inheriting the infection.
-        if (Math.random() < mom.infected.infectionDensity) {
+        if (
+          Math.random() <
+          mom.infected.infectionDensity * mom.maternalTransmissionSkill
+        ) {
           child.infected = mom.infected.clone();
         }
       }
@@ -860,6 +876,7 @@ class Experiment {
     this.reproductiveSuccessOverTime = [];
     this.averageParasitismMutualismOverTime = [];
     this.averageFitnessModificationOverTime = [];
+    this.maternalTransmissionSkillOverTime = [];
   }
 
   outputData() {
@@ -1031,6 +1048,13 @@ async function runExperiments(event) {
         allMosquitoes
           .filter((m) => m.infected !== null)
           .reduce((acc, m) => acc + m.infected.parasitismMutualismFactor, 0) /
+          allMosquitoes.filter((m) => m.infected !== null).length
+      );
+      experiment.maternalTransmissionSkillOverTime.push(
+        // Get the average maternal transmission skill of all infected mosquitoes.
+        allMosquitoes
+          .filter((m) => m.infected !== null)
+          .reduce((acc, m) => acc + m.maternalTransmissionSkill, 0) /
           allMosquitoes.filter((m) => m.infected !== null).length
       );
       // Update the world.
