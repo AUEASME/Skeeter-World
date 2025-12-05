@@ -41,6 +41,8 @@ let repeatCount = 1;
 /**
  * TO-DO FOR PUBLISHING:
  * 0. Why are infections always beginning in the upper left corner of the map AGAIN?
+ *    i. Maybe it's just because we evaluate cells for migration and such from top-left to bottom-right?
+ *    ii. So maybe if we just randomly shuffle the list of mosquitoes, then evaluate them outside the context of their location...
  * 1. Re-implement lock-and-key mechanism for compatibility between different Wolbachia strains.
  * 2. Implement some form of migration logging, so we can determine if different regions of fixation have unique properties.
  *    i. Maybe it would be easier to group similar Wolbachia strains into species, and track species proportion.
@@ -70,13 +72,13 @@ class Wolbachia {
     // this.parasitismMutualismFactor = Math.random() * 2 - 1; // Random value between -1.0 and 1.0.
     this.parasitismMutualismFactor =
       Math.random() *
-        (currentFitnessModifierRange[1] - currentFitnessModifierRange[0]) +
+      (currentFitnessModifierRange[1] - currentFitnessModifierRange[0]) +
       currentFitnessModifierRange[0];
     // Infection density primarily controls the maternal transmission rate of the infection.
     // This is a value between 0.0 and 1.0, first calculated as a random value between minInfectionDensity and maxInfectionDensity.
     this.infectionDensity =
       Math.random() *
-        (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
+      (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
       currentInfectionDensityRange[0];
     // Dr. Beckmann is of the opinion there is a maternal transmission rate independent of infection density.
     this.maternalTransmissionSkill = Math.random();
@@ -274,7 +276,7 @@ class Mosquito {
       if (nearestWaterCells.length > 0) {
         let nearestWaterCell =
           nearestWaterCells[
-            Math.floor(Math.random() * nearestWaterCells.length)
+          Math.floor(Math.random() * nearestWaterCells.length)
           ];
         let dx = nearestWaterCell.x - this.position.x;
         let dy = nearestWaterCell.y - this.position.y;
@@ -310,7 +312,7 @@ class Mosquito {
     // Check if any neighboring cell has fewer mosquitoes. If it does, move there.
     let currentCell = this.position;
     let currentPopulation = world.map[currentCell.y][currentCell.x].length;
-    let bestCell = null;
+    let bestCells = [];
     let bestPopulation = currentPopulation;
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -1; dx <= 1; dx++) {
@@ -318,19 +320,23 @@ class Mosquito {
         let x = currentCell.x + dx;
         if (y >= 0 && y < world.height && x >= 0 && x < world.width) {
           let population = world.map[y][x].length;
-          if (population < bestPopulation) {
-            bestCell = { x, y };
+          if (population <= bestPopulation) {
+            bestPopulation = population;
+            bestCells.push({ x, y });
           }
         }
       }
     }
-    if (bestCell) {
-      world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
-        currentCell.x
-      ].filter((m) => m !== this);
-      world.map[bestCell.y][bestCell.x].push(this);
-      this.position = bestCell;
-      return;
+    if (bestCells.length > 0) {
+      let newCell =
+        bestCells[Math.floor(Math.random() * bestCells.length)];
+      if (newCell.x !== currentCell.x || newCell.y !== currentCell.y) {
+        world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
+          currentCell.x
+        ].filter((m) => m !== this);
+        world.map[newCell.y][newCell.x].push(this);
+        this.position = newCell;
+      }
     }
   }
 
@@ -507,6 +513,12 @@ function mosquitoDay(population) {
     }
   }
 
+  // Randomly shuffle the population array to avoid location-based biases.
+  for (let i = population.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [population[i], population[j]] = [population[j], population[i]];
+  }
+
   for (let mosquito of population) {
     // Migrate and reproduce.
     mosquito.migrate();
@@ -586,7 +598,7 @@ function updatePlots(generation) {
   world.traceReproduction.y.push(
     // Get the average reproductive success odds of all mosquitoes.
     allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
-      allMosquitoes.length
+    allMosquitoes.length
   );
 
   let layout2 = {
@@ -602,12 +614,12 @@ function updatePlots(generation) {
   );
 }
 
-function updateWorld() {
+function updateWorld(population) {
   // Mosquitoes do their thing.
-  mosquitoDay(allMosquitoes);
+  mosquitoDay(population);
 
-  // Population control: kill of mosquitoes to meet carrying capacity.
-  allMosquitoes = [];
+  // Population control: kill off mosquitoes to meet carrying capacity.
+  population = [];
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
       // Sort mosquitoes by fitness.
@@ -615,7 +627,7 @@ function updateWorld() {
       // Keep the top carryingCapacity mosquitoes.
       world.map[y][x] = world.map[y][x].slice(0, carryingCapacity);
       // Add them to the global list.
-      allMosquitoes = allMosquitoes.concat(world.map[y][x]);
+      population = population.concat(world.map[y][x]);
     }
   }
 
@@ -624,6 +636,8 @@ function updateWorld() {
   // Update the plots.
   updatePlots(generation + 1);
   generation += 1;
+
+  return population;
 }
 
 function shouldStopSimulation() {
@@ -1034,12 +1048,12 @@ async function runExperiments(event) {
       // Update the experiment data.
       experiment.infectionRatio.push(
         allMosquitoes.filter((m) => m.infected !== null).length /
-          allMosquitoes.length
+        allMosquitoes.length
       );
       experiment.reproductiveSuccessOverTime.push(
         // Get the average reproductive success of all mosquitoes.
         allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
-          allMosquitoes.length
+        allMosquitoes.length
       );
       experiment.averageFitnessModificationOverTime.push(
         // Get the average fitness modification of all infected mosquitoes.
@@ -1049,7 +1063,7 @@ async function runExperiments(event) {
             (acc, m) =>
               acc +
               m.infected.parasitismMutualismFactor *
-                m.infected.infectionDensity,
+              m.infected.infectionDensity,
             0
           ) / allMosquitoes.filter((m) => m.infected !== null).length
       );
@@ -1058,17 +1072,17 @@ async function runExperiments(event) {
         allMosquitoes
           .filter((m) => m.infected !== null)
           .reduce((acc, m) => acc + m.infected.parasitismMutualismFactor, 0) /
-          allMosquitoes.filter((m) => m.infected !== null).length
+        allMosquitoes.filter((m) => m.infected !== null).length
       );
       experiment.maternalTransmissionSkillOverTime.push(
         // Get the average maternal transmission skill of all infected mosquitoes.
         allMosquitoes
           .filter((m) => m.infected !== null)
           .reduce((acc, m) => acc + m.maternalTransmissionSkill, 0) /
-          allMosquitoes.filter((m) => m.infected !== null).length
+        allMosquitoes.filter((m) => m.infected !== null).length
       );
       // Update the world.
-      updateWorld();
+      allMosquitoes = updateWorld(allMosquitoes);
       // Sleep for a fifth of a second.
       // This allows the browser time to handle user requests, such as scrolling, which get laggy if the simulation never takes a break.
       await new Promise((r) => setTimeout(r, 200));
