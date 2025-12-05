@@ -40,9 +40,7 @@ let repeatCount = 1;
 
 /**
  * TO-DO FOR PUBLISHING:
- * 0. Why are infections always beginning in the upper left corner of the map AGAIN?
- *    i. Maybe it's just because we evaluate cells for migration and such from top-left to bottom-right?
- *    ii. So maybe if we just randomly shuffle the list of mosquitoes, then evaluate them outside the context of their location...
+ * 0. Need to implement blood-drinking — a mosquito shouldn't be able to stay over water forever. Before it reproduces, it needs to drink blood on land.
  * 1. Re-implement lock-and-key mechanism for compatibility between different Wolbachia strains.
  * 2. Implement some form of migration logging, so we can determine if different regions of fixation have unique properties.
  *    i. Maybe it would be easier to group similar Wolbachia strains into species, and track species proportion.
@@ -687,7 +685,7 @@ function shouldStopSimulation() {
 function resetWorld(waterRatio = 0.25) {
   // Reset all global variables.
   world = new World(36, 36, waterRatio);
-  carryingCapacity = 16;
+  carryingCapacity = 32;
   allMosquitoes = [];
   generation = 0;
 }
