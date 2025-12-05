@@ -194,6 +194,8 @@ class Mosquito {
     this.age = 0;
     // "but a single female mosquito may produce up to 10 broods throughout her life."
     this.breedingCooldown = 0;
+    // Mosquitoes need blood meals to reproduce.
+    this.blood = 0;
 
     // Keep track of how many children survived per reproductive event.
     this.successes = 0.0;
@@ -249,14 +251,70 @@ class Mosquito {
   }
 
   migrate() {
+    let originalPosition = { x: this.position.x, y: this.position.y };
+
+    // If we still need blood, make sure we're over land.
+    if (this.breedingCooldown < 1 && this.blood < 1) {
+      // If we're in a water cell, move to the nearest land cell.
+      if (world.water_map[this.position.y][this.position.x] === 1) {
+        // Find the nearest land cell.
+        let nearestLandCells = [];
+        let nearestLandDistance = Infinity;
+        for (let y = 0; y < world.height; y++) {
+          for (let x = 0; x < world.width; x++) {
+            if (world.water_map[y][x] === 0) {
+              let distance =
+                Math.abs(this.position.x - x) + Math.abs(this.position.y - y);
+              if (distance <= nearestLandDistance) {
+                if (distance < nearestLandDistance) {
+                  nearestLandCells = [];
+                }
+                nearestLandDistance = distance;
+                nearestLandCells.push({ x, y });
+              }
+            }
+          }
+        }
+        // Move towards the nearest land cell.
+        if (nearestLandCells.length > 0) {
+          let nearestLandCell =
+            nearestLandCells[
+              Math.floor(Math.random() * nearestLandCells.length)
+            ];
+          let dx = nearestLandCell.x - this.position.x;
+          let dy = nearestLandCell.y - this.position.y;
+          if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) {
+              this.position.x++;
+            } else {
+              this.position.x--;
+            }
+          } else {
+            if (dy > 0) {
+              this.position.y++;
+            } else {
+              this.position.y--;
+            }
+          }
+          // Remove from old cell and add to new cell.
+          world.map[originalPosition.y][originalPosition.x] = world.map[
+            originalPosition.y
+          ][originalPosition.x].filter((m) => m !== this);
+          world.map[this.position.y][this.position.x].push(this);
+          return;
+        }
+      } else {
+        // We're already on land, so we can "drink blood" and increase our blood level.
+        this.blood = 1;
+      }
+    }
+
     // If breeding cooldown is 0, and we're not in a water cell, migrate in the direction of the nearest water cell.
     if (
       this.breedingCooldown < 1 &&
+      this.blood > 0 &&
       world.water_map[this.position.y][this.position.x] === 0
     ) {
-      // Store original position so we can remove ourselves from the old cell later.
-      let originalPosition = { x: this.position.x, y: this.position.y };
-
       // Find the nearest water cell.
       let nearestWaterCells = [];
       let nearestWaterDistance = Infinity;
@@ -332,10 +390,10 @@ class Mosquito {
     }
     if (bestCells.length > 0) {
       let newCell = bestCells[Math.floor(Math.random() * bestCells.length)];
-      // Move to new cell.
-      world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
-        currentCell.x
-      ].filter((m) => m !== this);
+      // Remove from old cell and add to new cell.
+      world.map[originalPosition.y][originalPosition.x] = world.map[
+        originalPosition.y
+      ][originalPosition.x].filter((m) => m !== this);
       world.map[newCell.y][newCell.x].push(this);
       this.position = newCell;
       return;
@@ -355,12 +413,11 @@ class Mosquito {
         }
       }
       if (neighbors.length > 0) {
-        let newCell =
-          neighbors[Math.floor(Math.random() * neighbors.length)];
-        // Move to new cell.
-        world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
-          currentCell.x
-        ].filter((m) => m !== this);
+        let newCell = neighbors[Math.floor(Math.random() * neighbors.length)];
+        // Remove from old cell and add to new cell.
+        world.map[originalPosition.y][originalPosition.x] = world.map[
+          originalPosition.y
+        ][originalPosition.x].filter((m) => m !== this);
         world.map[newCell.y][newCell.x].push(this);
         this.position = newCell;
         return;
