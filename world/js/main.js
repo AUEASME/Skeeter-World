@@ -70,13 +70,13 @@ class Wolbachia {
     // this.parasitismMutualismFactor = Math.random() * 2 - 1; // Random value between -1.0 and 1.0.
     this.parasitismMutualismFactor =
       Math.random() *
-        (currentFitnessModifierRange[1] - currentFitnessModifierRange[0]) +
+      (currentFitnessModifierRange[1] - currentFitnessModifierRange[0]) +
       currentFitnessModifierRange[0];
     // Infection density primarily controls the maternal transmission rate of the infection.
     // This is a value between 0.0 and 1.0, first calculated as a random value between minInfectionDensity and maxInfectionDensity.
     this.infectionDensity =
       Math.random() *
-        (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
+      (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
       currentInfectionDensityRange[0];
     // Dr. Beckmann is of the opinion there is a maternal transmission rate independent of infection density.
     this.maternalTransmissionSkill = Math.random();
@@ -279,7 +279,7 @@ class Mosquito {
         if (nearestLandCells.length > 0) {
           let nearestLandCell =
             nearestLandCells[
-              Math.floor(Math.random() * nearestLandCells.length)
+            Math.floor(Math.random() * nearestLandCells.length)
             ];
           let dx = nearestLandCell.x - this.position.x;
           let dy = nearestLandCell.y - this.position.y;
@@ -339,7 +339,7 @@ class Mosquito {
       if (nearestWaterCells.length > 0) {
         let nearestWaterCell =
           nearestWaterCells[
-            Math.floor(Math.random() * nearestWaterCells.length)
+          Math.floor(Math.random() * nearestWaterCells.length)
           ];
         let dx = nearestWaterCell.x - this.position.x;
         let dy = nearestWaterCell.y - this.position.y;
@@ -684,7 +684,7 @@ function updatePlots(generation) {
   world.traceReproduction.y.push(
     // Get the average reproductive success odds of all mosquitoes.
     allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
-      allMosquitoes.length
+    allMosquitoes.length
   );
 
   let layout2 = {
@@ -1134,12 +1134,12 @@ async function runExperiments(event) {
       // Update the experiment data.
       experiment.infectionRatio.push(
         allMosquitoes.filter((m) => m.infected !== null).length /
-          allMosquitoes.length
+        allMosquitoes.length
       );
       experiment.reproductiveSuccessOverTime.push(
         // Get the average reproductive success of all mosquitoes.
         allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
-          allMosquitoes.length
+        allMosquitoes.length
       );
       experiment.averageFitnessModificationOverTime.push(
         // Get the average fitness modification of all infected mosquitoes.
@@ -1149,7 +1149,7 @@ async function runExperiments(event) {
             (acc, m) =>
               acc +
               m.infected.parasitismMutualismFactor *
-                m.infected.infectionDensity,
+              m.infected.infectionDensity,
             0
           ) / allMosquitoes.filter((m) => m.infected !== null).length
       );
@@ -1158,14 +1158,14 @@ async function runExperiments(event) {
         allMosquitoes
           .filter((m) => m.infected !== null)
           .reduce((acc, m) => acc + m.infected.parasitismMutualismFactor, 0) /
-          allMosquitoes.filter((m) => m.infected !== null).length
+        allMosquitoes.filter((m) => m.infected !== null).length
       );
       experiment.maternalTransmissionSkillOverTime.push(
         // Get the average maternal transmission skill of all infected mosquitoes.
         allMosquitoes
           .filter((m) => m.infected !== null)
           .reduce((acc, m) => acc + m.maternalTransmissionSkill, 0) /
-          allMosquitoes.filter((m) => m.infected !== null).length
+        allMosquitoes.filter((m) => m.infected !== null).length
       );
       // Update the world.
       allMosquitoes = updateWorld(allMosquitoes);
