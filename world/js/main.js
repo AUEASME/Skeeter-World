@@ -7,7 +7,7 @@ let duration = 365;
 // World initialization parameters.
 let infectedMaleCounts = [0.25];
 let infectedFemaleCounts = [0.25];
-let waterRatios = [0.0625, 0.125, 0.25];
+let waterRatios = [0.25];
 let currentWaterRatio = null;
 // Infection parameters.
 let killRates = [1.0];
@@ -423,7 +423,7 @@ class Mosquito {
  ***********************************/
 
 class World {
-  constructor(width, height, waterRatio = 0.125) {
+  constructor(width, height, waterRatio = 0.25) {
     // 1. Generate an empty map of the given width and height.
     this.width = width;
     this.height = height;
@@ -684,7 +684,7 @@ function shouldStopSimulation() {
   }
 }
 
-function resetWorld(waterRatio = 0.125) {
+function resetWorld(waterRatio = 0.25) {
   // Reset all global variables.
   world = new World(36, 36, waterRatio);
   carryingCapacity = 16;
@@ -918,7 +918,7 @@ class Experiment {
     this.startTime = new Date();
     this.infectedMalesAtStart = 0.25;
     this.infectedFemalesAtStart = 0.25;
-    this.waterRatio = 0.125;
+    this.waterRatio = 0.25;
     // Infection data.
     this.killRate = 1.0;
     this.rescueRate = 1.0;
