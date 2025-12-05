@@ -453,6 +453,7 @@ class World {
           let mosquito = new Mosquito();
           mosquito.age = Math.floor(Math.random() * 14);
           mosquito.breedingCooldown = Math.floor(Math.random() * 4);
+          mosquito.position = { x: x, y: y };
           this.map[y][x].push(mosquito);
           allMosquitoes.push(mosquito);
         }
