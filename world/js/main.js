@@ -1085,7 +1085,7 @@ async function runExperiments(event) {
       allMosquitoes = updateWorld(allMosquitoes);
       // Sleep for a fifth of a second.
       // This allows the browser time to handle user requests, such as scrolling, which get laggy if the simulation never takes a break.
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 100));
     }
 
     // Once the simulation is complete, output the data.
