@@ -66,6 +66,10 @@ let repeatCount = 1;
 
 class Wolbachia {
   constructor() {
+    // Generate two random four-bit strings to represent toxin and antitoxin.
+    this.toxin = Math.floor(Math.random() * 16); // 0 to 15
+    this.antitoxin = Math.floor(Math.random() * 16); // 0 to 15
+
     // Wolbachia are defined by a scalar value, currentFitnessModifierRange[0] (probably -1.0) to currentFitnessModifierRange[1] (probably 1.0).
     // this.parasitismMutualismFactor = Math.random() * 2 - 1; // Random value between -1.0 and 1.0.
     this.parasitismMutualismFactor =
