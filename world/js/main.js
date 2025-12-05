@@ -268,6 +268,10 @@ class Mosquito {
             let distance =
               Math.abs(this.position.x - x) + Math.abs(this.position.y - y);
             if (distance <= nearestWaterDistance) {
+              if (distance < nearestWaterDistance) {
+                nearestWaterCells = [];
+              }
+
               nearestWaterDistance = distance;
               nearestWaterCells.push({ x, y });
             }
@@ -318,6 +322,10 @@ class Mosquito {
         if (y >= 0 && y < world.height && x >= 0 && x < world.width) {
           let population = world.map[y][x].length;
           if (population <= bestPopulation) {
+            if (population < bestPopulation) {
+              bestCells = [];
+            }
+
             bestPopulation = population;
             bestCells.push({ x, y });
           }
@@ -333,6 +341,32 @@ class Mosquito {
       world.map[newCell.y][newCell.x].push(this);
       this.position = newCell;
       return;
+    }
+
+    // If not breeding, migrate randomly to a neighboring cell.
+    if (this.breedingCooldown > 0) {
+      let currentCell = this.position;
+      let neighbors = [];
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          let y = currentCell.y + dy;
+          let x = currentCell.x + dx;
+          if (y >= 0 && y < world.height && x >= 0 && x < world.width) {
+            neighbors.push({ x, y });
+          }
+        }
+      }
+      if (neighbors.length > 0) {
+        let newCell =
+          neighbors[Math.floor(Math.random() * neighbors.length)];
+        // Move to new cell.
+        world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
+          currentCell.x
+        ].filter((m) => m !== this);
+        world.map[newCell.y][newCell.x].push(this);
+        this.position = newCell;
+        return;
+      }
     }
   }
 
