@@ -96,10 +96,28 @@ class Wolbachia {
     this.rescueRate = currentRescueRate || rescueRates[0];
   }
 
+  matchLockAndKey(otherWolbachia) {
+    // Return a scalar value representing compatibility between this Wolbachia and another Wolbachia.
+    // Calculate Hamming distance between toxin of this and antitoxin of other.
+    console.log("Working on this...");
+  }
+
   clone() {
     // Create a new Wolbachia with the same parasitismMutualismFactor.
     let clone = new Wolbachia();
     clone.parasitismMutualismFactor = this.parasitismMutualismFactor;
+
+    // 1/20 chance to mutate the toxin or antitoxin.
+    if (Math.random() < 0.05) {
+      if (Math.random() < 0.5) {
+        // Mutate toxin by increasing or decreasing by 1 (wrapping around).
+        clone.toxin = (this.toxin + (Math.random() < 0.5 ? -1 : 1) + 16) % 16;
+      } else {
+        // Mutate antitoxin by increasing or decreasing by 1 (wrapping around).
+        clone.antitoxin =
+          (this.antitoxin + (Math.random() < 0.5 ? -1 : 1) + 16) % 16;
+      }
+    }
 
     // 1/20 chance to mutate the parasitismMutualismFactor.
     if (Math.random() < 0.05) {
