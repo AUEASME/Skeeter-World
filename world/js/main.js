@@ -41,7 +41,8 @@ let repeatCount = 1;
  * TO-DO FOR PUBLISHING:
  * 0. DONE: Need to implement blood-drinking — a mosquito shouldn't be able to stay over water forever. Before it reproduces, it needs to drink blood on land.
  * 1. DONE: Re-implement lock-and-key mechanism for compatibility between different Wolbachia strains.
- * 2. Implement some form of migration logging, so we can determine if different regions of fixation have unique properties.
+ * 2.
+ * 3. Implement some form of migration logging, so we can determine if different regions of fixation have unique properties.
  *    i. Maybe it would be easier to group similar Wolbachia strains into species, and track species proportion.
  *    ii. But what would be the cutoff for species differentiation?
  *    iii. It's a high-dimensional space, so we could just log ALL the properties of each Wolbachia strain in the population at each time step. But that's a LOT of data.
@@ -492,7 +493,7 @@ class Mosquito {
         // Use the mother's infection density to determine the chance of inheriting the infection.
         if (
           Math.random() <
-          mom.infected.infectionDensity * mom.maternalTransmissionSkill
+          mom.infected.infectionDensity * mom.infected.maternalTransmissionSkill
         ) {
           child.infected = mom.infected.clone();
         }
@@ -717,11 +718,15 @@ function updatePlots(generation) {
   Plotly.newPlot("plot", [world.traceUninfected, world.traceInfected], layout);
 
   world.traceReproduction.x.push(generation);
-  world.traceReproduction.y.push(
-    // Get the average reproductive success odds of all mosquitoes.
-    allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
-      allMosquitoes.length
-  );
+  // Get all mosquitoes that have a successes property greater than zero.
+  let reproducingMosquitoes = allMosquitoes.filter((m) => m.successes > 0);
+  let averageSuccessRate = 0;
+  if (reproducingMosquitoes.length > 0) {
+    averageSuccessRate =
+      reproducingMosquitoes.reduce((sum, m) => sum + m.successes, 0) /
+      reproducingMosquitoes.length;
+  }
+  world.traceReproduction.y.push(averageSuccessRate);
 
   let layout2 = {
     title: "Reproductive Success Rate Over Time",
@@ -778,8 +783,6 @@ function shouldStopSimulation() {
 function resetWorld(waterRatio = 0.25) {
   // Reset all global variables.
   world = new World(36, 36, waterRatio);
-  carryingCapacity = 64;
-  allMosquitoes = [];
   generation = 0;
 }
 
@@ -1115,7 +1118,7 @@ async function runExperiments(event) {
     world.setWaterCells(experiment.waterRatio);
     world.populate();
 
-    let allMosquitoes = [];
+    allMosquitoes = [];
     for (let y = 0; y < world.height; y++) {
       for (let x = 0; x < world.width; x++) {
         allMosquitoes = allMosquitoes.concat(world.map[y][x]);
@@ -1172,13 +1175,17 @@ async function runExperiments(event) {
         allMosquitoes.filter((m) => m.infected !== null).length /
           allMosquitoes.length
       );
-      experiment.reproductiveSuccessOverTime.push(
-        // Get the average reproductive success of all mosquitoes.
-        allMosquitoes.reduce((acc, m) => acc + m.successes, 0) /
-          allMosquitoes.length
-      );
+      // Get all mosquitoes that have a successes property greater than zero.
+      let reproducingMosquitoes = allMosquitoes.filter((m) => m.successes > 0);
+      let averageSuccessRate = 0;
+      if (reproducingMosquitoes.length > 0) {
+        averageSuccessRate =
+          reproducingMosquitoes.reduce((sum, m) => sum + m.successes, 0) /
+          reproducingMosquitoes.length;
+      }
+      experiment.reproductiveSuccessOverTime.push(averageSuccessRate);
+      // Get the average fitness modification of all infected mosquitoes.
       experiment.averageFitnessModificationOverTime.push(
-        // Get the average fitness modification of all infected mosquitoes.
         allMosquitoes
           .filter((m) => m.infected !== null)
           .reduce(
