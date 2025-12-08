@@ -36,12 +36,11 @@ let repeatCount = 1;
 // Maybe a female should have to bite a human over land, THEN move to water to lay the eggs.
 
 // Make JSON downloads toggleable (checkbox on main menu).
-// Add simulation speed tracking -- why do simulations with less infected mosquitoes seem to run slower?
 
 /**
  * TO-DO FOR PUBLISHING:
- * 0. Need to implement blood-drinking — a mosquito shouldn't be able to stay over water forever. Before it reproduces, it needs to drink blood on land.
- * 1. Re-implement lock-and-key mechanism for compatibility between different Wolbachia strains.
+ * 0. DONE: Need to implement blood-drinking — a mosquito shouldn't be able to stay over water forever. Before it reproduces, it needs to drink blood on land.
+ * 1. DONE: Re-implement lock-and-key mechanism for compatibility between different Wolbachia strains.
  * 2. Implement some form of migration logging, so we can determine if different regions of fixation have unique properties.
  *    i. Maybe it would be easier to group similar Wolbachia strains into species, and track species proportion.
  *    ii. But what would be the cutoff for species differentiation?
@@ -103,11 +102,6 @@ class Wolbachia {
   }
 
   matchLockAndKey(otherWolbachia) {
-    // Ensure toxin and antitoxin lengths match.
-    if (this.toxin.length !== otherWolbachia.antitoxin.length) {
-      throw new Error("Toxin and antitoxin lengths do not match.");
-    }
-
     // Calculate Hamming distance between toxin of this and antitoxin of other.
     let similarity = 0;
     for (let i = 0; i < this.toxin.length; i++) {
