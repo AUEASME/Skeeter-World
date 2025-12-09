@@ -37,6 +37,8 @@ let repeatCount = 1;
 
 // Make JSON downloads toggleable (checkbox on main menu).
 
+// Does a pair of infected individuals generally produce the same number of viable offspring as a pair of uninfected individuals?
+
 /**
  * TO-DO FOR PUBLISHING:
  * 0. DONE: Need to implement blood-drinking — a mosquito shouldn't be able to stay over water forever. Before it reproduces, it needs to drink blood on land.
