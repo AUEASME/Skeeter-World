@@ -43,8 +43,7 @@ let repeatCount = 1;
  * TO-DO FOR PUBLISHING:
  * 0. DONE: Need to implement blood-drinking — a mosquito shouldn't be able to stay over water forever. Before it reproduces, it needs to drink blood on land.
  * 1. DONE: Re-implement lock-and-key mechanism for compatibility between different Wolbachia strains.
- * 2.
- * 3. Implement some form of migration logging, so we can determine if different regions of fixation have unique properties.
+ * 2. Implement some form of migration logging, so we can determine if different regions of fixation have unique properties.
  *    i. Maybe it would be easier to group similar Wolbachia strains into species, and track species proportion.
  *    ii. But what would be the cutoff for species differentiation?
  *    iii. It's a high-dimensional space, so we could just log ALL the properties of each Wolbachia strain in the population at each time step. But that's a LOT of data.
