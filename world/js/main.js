@@ -95,7 +95,7 @@ class Wolbachia {
     if (this.parasitismMutualismFactor < 0) {
       this.infectionDensity = Math.min(
         1.0,
-        this.infectionDensity + Math.abs(this.parasitismMutualismFactor) * 0.5
+        this.infectionDensity + Math.abs(this.parasitismMutualismFactor) * 0.5,
       );
     }
     // Set killRate and rescueRate to the current values.
@@ -138,7 +138,7 @@ class Wolbachia {
       // Clamp the value to the range [-1.0, 1.0].
       clone.parasitismMutualismFactor = Math.max(
         -1.0,
-        Math.min(1.0, clone.parasitismMutualismFactor)
+        Math.min(1.0, clone.parasitismMutualismFactor),
       );
     }
 
@@ -149,7 +149,7 @@ class Wolbachia {
       // Clamp the value to the range [0.0, 1.0].
       clone.infectionDensity = Math.max(
         0.0,
-        Math.min(1.0, clone.infectionDensity)
+        Math.min(1.0, clone.infectionDensity),
       );
     }
 
@@ -160,7 +160,7 @@ class Wolbachia {
       // Clamp the value to the range [0.0, 1.0].
       clone.maternalTransmissionSkill = Math.max(
         0.0,
-        Math.min(1.0, clone.maternalTransmissionSkill)
+        Math.min(1.0, clone.maternalTransmissionSkill),
       );
     }
 
@@ -477,14 +477,14 @@ class Mosquito {
         Math.floor(
           numberOfEggs *
             mom.infected.rescueRate *
-            mom.infected.matchLockAndKey(dad.infected)
+            mom.infected.matchLockAndKey(dad.infected),
         ),
-        0
+        0,
       );
     } else if (dad.infected !== null && mom.infected === null) {
       numberOfEggs = Math.max(
         Math.floor(numberOfEggs * (1 - dad.infected.killRate)),
-        0
+        0,
       );
     }
 
@@ -656,7 +656,7 @@ function mosquitoDay(population) {
       world.water_map[currentCell.y][currentCell.x] === 1
     ) {
       let eligibleMales = males[currentCell.y][currentCell.x].filter(
-        (m) => m.age > 14
+        (m) => m.age > 14,
       );
       if (eligibleMales.length > 0) {
         // Get a random mate.
@@ -738,7 +738,7 @@ function updatePlots(generation) {
   Plotly.newPlot(
     "reproductive_success_plot",
     [world.traceReproduction],
-    layout2
+    layout2,
   );
 }
 
@@ -845,7 +845,7 @@ function getInputValues(event) {
   for (let i = 0; i < infectedMaleCounts.length; i++) {
     if (infectedMaleCounts[i] < 0 || infectedMaleCounts[i] > 1) {
       alert(
-        "Infected male count cannot be less than zero or greater than one."
+        "Infected male count cannot be less than zero or greater than one.",
       );
       return;
     }
@@ -866,7 +866,7 @@ function getInputValues(event) {
   for (let i = 0; i < infectedFemaleCounts.length; i++) {
     if (infectedFemaleCounts[i] < 0 || infectedFemaleCounts[i] > 1) {
       alert(
-        "Infected male count cannot be less than zero or greater than one."
+        "Infected male count cannot be less than zero or greater than one.",
       );
       return;
     }
@@ -1141,10 +1141,10 @@ async function runExperiments(event) {
 
     // Infect the specified number of males and females.
     let allMales = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infected === null
+      (m) => m.sex === 1 && m.infected === null,
     );
     let allFemales = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infected === null
+      (m) => m.sex === 0 && m.infected === null,
     );
     allMales.forEach((male) => {
       if (Math.random() < experiment.infectedMalesAtStart) {
@@ -1174,7 +1174,7 @@ async function runExperiments(event) {
       // Update the experiment data.
       experiment.infectionRatio.push(
         allMosquitoes.filter((m) => m.infected !== null).length /
-          allMosquitoes.length
+          allMosquitoes.length,
       );
       // Get all mosquitoes that have a successes property greater than zero.
       let reproducingMosquitoes = allMosquitoes.filter((m) => m.successes > 0);
@@ -1194,22 +1194,22 @@ async function runExperiments(event) {
               acc +
               m.infected.parasitismMutualismFactor *
                 m.infected.infectionDensity,
-            0
-          ) / allMosquitoes.filter((m) => m.infected !== null).length
+            0,
+          ) / allMosquitoes.filter((m) => m.infected !== null).length,
       );
       experiment.averageParasitismMutualismOverTime.push(
         // Get the average parasitism/mutualism factor of all infected mosquitoes.
         allMosquitoes
           .filter((m) => m.infected !== null)
           .reduce((acc, m) => acc + m.infected.parasitismMutualismFactor, 0) /
-          allMosquitoes.filter((m) => m.infected !== null).length
+          allMosquitoes.filter((m) => m.infected !== null).length,
       );
       experiment.maternalTransmissionSkillOverTime.push(
         // Get the average maternal transmission skill of all infected mosquitoes.
         allMosquitoes
           .filter((m) => m.infected !== null)
           .reduce((acc, m) => acc + m.maternalTransmissionSkill, 0) /
-          allMosquitoes.filter((m) => m.infected !== null).length
+          allMosquitoes.filter((m) => m.infected !== null).length,
       );
       // Update the world.
       allMosquitoes = updateWorld(allMosquitoes);
