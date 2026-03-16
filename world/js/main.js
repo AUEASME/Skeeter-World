@@ -516,9 +516,10 @@ class Mosquito {
  ***********************************/
 
 class World {
-  constructor(width, height, waterRatio = 0.25) {
+  constructor(width, height) {
     // 0. Get the worldPixels matrix from localStorage.
     let storedPixels = localStorage.getItem("worldPixels");
+    // grass -> 0, water -> 1, mountain -> 2
 
     // 1. Generate an empty map of the given width and height.
     this.width = width;
@@ -526,11 +527,21 @@ class World {
     this.map = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0).map(() => []));
-    // 2. Generate another empty map, this time for water.
-    this.water_map = new Array(this.height)
-      .fill(0)
-      .map(() => new Array(this.width).fill(0));
-    this.setWaterCells(waterRatio);
+
+    // Set pixels corresponding to "water" in storedPixels to 1 in this.map.
+    this.map.forEach((row, y) =>
+      row.forEach((cell, x) => {
+        if (storedPixels) {
+          let pixels = JSON.parse(storedPixels);
+          if (pixels[y][x] === "water") {
+            this.map[y][x] = 1;
+          } else if (pixels[y][x] === "mountain") {
+            this.map[y][x] = 2;
+          }
+        }
+      }),
+    );
+
     // 3. Set up history.
     this.traceUninfected = {
       x: [],
@@ -558,14 +569,13 @@ class World {
     };
   }
 
-  setWaterCells(waterRatio) {
+  setWaterCells() {
     // If there are stored pixels, use them to set water cells.
     if (storedPixels) {
       let pixels = JSON.parse(storedPixels);
-      for (let y = 0; y < this.height; y++) {
-        for (let x = 0; x < this.width; x++) {
+      for (let y = 0; y < this.width; y++) {
+        for (let x = 0; x < this.height; x++) {
           if (pixels[y][x] === 1) {
-            this.water_map[y][x] = 1;
           }
         }
       }
