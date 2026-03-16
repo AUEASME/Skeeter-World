@@ -791,6 +791,10 @@ function rearrangePage() {
   // Delete form.
   let form = document.getElementById("start__params");
   form.remove();
+  let customCan = document.getElementById("can");
+  customCan.remove();
+  let terrainSelect = document.getElementById("terrainSelect");
+  terrainSelect.remove();
 
   // Show plot.
   let plot = document.getElementById("plot");

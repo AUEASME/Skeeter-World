@@ -13,8 +13,14 @@
       property="og:description"
       content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria."
     />
-    <meta property="og:image" content="https://easme.auburn.edu/world/img/ogp.png" />
-    <meta property="og:image:secure_url" content="https://easme.auburn.edu/world/img/ogp.png" />
+    <meta
+      property="og:image"
+      content="https://easme.auburn.edu/world/img/ogp.png"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://easme.auburn.edu/world/img/ogp.png"
+    />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1280" />
     <meta property="og:image:height" content="720" />
@@ -28,14 +34,217 @@
       name="twitter:description"
       content="Population dynamics simulation for mosquitoes infected with Wolbachia bacteria."
     />
-    <meta name="twitter:image" content="https://easme.auburn.edu/world/img/ogp.png" />
+    <meta
+      name="twitter:image"
+      content="https://easme.auburn.edu/world/img/ogp.png"
+    />
     <meta name="twitter:image:alt" content="Skeeter World" />
     <!-- END OF OGP DATA -->
     <link rel="icon" type="image/x-icon" href="/world/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="/world/css/main.css" />
     <title>Skeeter World 🦟</title>
   </head>
-  <body>
+  <script type="text/javascript">
+    const GRID_SIZE = 48;
+    const CELL_SIZE = 12;
+    const CANVAS_SIZE = GRID_SIZE * CELL_SIZE;
+
+    let canvas, ctx;
+    let isDrawing = false;
+    let currentColor = "SaddleBrown";
+    let lastCell = null;
+
+    // 48x48 logical "pixel" buffer
+    const pixels = Array.from({ length: GRID_SIZE }, () =>
+      Array.from({ length: GRID_SIZE }, () => "ForestGreen"),
+    );
+
+    // Randomly set 12.5% of pixels to water (DarkTurquoise).
+    for (let y = 0; y < GRID_SIZE; y++) {
+      for (let x = 0; x < GRID_SIZE; x++) {
+        if (Math.random() < 0.0625) {
+          pixels[y][x] = "DarkTurquoise";
+        }
+      }
+    }
+
+    // Choose two random points along opposite edges and draw a mountain line (SaddleBrown) between them.
+    const edgePoints = [];
+    edgePoints.push({ x: 0, y: Math.floor(Math.random() * GRID_SIZE) }); // Left edge
+    edgePoints.push({ x: Math.floor(Math.random() * GRID_SIZE), y: 0 }); // Top edge
+    edgePoints.push({
+      x: GRID_SIZE - 1,
+      y: Math.floor(Math.random() * GRID_SIZE),
+    }); // Right edge
+    edgePoints.push({
+      x: Math.floor(Math.random() * GRID_SIZE),
+      y: GRID_SIZE - 1,
+    }); // Bottom edge
+    const p1 = edgePoints[Math.floor(Math.random() * edgePoints.length)];
+    // Use modulo to ensure p2 is on the opposite edge.
+    const p2 = edgePoints[(edgePoints.indexOf(p1) + 2) % edgePoints.length];
+    paintLine(p1, p2);
+
+    currentColor = "DarkTurquoise"; // Start with water selected.
+
+    function init() {
+      canvas = document.getElementById("can");
+      canvas.width = CANVAS_SIZE;
+      canvas.height = CANVAS_SIZE;
+      ctx = canvas.getContext("2d");
+
+      render();
+
+      canvas.addEventListener("mousedown", (e) => findxy("down", e), false);
+      canvas.addEventListener("mousemove", (e) => findxy("move", e), false);
+      canvas.addEventListener("mouseup", () => findxy("up"), false);
+      canvas.addEventListener("mouseout", () => findxy("out"), false);
+    }
+
+    function color(obj) {
+      // Remove activeColor class from all color buttons.
+      document
+        .querySelectorAll(".colorButton")
+        .forEach((btn) => btn.classList.remove("activeColor"));
+      // Set the currentColor to the id of the clicked color button.
+      currentColor = obj.id;
+      // Add activeColor class to the selected color button.
+      document.querySelectorAll(".colorButton").forEach((btn) => {
+        btn.classList.toggle("activeColor", btn === obj);
+      });
+    }
+
+    function save() {
+      // Replace "ForestGreen" with "grass."
+      pixels.forEach((row) =>
+        row.forEach((color, i, arr) => {
+          if (color === "ForestGreen") arr[i] = "grass";
+        }),
+      );
+
+      // Replace "DarkTurquoise" with "water."
+      pixels.forEach((row) =>
+        row.forEach((color, i, arr) => {
+          if (color === "DarkTurquoise") arr[i] = "water";
+        }),
+      );
+
+      // Replace "SaddleBrown" with "mountain."
+      pixels.forEach((row) =>
+        row.forEach((color, i, arr) => {
+          if (color === "SaddleBrown") arr[i] = "mountain";
+        }),
+      );
+    }
+
+    function getCellFromEvent(e) {
+      const rect = canvas.getBoundingClientRect();
+      const sx = canvas.width / rect.width;
+      const sy = canvas.height / rect.height;
+
+      const px = (e.clientX - rect.left) * sx;
+      const py = (e.clientY - rect.top) * sy;
+
+      const cx = Math.max(
+        0,
+        Math.min(GRID_SIZE - 1, Math.floor(px / CELL_SIZE)),
+      );
+      const cy = Math.max(
+        0,
+        Math.min(GRID_SIZE - 1, Math.floor(py / CELL_SIZE)),
+      );
+      return { x: cx, y: cy };
+    }
+
+    function paintCell(cx, cy) {
+      pixels[cy][cx] = currentColor;
+    }
+
+    // Bresenham line on cell coordinates (for smooth drag painting)
+    function paintLine(c0, c1) {
+      let x0 = c0.x,
+        y0 = c0.y;
+      const x1 = c1.x,
+        y1 = c1.y;
+      const dx = Math.abs(x1 - x0);
+      const dy = Math.abs(y1 - y0);
+      const sx = x0 < x1 ? 1 : -1;
+      const sy = y0 < y1 ? 1 : -1;
+      let err = dx - dy;
+
+      while (true) {
+        paintCell(x0, y0);
+        if (x0 === x1 && y0 === y1) break;
+        const e2 = 2 * err;
+        if (e2 > -dy) {
+          err -= dy;
+          x0 += sx;
+        }
+        if (e2 < dx) {
+          err += dx;
+          y0 += sy;
+        }
+      }
+    }
+
+    function render() {
+      // Fill logical pixels
+      for (let y = 0; y < GRID_SIZE; y++) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+          ctx.fillStyle = pixels[y][x];
+          ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+      }
+
+      // Grid overlay.
+      ctx.strokeStyle = "DarkGreen";
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= GRID_SIZE; i++) {
+        const p = i * CELL_SIZE + 0.5;
+        ctx.beginPath();
+        ctx.moveTo(p, 0);
+        ctx.lineTo(p, CANVAS_SIZE);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, p);
+        ctx.lineTo(CANVAS_SIZE, p);
+        ctx.stroke();
+      }
+
+      // Border
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0.5, 0.5, CANVAS_SIZE - 1, CANVAS_SIZE - 1);
+    }
+
+    function findxy(res, e) {
+      if (res === "down") {
+        isDrawing = true;
+        const cell = getCellFromEvent(e);
+        paintCell(cell.x, cell.y);
+        lastCell = cell;
+        render();
+        return;
+      }
+
+      if (res === "up" || res === "out") {
+        isDrawing = false;
+        lastCell = null;
+        return;
+      }
+
+      if (res === "move" && isDrawing) {
+        const cell = getCellFromEvent(e);
+        if (!lastCell || cell.x !== lastCell.x || cell.y !== lastCell.y) {
+          paintLine(lastCell ?? cell, cell);
+          lastCell = cell;
+          render();
+        }
+      }
+    }
+  </script>
+  <body onload="init()">
     <h4><a href="https://easme.auburn.edu/">Back to EASME</a></h4>
     <nav>
       <a href="/world/" class="nav__disabled">Simulation</a>
@@ -59,9 +268,38 @@
         <div class="map">
           <canvas id="water" style="display: none"></canvas>
           <div class="key" style="display: none">
-            <p style="color: cornflowerblue;">Water</p>
+            <p style="color: cornflowerblue">Water</p>
             <p style="color: forestgreen">Dry Land</p>
           </div>
+        </div>
+      </div>
+      <canvas
+        id="can"
+        width="576"
+        height="576"
+        style="border: 2px solid black"
+      ></canvas>
+      <div id="terrainSelect">
+        <p>Choose Terrain Type</p>
+        <div id="terrainButtons">
+          <div
+            style="background: ForestGreen"
+            id="ForestGreen"
+            class="colorButton"
+            onclick="color(this)"
+          ></div>
+          <div
+            style="background: DarkTurquoise"
+            id="DarkTurquoise"
+            class="colorButton activeColor"
+            onclick="color(this)"
+          ></div>
+          <div
+            style="background: SaddleBrown"
+            id="SaddleBrown"
+            class="colorButton"
+            onclick="color(this)"
+          ></div>
         </div>
       </div>
       <form id="start__params">
@@ -76,37 +314,62 @@
         >
         <input type="text" id="infected__females" name="infected__females" />
         <label for="water__percent"
-          >% of world to be water (0.0 — 1.0, default 0.125):</label>
+          >% of world to be water (0.0 — 1.0, default 0.125):</label
+        >
         <input type="text" id="water__percent" name="water__percent" />
         <!-- Wolbachia Parameters -->
         <h3>Wolbachia Parameters</h3>
         <label for="kill__rate"
-          >Initial CI (kill) rate for <em>Wolbachia</em> (0.0 — 1.0, default 1.0):</label
+          >Initial CI (kill) rate for <em>Wolbachia</em> (0.0 — 1.0, default
+          1.0):</label
         >
         <input type="text" id="kill__rate" name="kill__rate" />
         <label for="rescue__rate"
-          >Initial rescue rate for <em>Wolbachia</em> (0.0 — 1.0, default 1.0):</label
+          >Initial rescue rate for <em>Wolbachia</em> (0.0 — 1.0, default
+          1.0):</label
         >
         <input type="text" id="rescue__rate" name="rescue__rate" />
         <label for="maximum__fitness__detriment"
-          >Max. fitness detriment for <em>Wolbachia</em> (-1.0 — 0.0, default -1.0):</label
+          >Max. fitness detriment for <em>Wolbachia</em> (-1.0 — 0.0, default
+          -1.0):</label
         >
-        <input type="text" id="maximum__fitness__detriment" name="maximum__fitness__detriment" />
+        <input
+          type="text"
+          id="maximum__fitness__detriment"
+          name="maximum__fitness__detriment"
+        />
         <label for="maximum__fitness__benefit"
-          >Max. fitness benefit for <em>Wolbachia</em> (0.0 — 1.0, default 1.0):</label
+          >Max. fitness benefit for <em>Wolbachia</em> (0.0 — 1.0, default
+          1.0):</label
         >
-        <input type="text" id="maximum__fitness__benefit" name="maximum__fitness__benefit" />
+        <input
+          type="text"
+          id="maximum__fitness__benefit"
+          name="maximum__fitness__benefit"
+        />
         <label for="minimum__infection__density"
-          >Min. infection density for <em>Wolbachia</em> (0.0 — 1.0, default 0.5):</label
+          >Min. infection density for <em>Wolbachia</em> (0.0 — 1.0, default
+          0.5):</label
         >
-        <input type="text" id="minimum__infection__density" name="minimum__infection__density" />
+        <input
+          type="text"
+          id="minimum__infection__density"
+          name="minimum__infection__density"
+        />
         <label for="maximum__infection__density"
-          >Max. infection density for <em>Wolbachia</em> (0.0 — 1.0, default 1.0):</label
+          >Max. infection density for <em>Wolbachia</em> (0.0 — 1.0, default
+          1.0):</label
         >
-        <input type="text" id="maximum__infection__density" name="maximum__infection__density" />
+        <input
+          type="text"
+          id="maximum__infection__density"
+          name="maximum__infection__density"
+        />
         <!-- Simulation Parameters -->
         <h3>Simulation Parameters</h3>
-        <label for="repeats"># of times to run each unique simulation (default 1):</label>
+        <label for="repeats"
+          ># of times to run each unique simulation (default 1):</label
+        >
         <input type="number" id="repeats" name="repeats" />
         <!-- Start -->
         <button id="start" onclick="runExperiments(event)">

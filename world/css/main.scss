@@ -42,6 +42,38 @@ body {
     display: flex;
   }
 
+  div#terrainSelect {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.5rem;
+
+    p {
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.125rem;
+    }
+
+    div#terrainButtons {
+      display: flex;
+      flex-flow: row nowrap;
+      gap: 0.5rem;
+
+      .colorButton {
+        min-width: 16px;
+        min-height: 16px;
+        cursor: pointer;
+        border: 2px ridge #000;
+
+        &.activeColor {
+          border: 2px ridge DeepPink;
+        }
+      }
+    }
+  }
+
   > h4 {
     width: 100%;
     text-align: center;
