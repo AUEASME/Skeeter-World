@@ -6,13 +6,35 @@
 
     let canvas, ctx;
     let isDrawing = false;
-    let currentColor = "LightSeaGreen";
+    let currentColor = "SaddleBrown";
     let lastCell = null;
 
     // 48x48 logical "pixel" buffer
     const pixels = Array.from({ length: GRID_SIZE }, () =>
       Array.from({ length: GRID_SIZE }, () => "ForestGreen"),
     );
+
+    // Randomly set 12.5% of pixels to water (DarkTurquoise).
+    for (let y = 0; y < GRID_SIZE; y++) {
+      for (let x = 0; x < GRID_SIZE; x++) {
+        if (Math.random() < 0.0625) {
+          pixels[y][x] = "DarkTurquoise";
+        }
+      }
+    }
+
+    // Choose two random points along opposite edges and draw a mountain line (SaddleBrown) between them.
+    const edgePoints = [];
+    edgePoints.push({ x: 0, y: Math.floor(Math.random() * GRID_SIZE) }); // Left edge
+    edgePoints.push({ x: Math.floor(Math.random() * GRID_SIZE), y: 0 }); // Top edge
+    edgePoints.push({ x: GRID_SIZE - 1, y: Math.floor(Math.random() * GRID_SIZE) }); // Right edge
+    edgePoints.push({ x: Math.floor(Math.random() * GRID_SIZE), y: GRID_SIZE - 1 }); // Bottom edge
+    const p1 = edgePoints[Math.floor(Math.random() * edgePoints.length)];
+    // Use modulo to ensure p2 is on the opposite edge.
+    const p2 = edgePoints[(edgePoints.indexOf(p1) + 2) % edgePoints.length];
+    paintLine(p1, p2);
+
+    currentColor = "DarkTurquoise"; // Start with water selected.
 
     function init() {
       canvas = document.getElementById("can");
@@ -49,10 +71,10 @@
         }),
       );
 
-      // Replace "LightSeaGreen" with "water."
+      // Replace "DarkTurquoise" with "water."
       pixels.forEach((row) =>
         row.forEach((color, i, arr) => {
-          if (color === "LightSeaGreen") arr[i] = "water";
+          if (color === "DarkTurquoise") arr[i] = "water";
         }),
       );
 
@@ -179,7 +201,7 @@
     }
 
     .activeColor {
-      border: 2px ridge red;
+      border: 2px ridge DeepPink;
     }
   </style>
 
@@ -212,9 +234,9 @@
         left: 46%;
         width: 16px;
         height: 16px;
-        background: LightSeaGreen;
+        background: DarkTurquoise;
       "
-      id="LightSeaGreen"
+      id="DarkTurquoise"
       class="colorButton activeColor"
       onclick="color(this)"
     ></div>
