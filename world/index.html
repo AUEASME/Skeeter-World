@@ -45,8 +45,8 @@
     <title>Skeeter World 🦟</title>
   </head>
   <script type="text/javascript">
-    const GRID_SIZE = 48;
-    const CELL_SIZE = 12;
+    const GRID_SIZE = 36;
+    const CELL_SIZE = 16;
     const CANVAS_SIZE = GRID_SIZE * CELL_SIZE;
 
     let canvas, ctx;
@@ -115,26 +115,32 @@
     }
 
     function save() {
+      // Duplicate pixels to avoid mutating the original during replacement.
+      const savedPixels = pixels.map((row) => row.slice());
+
       // Replace "ForestGreen" with "grass."
-      pixels.forEach((row) =>
+      savedPixels.forEach((row) =>
         row.forEach((color, i, arr) => {
           if (color === "ForestGreen") arr[i] = "grass";
         }),
       );
 
       // Replace "DarkTurquoise" with "water."
-      pixels.forEach((row) =>
+      savedPixels.forEach((row) =>
         row.forEach((color, i, arr) => {
           if (color === "DarkTurquoise") arr[i] = "water";
         }),
       );
 
       // Replace "SaddleBrown" with "mountain."
-      pixels.forEach((row) =>
+      savedPixels.forEach((row) =>
         row.forEach((color, i, arr) => {
           if (color === "SaddleBrown") arr[i] = "mountain";
         }),
       );
+
+      // Put pixels in localStorage as JSON string.
+      localStorage.setItem("worldPixels", JSON.stringify(savedPixels));
     }
 
     function getCellFromEvent(e) {
@@ -158,6 +164,9 @@
 
     function paintCell(cx, cy) {
       pixels[cy][cx] = currentColor;
+
+      // Save the updated pixels to localStorage after each paint action.
+      save();
     }
 
     // Bresenham line on cell coordinates (for smooth drag painting)
@@ -280,7 +289,7 @@
         style="border: 2px solid black"
       ></canvas>
       <div id="terrainSelect">
-        <p>Choose Terrain Type</p>
+        <p>Choose Terrain Brush</p>
         <div id="terrainButtons">
           <div
             style="background: ForestGreen"

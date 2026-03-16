@@ -517,6 +517,9 @@ class Mosquito {
 
 class World {
   constructor(width, height, waterRatio = 0.25) {
+    // 0. Get the worldPixels matrix from localStorage.
+    let storedPixels = localStorage.getItem("worldPixels");
+
     // 1. Generate an empty map of the given width and height.
     this.width = width;
     this.height = height;
@@ -556,13 +559,14 @@ class World {
   }
 
   setWaterCells(waterRatio) {
-    // Set the water cells to the given ratio.
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-        if (Math.random() < waterRatio) {
-          this.water_map[y][x] = 1;
-        } else {
-          this.water_map[y][x] = 0;
+    // If there are stored pixels, use them to set water cells.
+    if (storedPixels) {
+      let pixels = JSON.parse(storedPixels);
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          if (pixels[y][x] === 1) {
+            this.water_map[y][x] = 1;
+          }
         }
       }
     }
