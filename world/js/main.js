@@ -519,7 +519,6 @@ class World {
   constructor(width, height) {
     // 0. Get the worldPixels matrix from localStorage.
     let storedPixels = localStorage.getItem("worldPixels");
-    // grass -> 0, water -> 1, mountain -> 2
 
     // 1. Generate an empty map of the given width and height.
     this.width = width;
@@ -527,9 +526,14 @@ class World {
     this.map = new Array(height)
       .fill(0)
       .map(() => new Array(width).fill(0).map(() => []));
+    // 2. Generate an empty terrain matrix.
+    this.terrainMap = new Array(height)
+      .fill(0)
+      .map(() => new Array(width).fill(0));
 
     // Set pixels corresponding to "water" in storedPixels to 1 in this.map.
-    this.map.forEach((row, y) =>
+    // Pixels corresponding to "mountain" in storedPixels should be set to 2 in this.map.
+    this.terrainMap.forEach((row, y) =>
       row.forEach((cell, x) => {
         if (storedPixels) {
           let pixels = JSON.parse(storedPixels);
@@ -567,19 +571,6 @@ class World {
       mode: "lines",
       marker: { color: "RebeccaPurple" },
     };
-  }
-
-  setWaterCells() {
-    // If there are stored pixels, use them to set water cells.
-    if (storedPixels) {
-      let pixels = JSON.parse(storedPixels);
-      for (let y = 0; y < this.width; y++) {
-        for (let x = 0; x < this.height; x++) {
-          if (pixels[y][x] === 1) {
-          }
-        }
-      }
-    }
   }
 
   populate() {
