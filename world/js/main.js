@@ -12,8 +12,8 @@ let currentWaterRatio = null;
 // Infection parameters.
 let ciKillRates = [1.0];
 let currentciKillRate = null;
-let rescueRates = [1.0];
-let currentRescueRate = null;
+let ciRescueRates = [1.0];
+let currentciRescueRate = null;
 let minFitnessModifiers = [-1.0];
 let maxFitnessModifiers = [1.0];
 let currentFitnessModifierRange = null;
@@ -102,9 +102,9 @@ class Wolbachia {
         this.infectionDensity + Math.abs(this.parasitismMutualismFactor) * 0.5,
       );
     }
-    // Set ciKillRate and rescueRate to the current values.
+    // Set ciKillRate and ciRescueRate to the current values.
     this.ciKillRate = currentciKillRate || ciKillRates[0];
-    this.rescueRate = currentRescueRate || rescueRates[0];
+    this.ciRescueRate = currentciRescueRate || ciRescueRates[0];
   }
 
   matchLockAndKey(otherWolbachia) {
@@ -175,11 +175,11 @@ class Wolbachia {
       clone.ciKillRate = Math.max(0.0, Math.min(1.0, clone.ciKillRate));
     }
 
-    // 1/20 chance to mutate the rescueRate by up to 0.05 in either direction.
+    // 1/20 chance to mutate the ciRescueRate by up to 0.05 in either direction.
     if (Math.random() < 0.05) {
-      clone.rescueRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
+      clone.ciRescueRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
-      clone.rescueRate = Math.max(0.0, Math.min(1.0, clone.rescueRate));
+      clone.ciRescueRate = Math.max(0.0, Math.min(1.0, clone.ciRescueRate));
     }
 
     return clone;
@@ -468,7 +468,7 @@ class Mosquito {
     this.breedingCooldown = 4;
 
     let currentCell = this.position;
-    // If both parents are infected, the child has a rescueRate chance of surviving, in which case it inherits mother's infections.
+    // If both parents are infected, the child has a ciRescueRate chance of surviving, in which case it inherits mother's infections.
     // If the dad is infected but the mom is not, the child has a ciKillRate chance of immediately dying.
     // If the mom is infected but the dad is not, the child survives, but inherits the mom's infection.
     // If neither parent is infected, the child survives no matter what.
@@ -480,7 +480,7 @@ class Mosquito {
       numberOfEggs = Math.max(
         Math.floor(
           numberOfEggs *
-            mom.infected.rescueRate *
+            mom.infected.ciRescueRate *
             mom.infected.matchLockAndKey(dad.infected),
         ),
         0,
@@ -918,16 +918,16 @@ function getInputValues(event) {
   }
 
   // Get rescue__rate (0.0 to 1.0).
-  let rescueRateInDocument = document
+  let ciRescueRateInDocument = document
     .getElementById("rescue__rate")
     .value.split(",");
-  if (rescueRateInDocument.length > 0 && rescueRateInDocument[0] !== "") {
-    rescueRates = rescueRateInDocument;
+  if (ciRescueRateInDocument.length > 0 && ciRescueRateInDocument[0] !== "") {
+    ciRescueRates = ciRescueRateInDocument;
     // Convert to float.
-    rescueRates = rescueRates.map((r) => parseFloat(r));
+    ciRescueRates = ciRescueRates.map((r) => parseFloat(r));
   }
-  for (let i = 0; i < rescueRates.length; i++) {
-    if (rescueRates[i] < 0 || rescueRates[i] > 1) {
+  for (let i = 0; i < ciRescueRates.length; i++) {
+    if (ciRescueRates[i] < 0 || ciRescueRates[i] > 1) {
       alert("Rescue rate must be between 0 and 1.");
       return;
     }
@@ -1029,7 +1029,7 @@ class Experiment {
     this.waterRatio = 0.25;
     // Infection data.
     this.ciKillRate = 1.0;
-    this.rescueRate = 1.0;
+    this.ciRescueRate = 1.0;
     this.maxFitnessDetriment = -1.0;
     this.maxFitnessBenefit = 1.0;
     this.minInfectionDensity = 0.0;
@@ -1049,7 +1049,7 @@ class Experiment {
       infectedMalesAtStart: this.infectedMalesAtStart,
       infectedFemalesAtStart: this.infectedFemalesAtStart,
       ciKillRate: this.ciKillRate,
-      rescueRate: this.rescueRate,
+      ciRescueRate: this.ciRescueRate,
       // New data.
       waterRatio: this.waterRatio,
       minMaternalTransmissionRate: this.minMaternalTransmissionRate,
@@ -1095,7 +1095,7 @@ async function runExperiments(event) {
       for (let infectedFemaleCount of infectedFemaleCounts) {
         for (let waterRatio of waterRatios) {
           for (let ciKillRate of ciKillRates) {
-            for (let rescueRate of rescueRates) {
+            for (let ciRescueRate of ciRescueRates) {
               for (let minFitnessModifier of minFitnessModifiers) {
                 for (let maxFitnessModifier of maxFitnessModifiers) {
                   for (let minInfectionDensity of minInfectionDensities) {
@@ -1106,7 +1106,7 @@ async function runExperiments(event) {
                       experiment.infectedFemalesAtStart = infectedFemaleCount;
                       experiment.waterRatio = waterRatio;
                       experiment.ciKillRate = ciKillRate;
-                      experiment.rescueRate = rescueRate;
+                      experiment.ciRescueRate = ciRescueRate;
                       experiment.minFitnessModifier = minFitnessModifier;
                       experiment.maxFitnessModifier = maxFitnessModifier;
                       experiment.minInfectionDensity = minInfectionDensity;
@@ -1141,7 +1141,7 @@ async function runExperiments(event) {
 
     // Set up simulation parameters.
     currentciKillRate = experiment.ciKillRate;
-    currentRescueRate = experiment.rescueRate;
+    currentciRescueRate = experiment.ciRescueRate;
     currentFitnessModifierRange = [
       experiment.minFitnessModifier,
       experiment.maxFitnessModifier,
