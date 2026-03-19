@@ -11,7 +11,7 @@ for file in files:
     with open(file) as f:
         data.append(json.load(f))
 
-# Create a 2D scatter plot charting killRate vs. rescueRate vs. max(infectionRatio), with the infectionRatio determining the size of the points.
+# Create a 2D scatter plot charting ciKillRate vs. rescueRate vs. max(infectionRatio), with the infectionRatio determining the size of the points.
 fig = plt.figure()
 
 x = []
@@ -20,7 +20,7 @@ s = []
 colors = []
 max_size = 0
 for experiment in data:
-    x.append(experiment["killRate"])
+    x.append(experiment["ciKillRate"])
     y.append(experiment["rescueRate"])
     s.append(max(experiment["infectionRatio"]))
     max_size = max(max_size, max(experiment["infectionRatio"]))

@@ -3,15 +3,15 @@
  *************************/
 
 // Immutable parameters.
-let duration = 730;
+let days = 730;
 // World initialization parameters.
 let infectedMaleCounts = [0.25];
 let infectedFemaleCounts = [0.25];
 let waterRatios = [0.25];
 let currentWaterRatio = null;
 // Infection parameters.
-let killRates = [1.0];
-let currentKillRate = null;
+let ciKillRates = [1.0];
+let currentciKillRate = null;
 let rescueRates = [1.0];
 let currentRescueRate = null;
 let minFitnessModifiers = [-1.0];
@@ -22,14 +22,14 @@ let maxInfectionDensities = [1.0];
 let currentInfectionDensityRange = null;
 let repeatCount = 1;
 
-// Maternal transmission rates *and* fitness modifiers are an emergent property of endosymbiont densitites in host tissues.
+// Maternal transmission rates *and* fitness modifiers are an emergent property of endosymbiont densities in host tissues.
 // Density may be a factor that EXACERBATES positive OR negative fitness effects.
 // Spectrum between:
-//   parasitism                    <-->                    mutualism
-//   fitness decrease              <-->             fitness increase
-//   wol. fitness increase         <-->        wol. fitness decrease
-//   high rep. manipulation        <-->        low rep. manipulation
-//   short evolutionary time scale <--> long evolutionary time scale
+//   parasitism                     <-->                     mutualism
+//   fitness decrease               <-->              fitness increase
+//   wol. fitness increase          <-->         wol. fitness decrease
+//   high rep. manipulation         <-->         low rep. manipulation
+//   short evolutionary time scale  <-->  long evolutionary time scale
 // Fitness modifiers:
 //   reproductive output (negative)
 //   nutrition for host (longevity-boosting)
@@ -47,6 +47,8 @@ let repeatCount = 1;
  *    i. Maybe it would be easier to group similar Wolbachia strains into species, and track species proportion.
  *    ii. But what would be the cutoff for species differentiation?
  *    iii. It's a high-dimensional space, so we could just log ALL the properties of each Wolbachia strain in the population at each time step. But that's a LOT of data.
+ * 
+ * Is [this](https://www.nature.com/articles/s41467-021-26752-4) what Nick meant by gravity model for mobility?
  */
 
 /*********************
@@ -89,7 +91,9 @@ class Wolbachia {
       Math.random() *
         (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
       currentInfectionDensityRange[0];
-    // Dr. Beckmann is of the opinion there is a maternal transmission rate independent of infection density.
+    // Wolbachia has genes that hijack the cytoskeleton to make maternal transmission happen.
+	  // This can influence the maternal transmission rate along with infection density.
+	  // Bill Sullivan studies this.
     this.maternalTransmissionSkill = Math.random();
     // If parasite, increase density.
     if (this.parasitismMutualismFactor < 0) {
@@ -98,8 +102,8 @@ class Wolbachia {
         this.infectionDensity + Math.abs(this.parasitismMutualismFactor) * 0.5,
       );
     }
-    // Set killRate and rescueRate to the current values.
-    this.killRate = currentKillRate || killRates[0];
+    // Set ciKillRate and rescueRate to the current values.
+    this.ciKillRate = currentciKillRate || ciKillRates[0];
     this.rescueRate = currentRescueRate || rescueRates[0];
   }
 
@@ -114,7 +118,7 @@ class Wolbachia {
     return similarity / this.toxin.length; // Return a value between 0.0 and 1.0.
   }
 
-  clone() {
+  binaryFission() {
     // Create a new Wolbachia with the same parasitismMutualismFactor.
     let clone = new Wolbachia();
     clone.parasitismMutualismFactor = this.parasitismMutualismFactor;
@@ -164,11 +168,11 @@ class Wolbachia {
       );
     }
 
-    // 1/20 chance to mutate the killRate by up to 0.05 in either direction.
+    // 1/20 chance to mutate the ciKillRate by up to 0.05 in either direction.
     if (Math.random() < 0.05) {
-      clone.killRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
+      clone.ciKillRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
-      clone.killRate = Math.max(0.0, Math.min(1.0, clone.killRate));
+      clone.ciKillRate = Math.max(0.0, Math.min(1.0, clone.ciKillRate));
     }
 
     // 1/20 chance to mutate the rescueRate by up to 0.05 in either direction.
@@ -198,7 +202,7 @@ class Mosquito {
       let infectionDensity = mom.infected.infectionDensity;
       // Chance of inheriting the infection is proportional to the infection density.
       if (Math.random() < infectionDensity) {
-        this.infected = mom.infected.clone();
+        this.infected = mom.infected.binaryFission();
       }
     }
 
@@ -465,7 +469,7 @@ class Mosquito {
 
     let currentCell = this.position;
     // If both parents are infected, the child has a rescueRate chance of surviving, in which case it inherits mother's infections.
-    // If the dad is infected but the mom is not, the child has a killRate chance of immediately dying.
+    // If the dad is infected but the mom is not, the child has a ciKillRate chance of immediately dying.
     // If the mom is infected but the dad is not, the child survives, but inherits the mom's infection.
     // If neither parent is infected, the child survives no matter what.
     // Child fitness is the average of the parents' fitness.
@@ -483,7 +487,7 @@ class Mosquito {
       );
     } else if (dad.infected !== null && mom.infected === null) {
       numberOfEggs = Math.max(
-        Math.floor(numberOfEggs * (1 - dad.infected.killRate)),
+        Math.floor(numberOfEggs * (1 - dad.infected.ciKillRate)),
         0,
       );
     }
@@ -496,7 +500,7 @@ class Mosquito {
           Math.random() <
           mom.infected.infectionDensity * mom.infected.maternalTransmissionSkill
         ) {
-          child.infected = mom.infected.clone();
+          child.infected = mom.infected.binaryFission();
         }
       }
       world.map[currentCell.y][currentCell.x].push(child);
@@ -702,16 +706,16 @@ let carryingCapacity = 64;
 let allMosquitoes = [];
 
 // Set up logging.
-let generation = 0;
+let currentDay = 0;
 
-function updatePlots(generation) {
+function updatePlots(currentDay) {
   // Update infection plot.
   let uninfectedCount = allMosquitoes.filter((m) => m.infected === null).length;
   let infectedCount = allMosquitoes.filter((m) => m.infected !== null).length;
 
-  world.traceUninfected.x.push(generation);
+  world.traceUninfected.x.push(currentDay);
   world.traceUninfected.y.push(uninfectedCount);
-  world.traceInfected.x.push(generation);
+  world.traceInfected.x.push(currentDay);
   world.traceInfected.y.push(infectedCount);
 
   let layout = {
@@ -723,7 +727,7 @@ function updatePlots(generation) {
 
   Plotly.newPlot("plot", [world.traceUninfected, world.traceInfected], layout);
 
-  world.traceReproduction.x.push(generation);
+  world.traceReproduction.x.push(currentDay);
   // Get all mosquitoes that have a successes property greater than zero.
   let reproducingMosquitoes = allMosquitoes.filter((m) => m.successes > 0);
   let averageSuccessRate = 0;
@@ -767,8 +771,8 @@ function updateWorld(population) {
   renderWorld();
 
   // Update the plots.
-  updatePlots(generation + 1);
-  generation += 1;
+  updatePlots(currentDay + 1);
+  currentDay += 1;
 
   return population;
 }
@@ -789,7 +793,7 @@ function shouldStopSimulation() {
 function resetWorld(waterRatio = 0.25) {
   // Reset all global variables.
   world = new World(36, 36, waterRatio);
-  generation = 0;
+  currentDay = 0;
 }
 
 function rearrangePage() {
@@ -898,16 +902,16 @@ function getInputValues(event) {
   }
 
   // Get kill__rate (0.0 to 1.0).
-  let killRateInDocument = document
+  let ciKillRateInDocument = document
     .getElementById("kill__rate")
     .value.split(",");
-  if (killRateInDocument.length > 0 && killRateInDocument[0] !== "") {
-    killRates = killRateInDocument;
+  if (ciKillRateInDocument.length > 0 && ciKillRateInDocument[0] !== "") {
+    ciKillRates = ciKillRateInDocument;
     // Convert to float.
-    killRates = killRates.map((r) => parseFloat(r));
+    ciKillRates = ciKillRates.map((r) => parseFloat(r));
   }
-  for (let i = 0; i < killRates.length; i++) {
-    if (killRates[i] < 0 || killRates[i] > 1) {
+  for (let i = 0; i < ciKillRates.length; i++) {
+    if (ciKillRates[i] < 0 || ciKillRates[i] > 1) {
       alert("Kill rate must be between 0 and 1.");
       return;
     }
@@ -1024,7 +1028,7 @@ class Experiment {
     this.infectedFemalesAtStart = 0.25;
     this.waterRatio = 0.25;
     // Infection data.
-    this.killRate = 1.0;
+    this.ciKillRate = 1.0;
     this.rescueRate = 1.0;
     this.maxFitnessDetriment = -1.0;
     this.maxFitnessBenefit = 1.0;
@@ -1044,7 +1048,7 @@ class Experiment {
       startTime: this.startTime,
       infectedMalesAtStart: this.infectedMalesAtStart,
       infectedFemalesAtStart: this.infectedFemalesAtStart,
-      killRate: this.killRate,
+      ciKillRate: this.ciKillRate,
       rescueRate: this.rescueRate,
       // New data.
       waterRatio: this.waterRatio,
@@ -1053,7 +1057,7 @@ class Experiment {
       minFitnessModifier: this.minFitnessModifier,
       maxFitnessModifier: this.maxFitnessModifier,
       // Run data.
-      simulationLength: generation,
+      simulationLength: currentDay,
       infectionRatio: this.infectionRatio,
       reproductiveSuccessOverTime: this.reproductiveSuccessOverTime,
       averageParasitismMutualismOverTime:
@@ -1090,7 +1094,7 @@ async function runExperiments(event) {
     for (let infectedMaleCount of infectedMaleCounts) {
       for (let infectedFemaleCount of infectedFemaleCounts) {
         for (let waterRatio of waterRatios) {
-          for (let killRate of killRates) {
+          for (let ciKillRate of ciKillRates) {
             for (let rescueRate of rescueRates) {
               for (let minFitnessModifier of minFitnessModifiers) {
                 for (let maxFitnessModifier of maxFitnessModifiers) {
@@ -1101,7 +1105,7 @@ async function runExperiments(event) {
                       experiment.infectedMalesAtStart = infectedMaleCount;
                       experiment.infectedFemalesAtStart = infectedFemaleCount;
                       experiment.waterRatio = waterRatio;
-                      experiment.killRate = killRate;
+                      experiment.ciKillRate = ciKillRate;
                       experiment.rescueRate = rescueRate;
                       experiment.minFitnessModifier = minFitnessModifier;
                       experiment.maxFitnessModifier = maxFitnessModifier;
@@ -1136,7 +1140,7 @@ async function runExperiments(event) {
     }
 
     // Set up simulation parameters.
-    currentKillRate = experiment.killRate;
+    currentciKillRate = experiment.ciKillRate;
     currentRescueRate = experiment.rescueRate;
     currentFitnessModifierRange = [
       experiment.minFitnessModifier,
@@ -1173,7 +1177,7 @@ async function runExperiments(event) {
     });
 
     // Run the simulation.
-    while (!shouldStopSimulation() && generation < duration) {
+    while (!shouldStopSimulation() && currentDay < days) {
       allMosquitoes = [];
       for (let y = 0; y < world.height; y++) {
         for (let x = 0; x < world.width; x++) {
