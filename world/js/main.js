@@ -47,8 +47,8 @@ let repeatCount = 1;
  *    i. Maybe it would be easier to group similar Wolbachia strains into species, and track species proportion.
  *    ii. But what would be the cutoff for species differentiation?
  *    iii. It's a high-dimensional space, so we could just log ALL the properties of each Wolbachia strain in the population at each time step. But that's a LOT of data.
- * 
- * Is [this](https://www.nature.com/articles/s41467-021-26752-4) what Nick meant by gravity model for mobility?
+ *    iv. Is [this](https://www.nature.com/articles/s41467-021-26752-4) what Nick meant by gravity model for mobility?
+ * 3. "Stretch goal": Implement a toxic amino acid analogue that is present in some cells of the world, and a corresponding transporter that can be either adaptive or deleterious depending on the presence of the analogue. This would allow us to explore the toxin-first route of TA system evolution.
  */
 
 /*********************
