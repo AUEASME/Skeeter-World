@@ -67,6 +67,14 @@ let repeatCount = 1;
  * "but deleterious when a toxic analogue is also present. In both cases, toxicity is an environment-dependent side-effect of an otherwise adaptive trait."
  */
 
+class MapCell {
+  constructor() {
+    this.terrainType = "land"; // land, water, or mountain
+    this.aminoAcidsToAnaloguesRatio = 0.0; // Ratio of amino acids to toxic analogues in this cell, from 0.0 to 1.0. 1.0 means all amino acids, 0.0 means all toxic analogues.
+    this.mosquitoes = [];
+  }
+}
+
 class Wolbachia {
   constructor() {
     // Generate two random four-bit strings to represent toxin and antitoxin.
@@ -92,8 +100,8 @@ class Wolbachia {
         (currentInfectionDensityRange[1] - currentInfectionDensityRange[0]) +
       currentInfectionDensityRange[0];
     // Wolbachia has genes that hijack the cytoskeleton to make maternal transmission happen.
-	  // This can influence the maternal transmission rate along with infection density.
-	  // Bill Sullivan studies this.
+    // This can influence the maternal transmission rate along with infection density.
+    // Bill Sullivan studies this.
     this.maternalTransmissionSkill = Math.random();
     // If parasite, increase density.
     if (this.parasitismMutualismFactor < 0) {
@@ -177,7 +185,8 @@ class Wolbachia {
 
     // 1/20 chance to mutate the ciRescueRate by up to 0.05 in either direction.
     if (Math.random() < 0.05) {
-      clone.ciRescueRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
+      clone.ciRescueRate +=
+        (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
       clone.ciRescueRate = Math.max(0.0, Math.min(1.0, clone.ciRescueRate));
     }
