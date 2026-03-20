@@ -69,9 +69,13 @@ let repeatCount = 1;
 
 class MapCell {
   constructor() {
-    this.terrainType = "land"; // land, water, or mountain
+    this.terrainType = "land"; // Land, water, or mountain.
+    // A nitrogen-limiting environment severely impacts cellular metabolism, forcing organisms to conserve nitrogen by reducing the overall synthesis of nitrogen-rich amino acids, lowering protein production, and initiating the degradation of existing proteins to recycle nitrogen for essential functions.
+    // Source: https://pmc.ncbi.nlm.nih.gov/articles/PMC2686650/
+    this.nitrogenInEnvironment = 0.5; // Amount of nitrogen in the environment, from 0.0 to 1.0.
+    // Amino acid transporters can be adaptive in nitrogen-limiting environments, but they can also be deleterious if they import toxic amino acid analogues. So, the ratio of amino acids to toxic analogues in the environment can influence the fitness effect of an amino acid transporter in a nitrogen-poor cell.
     this.aminoAcidsToAnaloguesRatio = 0.0; // Ratio of amino acids to toxic analogues in this cell, from 0.0 to 1.0. 1.0 means all amino acids, 0.0 means all toxic analogues.
-    this.mosquitoes = [];
+    this.mosquitoes = []; // Array of mosquitoes currently in this cell.
   }
 }
 
