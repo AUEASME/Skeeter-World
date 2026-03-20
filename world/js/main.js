@@ -76,6 +76,7 @@ class MapCell {
     // Amino acid transporters can be adaptive in nitrogen-limiting environments, but they can also be deleterious if they import toxic amino acid analogues. So, the ratio of amino acids to toxic analogues in the environment can influence the fitness effect of an amino acid transporter in a nitrogen-poor cell.
     this.aminoAcidsToAnaloguesRatio = 0.0; // Ratio of amino acids to toxic analogues in this cell, from 0.0 to 1.0. 1.0 means all amino acids, 0.0 means all toxic analogues.
     this.mosquitoes = []; // Array of mosquitoes currently in this cell.
+    this.gravity = 0.0; // Nitrogen in environment times amino acid to analogue ratio, from 0.0 to 1.0. This is a measure of how attractive this cell is to mosquitoes, and can influence migration patterns.
   }
 }
 
