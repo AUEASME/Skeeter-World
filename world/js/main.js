@@ -69,7 +69,8 @@ let repeatCount = 1;
 
 class MapCell {
   constructor() {
-    this.terrainType = "land"; // Land, water, or mountain.
+    this.location = { x: 0, y: 0 }; // Set by outside code.
+    this.terrainType = "grass"; // grass, water, or mountain.
     // A nitrogen-limiting environment severely impacts cellular metabolism, forcing organisms to conserve nitrogen by reducing the overall synthesis of nitrogen-rich amino acids, lowering protein production, and initiating the degradation of existing proteins to recycle nitrogen for essential functions.
     // Source: https://pmc.ncbi.nlm.nih.gov/articles/PMC2686650/
     this.nitrogenInEnvironment = 0.5; // Amount of nitrogen in the environment, from 0.0 to 1.0.
@@ -538,31 +539,33 @@ class World {
     // 0. Get the worldPixels matrix from localStorage.
     let storedPixels = localStorage.getItem("worldPixels");
 
-    // 1. Generate an empty map of the given width and height.
+    // 1. Generate a matrix of MapCell objects to represent the world.
     this.width = width;
     this.height = height;
     this.map = new Array(height)
       .fill(0)
-      .map(() => new Array(width).fill(0).map(() => []));
-    // 2. Generate an empty terrain matrix.
-    this.terrainMap = new Array(height)
-      .fill(0)
-      .map(() => new Array(width).fill(0));
+      .map(() => new Array(width).fill(0).map(() => new MapCell()));
 
-    // Set pixels corresponding to "water" in storedPixels to 1 in this.map.
-    // Pixels corresponding to "mountain" in storedPixels should be set to 2 in this.map.
-    this.terrainMap.forEach((row, y) =>
-      row.forEach((cell, x) => {
-        if (storedPixels) {
-          let pixels = JSON.parse(storedPixels);
-          if (pixels[y][x] === "water") {
-            this.map[y][x] = 1;
-          } else if (pixels[y][x] === "mountain") {
-            this.map[y][x] = 2;
-          }
+    // 2. Set the location of each cell in the map.
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        this.map[y][x].location = { x, y };
+      }
+    }
+
+    // 3. Update the terrain type of each cell based on the worldPixels matrix.
+    if (storedPixels) {
+      let worldPixels = JSON.parse(storedPixels);
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          this.map[y][x].terrainType = worldPixels[y][x];
         }
-      }),
-    );
+      }
+    } else {
+      alert(
+        "No world pixels found in localStorage. Please generate a world first.",
+      );
+    }
 
     // 3. Set up history.
     this.traceUninfected = {
@@ -600,7 +603,8 @@ class World {
           mosquito.age = Math.floor(Math.random() * 14);
           mosquito.breedingCooldown = Math.floor(Math.random() * 4);
           mosquito.position = { x: x, y: y };
-          this.map[y][x].push(mosquito);
+          this.map[y][x].mosquitoes.push(mosquito);
+          // Also add to global list of mosquitoes.
           allMosquitoes.push(mosquito);
         }
       }
@@ -620,7 +624,7 @@ function renderWorld() {
   // For each infected mosquito in each cell, add 1 to the blue channel.
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
-      let cell = world.map[y][x];
+      let cell = world.map[y][x].mosquitoes;
       let red = 255;
       let green = 255;
       let blue = 255;
