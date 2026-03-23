@@ -49,6 +49,9 @@ let repeatCount = 1;
  *    iii. It's a high-dimensional space, so we could just log ALL the properties of each Wolbachia strain in the population at each time step. But that's a LOT of data.
  *    iv. Is [this](https://www.nature.com/articles/s41467-021-26752-4) what Nick meant by gravity model for mobility?
  * 3. "Stretch goal": Implement a toxic amino acid analogue that is present in some cells of the world, and a corresponding transporter that can be either adaptive or deleterious depending on the presence of the analogue. This would allow us to explore the toxin-first route of TA system evolution.
+ *    i. A Wolbachia can have an... INTRINSIC fitness benefit to the host, or a contextual benefit to the host (transporting amino acids in a nitrogen-limiting environment), or both.
+ *    ii. Same with fitness detriment/selfishness.
+ *    iii. We would expect functional fitness benefits to decrease after a TA system evolved, since there's an intrinsic cost in helping the host.
  */
 
 /*********************
@@ -73,11 +76,15 @@ class MapCell {
     this.terrainType = "grass"; // grass, water, or mountain.
     // A nitrogen-limiting environment severely impacts cellular metabolism, forcing organisms to conserve nitrogen by reducing the overall synthesis of nitrogen-rich amino acids, lowering protein production, and initiating the degradation of existing proteins to recycle nitrogen for essential functions.
     // Source: https://pmc.ncbi.nlm.nih.gov/articles/PMC2686650/
-    this.nitrogenInEnvironment = 0.5; // Amount of nitrogen in the environment, from 0.0 to 1.0.
+    this.nitrogenInEnvironment = Math.random(); // Amount of nitrogen in the environment, from 0.0 to 1.0.
     // Amino acid transporters can be adaptive in nitrogen-limiting environments, but they can also be deleterious if they import toxic amino acid analogues. So, the ratio of amino acids to toxic analogues in the environment can influence the fitness effect of an amino acid transporter in a nitrogen-poor cell.
-    this.aminoAcidsToAnaloguesRatio = 0.0; // Ratio of amino acids to toxic analogues in this cell, from 0.0 to 1.0. 1.0 means all amino acids, 0.0 means all toxic analogues.
+    this.aminoAcidsToAnaloguesRatio = Math.random(); // Ratio of amino acids to toxic analogues in this cell, from 0.0 to 1.0. 1.0 means all amino acids, 0.0 means all toxic analogues.
     this.mosquitoes = []; // Array of mosquitoes currently in this cell.
-    this.gravity = 0.0; // Nitrogen in environment times amino acid to analogue ratio, from 0.0 to 1.0. This is a measure of how attractive this cell is to mosquitoes, and can influence migration patterns.
+    this.gravity =
+      this.nitrogenInEnvironment *
+      this.aminoAcidsToAnaloguesRatio *
+      (this.terrainType === "mountain" ? 0.5 : 1.0);
+    // Nitrogen in environment times amino acid to analogue ratio times 0.5 if mountain, from 0.0 to 1.0. This is a measure of how attractive this cell is to mosquitoes, and can influence migration patterns.
   }
 }
 
