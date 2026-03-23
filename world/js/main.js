@@ -90,6 +90,11 @@ class MapCell {
 
 class Wolbachia {
   constructor() {
+    /*************
+     * NEW STUFF *
+     *************/
+
+
     // Generate two random four-bit strings to represent toxin and antitoxin.
     this.toxin = [0, 0, 0, 0];
     for (let i = 0; i < 4; i++) {
@@ -105,6 +110,9 @@ class Wolbachia {
     this.environmentalResistance = Math.random(); // Resistance to environmental toxins, from 0.0 to 1.0. Note that this is EXCLUSIVELY helpful.
 
 
+    /*************
+     * OLD STUFF *
+     *************/
 
 
     // Wolbachia are defined by a scalar value, currentFitnessModifierRange[0] (probably -1.0) to currentFitnessModifierRange[1] (probably 1.0).
