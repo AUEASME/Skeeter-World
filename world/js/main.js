@@ -100,6 +100,13 @@ class Wolbachia {
       this.antitoxin[i] = Math.round(Math.random());
     }
 
+    // For environmental stuff.
+    this.transporterEfficiency = Math.random(); // Efficiency of amino acid transporter, from 0.0 to 1.0. Note that this can be harmful OR helpful.
+    this.environmentalResistance = Math.random(); // Resistance to environmental toxins, from 0.0 to 1.0. Note that this is EXCLUSIVELY helpful.
+
+
+
+
     // Wolbachia are defined by a scalar value, currentFitnessModifierRange[0] (probably -1.0) to currentFitnessModifierRange[1] (probably 1.0).
     // this.parasitismMutualismFactor = Math.random() * 2 - 1; // Random value between -1.0 and 1.0.
     this.parasitismMutualismFactor =
