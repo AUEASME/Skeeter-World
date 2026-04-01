@@ -182,10 +182,10 @@ class Wolbachia {
       );
     }
 
-    // 1/20 chance to mutate the infection density by up to 0.05 in either direction.
-    if (Math.random() < 0.05) {
+    // 1/100 chance to mutate the infection density by up to 0.01 in either direction.
+    if (Math.random() < 0.01) {
       clone.infectionDensity +=
-        (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
+        (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.01;
       // Clamp the value to the range [0.0, 1.0].
       clone.infectionDensity = Math.max(
         0.0,
@@ -305,15 +305,6 @@ class Mosquito {
       ].filter((m) => m !== this);
       return;
     }
-  }
-
-  changeSex() {
-    if (this.sex === 0) {
-      this.sex = 1;
-      return;
-    }
-
-    this.sex = 0;
   }
 
   changeInfectionStatus() {
