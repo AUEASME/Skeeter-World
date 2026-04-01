@@ -130,7 +130,7 @@ class Wolbachia {
     // Wolbachia has genes that hijack the cytoskeleton to make maternal transmission happen.
     // This can influence the maternal transmission rate along with infection density.
     // Bill Sullivan studies this.
-    this.maternalTransmissionSkill = Math.random();
+    this.maternalTransmissionRate = Math.random();
     // If parasite, increase density.
     if (this.parasitismMutualismFactor < 0) {
       this.infectionDensity = Math.min(
@@ -193,14 +193,14 @@ class Wolbachia {
       );
     }
 
-    // 1/20 chance to mutate the maternalTransmissionSkill by up to 0.05 in either direction.
+    // 1/20 chance to mutate the maternalTransmissionRate by up to 0.05 in either direction.
     if (Math.random() < 0.05) {
-      clone.maternalTransmissionSkill +=
+      clone.maternalTransmissionRate +=
         (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
-      clone.maternalTransmissionSkill = Math.max(
+      clone.maternalTransmissionRate = Math.max(
         0.0,
-        Math.min(1.0, clone.maternalTransmissionSkill),
+        Math.min(1.0, clone.maternalTransmissionRate),
       );
     }
 
@@ -524,7 +524,7 @@ class Mosquito {
         // Use the mother's infection density to determine the chance of inheriting the infection.
         if (
           Math.random() <
-          mom.strains.infectionDensity * mom.strains.maternalTransmissionSkill
+          mom.strains.infectionDensity * mom.strains.maternalTransmissionRate
         ) {
           child.strains = mom.strains.binaryFission();
         }
@@ -1068,7 +1068,7 @@ class Experiment {
     this.reproductiveSuccessOverTime = [];
     this.averageParasitismMutualismOverTime = [];
     this.averageFitnessModificationOverTime = [];
-    this.maternalTransmissionSkillOverTime = [];
+    this.maternalTransmissionRateOverTime = [];
   }
 
   outputData() {
@@ -1246,11 +1246,11 @@ async function runExperiments(event) {
           .reduce((acc, m) => acc + m.strains.parasitismMutualismFactor, 0) /
           allMosquitoes.filter((m) => m.strains !== null).length,
       );
-      experiment.maternalTransmissionSkillOverTime.push(
+      experiment.maternalTransmissionRateOverTime.push(
         // Get the average maternal transmission skill of all infected mosquitoes.
         allMosquitoes
           .filter((m) => m.strains !== null)
-          .reduce((acc, m) => acc + m.maternalTransmissionSkill, 0) /
+          .reduce((acc, m) => acc + m.maternalTransmissionRate, 0) /
           allMosquitoes.filter((m) => m.strains !== null).length,
       );
       // Update the world.
