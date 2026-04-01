@@ -231,32 +231,32 @@ class Mosquito {
   constructor(dad, mom) {
     // this.sex can be 0 (female) or 1 (male).
     this.sex = Math.round(Math.random());
-    // this.infected is a boolean that indicates whether the mosquito is infected with Wolbachia.
-    this.infected = null;
+    // this.strains is an array that stores unique Wolbachia infections.
+    this.strains = null;
     // If the mother is infected, the child has a chance to inherit the infection.
-    if (mom && mom.infected !== null) {
+    if (mom && mom.strains !== null) {
       // Get the infection density of the mother to determine the chance of inheriting the infection.
-      let infectionDensity = mom.infected.infectionDensity;
+      let infectionDensity = mom.strains.infectionDensity;
       // Chance of inheriting the infection is proportional to the infection density.
       if (Math.random() < infectionDensity) {
-        this.infected = mom.infected.binaryFission();
+        this.strains = mom.strains.binaryFission();
       }
     }
 
     // Generate a random fitness value from 0 to 1.
     this.fitness = Math.random();
     // Position is set by outside code.
-    this.position = { x: 0, y: 0 };
+    this.mapLocation = { x: 0, y: 0 };
     // If this mosquito is the child of two other mosquitoes, override the random values.
     if (dad && mom) {
       this.fitness = (dad.fitness + mom.fitness) / 2;
-      this.position = mom.position;
+      this.mapLocation = mom.mapLocation;
     }
 
-    if (this.infected !== null) {
+    if (this.strains !== null) {
       this.fitness +=
-        this.infected.parasitismMutualismFactor *
-        this.infected.infectionDensity;
+        this.strains.parasitismMutualismFactor *
+        this.strains.infectionDensity;
     }
 
     /**
@@ -284,10 +284,10 @@ class Mosquito {
     // Male mosquitoes live for about eighteen days, and fourteen of those are spend growing, so for each subsequent day, they have a 1/4 chance of dying.
     // Longevity can be influenced by the fitness effect of a Wolbachia infection, however.
     // A fitness modifier of -1.0 decreases survival odds to 0.125, while a fitness modifier of 1.0 increases survival odds to 0.375.
-    let survivalOdds = 0.25 + this.infected?.parasitismMutualismFactor / 2;
+    let survivalOdds = 0.25 + this.strains?.parasitismMutualismFactor / 2;
     if (this.sex === 1 && this.age > 14 && Math.random() < survivalOdds) {
       // Kill self.
-      let currentCell = this.position;
+      let currentCell = this.mapLocation;
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
         currentCell.x
       ].filter((m) => m !== this);
@@ -296,10 +296,10 @@ class Mosquito {
 
     // Females, on the other hand, live about 40 days after reaching maturity, so... they have a 1/40 chance of dying each day.
     // Longevity can be influenced by the fitness effect of a Wolbachia infection, however.
-    survivalOdds = 0.025 + this.infected?.parasitismMutualismFactor / 40;
+    survivalOdds = 0.025 + this.strains?.parasitismMutualismFactor / 40;
     if (this.sex === 0 && this.age > 14 && Math.random() < survivalOdds) {
       // Kill self.
-      let currentCell = this.position;
+      let currentCell = this.mapLocation;
       world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
         currentCell.x
       ].filter((m) => m !== this);
@@ -317,21 +317,21 @@ class Mosquito {
   }
 
   changeInfectionStatus() {
-    if (this.infected === null) {
-      this.infected = new Wolbachia();
+    if (this.strains === null) {
+      this.strains = new Wolbachia();
       return;
     }
 
-    this.infected = null;
+    this.strains = null;
   }
 
   migrate() {
-    let originalPosition = { x: this.position.x, y: this.position.y };
+    let originalPosition = { x: this.mapLocation.x, y: this.mapLocation.y };
 
     // If we still need blood, make sure we're over land.
     if (this.breedingCooldown < 1 && this.blood < 1) {
       // If we're in a water cell, move to the nearest land cell.
-      if (world.water_map[this.position.y][this.position.x] === 1) {
+      if (world.water_map[this.mapLocation.y][this.mapLocation.x] === 1) {
         // Find the nearest land cell.
         let nearestLandCells = [];
         let nearestLandDistance = Infinity;
@@ -339,7 +339,7 @@ class Mosquito {
           for (let x = 0; x < world.width; x++) {
             if (world.water_map[y][x] === 0) {
               let distance =
-                Math.abs(this.position.x - x) + Math.abs(this.position.y - y);
+                Math.abs(this.mapLocation.x - x) + Math.abs(this.mapLocation.y - y);
               if (distance <= nearestLandDistance) {
                 if (distance < nearestLandDistance) {
                   nearestLandCells = [];
@@ -356,26 +356,26 @@ class Mosquito {
             nearestLandCells[
               Math.floor(Math.random() * nearestLandCells.length)
             ];
-          let dx = nearestLandCell.x - this.position.x;
-          let dy = nearestLandCell.y - this.position.y;
+          let dx = nearestLandCell.x - this.mapLocation.x;
+          let dy = nearestLandCell.y - this.mapLocation.y;
           if (Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) {
-              this.position.x++;
+              this.mapLocation.x++;
             } else {
-              this.position.x--;
+              this.mapLocation.x--;
             }
           } else {
             if (dy > 0) {
-              this.position.y++;
+              this.mapLocation.y++;
             } else {
-              this.position.y--;
+              this.mapLocation.y--;
             }
           }
           // Remove from old cell and add to new cell.
           world.map[originalPosition.y][originalPosition.x] = world.map[
             originalPosition.y
           ][originalPosition.x].filter((m) => m !== this);
-          world.map[this.position.y][this.position.x].push(this);
+          world.map[this.mapLocation.y][this.mapLocation.x].push(this);
           return;
         }
       } else {
@@ -388,7 +388,7 @@ class Mosquito {
     if (
       this.breedingCooldown < 1 &&
       this.blood > 0 &&
-      world.water_map[this.position.y][this.position.x] === 0
+      world.water_map[this.mapLocation.y][this.mapLocation.x] === 0
     ) {
       // Find the nearest water cell.
       let nearestWaterCells = [];
@@ -397,7 +397,7 @@ class Mosquito {
         for (let x = 0; x < world.width; x++) {
           if (world.water_map[y][x] === 1) {
             let distance =
-              Math.abs(this.position.x - x) + Math.abs(this.position.y - y);
+              Math.abs(this.mapLocation.x - x) + Math.abs(this.mapLocation.y - y);
             if (distance <= nearestWaterDistance) {
               if (distance < nearestWaterDistance) {
                 nearestWaterCells = [];
@@ -416,19 +416,19 @@ class Mosquito {
           nearestWaterCells[
             Math.floor(Math.random() * nearestWaterCells.length)
           ];
-        let dx = nearestWaterCell.x - this.position.x;
-        let dy = nearestWaterCell.y - this.position.y;
+        let dx = nearestWaterCell.x - this.mapLocation.x;
+        let dy = nearestWaterCell.y - this.mapLocation.y;
         if (Math.abs(dx) > Math.abs(dy)) {
           if (dx > 0) {
-            this.position.x++;
+            this.mapLocation.x++;
           } else {
-            this.position.x--;
+            this.mapLocation.x--;
           }
         } else {
           if (dy > 0) {
-            this.position.y++;
+            this.mapLocation.y++;
           } else {
-            this.position.y--;
+            this.mapLocation.y--;
           }
         }
 
@@ -436,13 +436,13 @@ class Mosquito {
         world.map[originalPosition.y][originalPosition.x] = world.map[
           originalPosition.y
         ][originalPosition.x].filter((m) => m !== this);
-        world.map[this.position.y][this.position.x].push(this);
+        world.map[this.mapLocation.y][this.mapLocation.x].push(this);
         return;
       }
     }
 
     // Check if any neighboring cell has fewer mosquitoes. If it does, move there.
-    let currentCell = this.position;
+    let currentCell = this.mapLocation;
     let currentPopulation = world.map[currentCell.y][currentCell.x].length;
     let bestCells = [];
     let bestPopulation = currentPopulation;
@@ -470,13 +470,13 @@ class Mosquito {
         originalPosition.y
       ][originalPosition.x].filter((m) => m !== this);
       world.map[newCell.y][newCell.x].push(this);
-      this.position = newCell;
+      this.mapLocation = newCell;
       return;
     }
 
     // If not breeding, migrate randomly to a neighboring cell.
     if (this.breedingCooldown > 0) {
-      let currentCell = this.position;
+      let currentCell = this.mapLocation;
       let neighbors = [];
       for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
@@ -494,7 +494,7 @@ class Mosquito {
           originalPosition.y
         ][originalPosition.x].filter((m) => m !== this);
         world.map[newCell.y][newCell.x].push(this);
-        this.position = newCell;
+        this.mapLocation = newCell;
         return;
       }
     }
@@ -504,7 +504,7 @@ class Mosquito {
     // Reset breeding cooldown.
     this.breedingCooldown = 4;
 
-    let currentCell = this.position;
+    let currentCell = this.mapLocation;
     // If both parents are infected, the child has a ciRescueRate chance of surviving, in which case it inherits mother's infections.
     // If the dad is infected but the mom is not, the child has a ciKillRate chance of immediately dying.
     // If the mom is infected but the dad is not, the child survives, but inherits the mom's infection.
@@ -513,35 +513,35 @@ class Mosquito {
     let dad = mate,
       mom = this;
     let numberOfEggs = Math.round(100 * mom.fitness);
-    if (dad.infected !== null && mom.infected !== null) {
+    if (dad.strains !== null && mom.strains !== null) {
       numberOfEggs = Math.max(
         Math.floor(
           numberOfEggs *
-            mom.infected.ciRescueRate *
-            mom.infected.matchLockAndKey(dad.infected),
+            mom.strains.ciRescueRate *
+            mom.strains.matchLockAndKey(dad.strains),
         ),
         0,
       );
-    } else if (dad.infected !== null && mom.infected === null) {
+    } else if (dad.strains !== null && mom.strains === null) {
       numberOfEggs = Math.max(
-        Math.floor(numberOfEggs * (1 - dad.infected.ciKillRate)),
+        Math.floor(numberOfEggs * (1 - dad.strains.ciKillRate)),
         0,
       );
     }
 
     for (let i = 0; i < numberOfEggs; i++) {
       let child = new Mosquito(dad, mom);
-      if (mom.infected !== null) {
+      if (mom.strains !== null) {
         // Use the mother's infection density to determine the chance of inheriting the infection.
         if (
           Math.random() <
-          mom.infected.infectionDensity * mom.infected.maternalTransmissionSkill
+          mom.strains.infectionDensity * mom.strains.maternalTransmissionSkill
         ) {
-          child.infected = mom.infected.binaryFission();
+          child.strains = mom.strains.binaryFission();
         }
       }
       world.map[currentCell.y][currentCell.x].push(child);
-      child.position = currentCell;
+      child.mapLocation = currentCell;
     }
 
     this.successes = numberOfEggs;
@@ -624,7 +624,7 @@ class World {
           let mosquito = new Mosquito();
           mosquito.age = Math.floor(Math.random() * 14);
           mosquito.breedingCooldown = Math.floor(Math.random() * 4);
-          mosquito.position = { x: x, y: y };
+          mosquito.mapLocation = { x: x, y: y };
           this.map[y][x].mosquitoes.push(mosquito);
           // Also add to global list of mosquitoes.
           allMosquitoes.push(mosquito);
@@ -651,7 +651,7 @@ function renderWorld() {
       let green = 255;
       let blue = 255;
       for (let mosquito of cell) {
-        if (mosquito.infected === null) {
+        if (mosquito.strains === null) {
           green -= 255 / carryingCapacity;
           blue -= 255 / carryingCapacity;
         } else {
@@ -681,7 +681,7 @@ function mosquitoDay(population) {
   // Assign each male to their cell.
   for (let mosquito of population) {
     if (mosquito.sex === 1) {
-      let currentCell = mosquito.position;
+      let currentCell = mosquito.mapLocation;
       males[currentCell.y][currentCell.x].push(mosquito);
     }
   }
@@ -695,7 +695,7 @@ function mosquitoDay(population) {
   for (let mosquito of population) {
     // Migrate and reproduce.
     mosquito.migrate();
-    let currentCell = mosquito.position;
+    let currentCell = mosquito.mapLocation;
 
     // If mosquito is female, reproduce.
     if (
@@ -750,8 +750,8 @@ let currentDay = 0;
 
 function updatePlots(currentDay) {
   // Update infection plot.
-  let uninfectedCount = allMosquitoes.filter((m) => m.infected === null).length;
-  let infectedCount = allMosquitoes.filter((m) => m.infected !== null).length;
+  let uninfectedCount = allMosquitoes.filter((m) => m.strains === null).length;
+  let infectedCount = allMosquitoes.filter((m) => m.strains !== null).length;
 
   world.traceUninfected.x.push(currentDay);
   world.traceUninfected.y.push(uninfectedCount);
@@ -819,7 +819,7 @@ function updateWorld(population) {
 
 function shouldStopSimulation() {
   // Check if infection has been eradicated.
-  let infectedMosquitoes = allMosquitoes.filter((m) => m.infected !== null);
+  let infectedMosquitoes = allMosquitoes.filter((m) => m.strains !== null);
   if (infectedMosquitoes.length === 0) {
     return true;
   }
@@ -1064,8 +1064,8 @@ class Experiment {
   constructor() {
     // Start data.
     this.startTime = new Date();
-    this.infectedMalesAtStart = 0.25;
-    this.infectedFemalesAtStart = 0.25;
+    this.strainsMalesAtStart = 0.25;
+    this.strainsFemalesAtStart = 0.25;
     this.waterRatio = 0.25;
     // Infection data.
     this.ciKillRate = 1.0;
@@ -1086,8 +1086,8 @@ class Experiment {
     let allData = {
       // Start data.
       startTime: this.startTime,
-      infectedMalesAtStart: this.infectedMalesAtStart,
-      infectedFemalesAtStart: this.infectedFemalesAtStart,
+      infectedMalesAtStart: this.strainsMalesAtStart,
+      infectedFemalesAtStart: this.strainsFemalesAtStart,
       ciKillRate: this.ciKillRate,
       ciRescueRate: this.ciRescueRate,
       // New data.
@@ -1142,8 +1142,8 @@ async function runExperiments(event) {
                     for (let maxInfectionDensity of maxInfectionDensities) {
                       // Create a new experiment.
                       let experiment = new Experiment();
-                      experiment.infectedMalesAtStart = infectedMaleCount;
-                      experiment.infectedFemalesAtStart = infectedFemaleCount;
+                      experiment.strainsMalesAtStart = infectedMaleCount;
+                      experiment.strainsFemalesAtStart = infectedFemaleCount;
                       experiment.waterRatio = waterRatio;
                       experiment.ciKillRate = ciKillRate;
                       experiment.ciRescueRate = ciRescueRate;
@@ -1194,25 +1194,25 @@ async function runExperiments(event) {
 
     // Infect the specified number of males and females.
     let allMales = allMosquitoes.filter(
-      (m) => m.sex === 1 && m.infected === null,
+      (m) => m.sex === 1 && m.strains === null,
     );
     let allFemales = allMosquitoes.filter(
-      (m) => m.sex === 0 && m.infected === null,
+      (m) => m.sex === 0 && m.strains === null,
     );
     allMales.forEach((male) => {
-      if (Math.random() < experiment.infectedMalesAtStart) {
+      if (Math.random() < experiment.strainsMalesAtStart) {
         male.changeInfectionStatus();
         male.fitness +=
-          male.infected.parasitismMutualismFactor *
-          male.infected.infectionDensity;
+          male.strains.parasitismMutualismFactor *
+          male.strains.infectionDensity;
       }
     });
     allFemales.forEach((female) => {
-      if (Math.random() < experiment.infectedFemalesAtStart) {
+      if (Math.random() < experiment.strainsFemalesAtStart) {
         female.changeInfectionStatus();
         female.fitness +=
-          female.infected.parasitismMutualismFactor *
-          female.infected.infectionDensity;
+          female.strains.parasitismMutualismFactor *
+          female.strains.infectionDensity;
       }
     });
 
@@ -1226,7 +1226,7 @@ async function runExperiments(event) {
       }
       // Update the experiment data.
       experiment.infectionRatio.push(
-        allMosquitoes.filter((m) => m.infected !== null).length /
+        allMosquitoes.filter((m) => m.strains !== null).length /
           allMosquitoes.length,
       );
       // Get all mosquitoes that have a successes property greater than zero.
@@ -1241,28 +1241,28 @@ async function runExperiments(event) {
       // Get the average fitness modification of all infected mosquitoes.
       experiment.averageFitnessModificationOverTime.push(
         allMosquitoes
-          .filter((m) => m.infected !== null)
+          .filter((m) => m.strains !== null)
           .reduce(
             (acc, m) =>
               acc +
-              m.infected.parasitismMutualismFactor *
-                m.infected.infectionDensity,
+              m.strains.parasitismMutualismFactor *
+                m.strains.infectionDensity,
             0,
-          ) / allMosquitoes.filter((m) => m.infected !== null).length,
+          ) / allMosquitoes.filter((m) => m.strains !== null).length,
       );
       experiment.averageParasitismMutualismOverTime.push(
         // Get the average parasitism/mutualism factor of all infected mosquitoes.
         allMosquitoes
-          .filter((m) => m.infected !== null)
-          .reduce((acc, m) => acc + m.infected.parasitismMutualismFactor, 0) /
-          allMosquitoes.filter((m) => m.infected !== null).length,
+          .filter((m) => m.strains !== null)
+          .reduce((acc, m) => acc + m.strains.parasitismMutualismFactor, 0) /
+          allMosquitoes.filter((m) => m.strains !== null).length,
       );
       experiment.maternalTransmissionSkillOverTime.push(
         // Get the average maternal transmission skill of all infected mosquitoes.
         allMosquitoes
-          .filter((m) => m.infected !== null)
+          .filter((m) => m.strains !== null)
           .reduce((acc, m) => acc + m.maternalTransmissionSkill, 0) /
-          allMosquitoes.filter((m) => m.infected !== null).length,
+          allMosquitoes.filter((m) => m.strains !== null).length,
       );
       // Update the world.
       allMosquitoes = updateWorld(allMosquitoes);
