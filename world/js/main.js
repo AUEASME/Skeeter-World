@@ -320,13 +320,13 @@ class Mosquito {
     // If we still need blood, make sure we're over land.
     if (this.breedingCooldown < 1 && this.blood < 1) {
       // If we're in a water cell, move to the nearest land cell.
-      if (world.water_map[this.mapLocation.y][this.mapLocation.x] === 1) {
+      if (world.waterMap[this.mapLocation.y][this.mapLocation.x] === 1) {
         // Find the nearest land cell.
         let nearestLandCells = [];
         let nearestLandDistance = Infinity;
         for (let y = 0; y < world.height; y++) {
           for (let x = 0; x < world.width; x++) {
-            if (world.water_map[y][x] === 0) {
+            if (world.waterMap[y][x] === 0) {
               let distance =
                 Math.abs(this.mapLocation.x - x) + Math.abs(this.mapLocation.y - y);
               if (distance <= nearestLandDistance) {
@@ -377,14 +377,14 @@ class Mosquito {
     if (
       this.breedingCooldown < 1 &&
       this.blood > 0 &&
-      world.water_map[this.mapLocation.y][this.mapLocation.x] === 0
+      world.waterMap[this.mapLocation.y][this.mapLocation.x] === 0
     ) {
       // Find the nearest water cell.
       let nearestWaterCells = [];
       let nearestWaterDistance = Infinity;
       for (let y = 0; y < world.height; y++) {
         for (let x = 0; x < world.width; x++) {
-          if (world.water_map[y][x] === 1) {
+          if (world.waterMap[y][x] === 1) {
             let distance =
               Math.abs(this.mapLocation.x - x) + Math.abs(this.mapLocation.y - y);
             if (distance <= nearestWaterDistance) {
@@ -691,7 +691,7 @@ function mosquitoDay(population) {
       mosquito.sex === 0 &&
       mosquito.breedingCooldown < 1 &&
       mosquito.age > 14 &&
-      world.water_map[currentCell.y][currentCell.x] === 1
+      world.waterMap[currentCell.y][currentCell.x] === 1
     ) {
       let eligibleMales = males[currentCell.y][currentCell.x].filter(
         (m) => m.age > 14,
@@ -851,7 +851,7 @@ function rearrangePage() {
   waterCanvas.height = world.height * 12;
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
-      let cell = world.water_map[y][x];
+      let cell = world.waterMap[y][x];
       let color = cell === 1 ? "CornflowerBlue" : "ForestGreen";
       waterContext.fillStyle = color;
       waterContext.fillRect(x * 12, y * 12, 12, 12);
