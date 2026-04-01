@@ -930,9 +930,9 @@ function getInputValues(event) {
     }
   }
 
-  // Get kill__rate (0.0 to 1.0).
+  // Get ci__kill__rate (0.0 to 1.0).
   let ciKillRateInDocument = document
-    .getElementById("kill__rate")
+    .getElementById("ci__kill__rate")
     .value.split(",");
   if (ciKillRateInDocument.length > 0 && ciKillRateInDocument[0] !== "") {
     ciKillRates = ciKillRateInDocument;
@@ -946,9 +946,9 @@ function getInputValues(event) {
     }
   }
 
-  // Get rescue__rate (0.0 to 1.0).
+  // Get ci__rescue__rate (0.0 to 1.0).
   let ciRescueRateInDocument = document
-    .getElementById("rescue__rate")
+    .getElementById("ci__rescue__rate")
     .value.split(",");
   if (ciRescueRateInDocument.length > 0 && ciRescueRateInDocument[0] !== "") {
     ciRescueRates = ciRescueRateInDocument;
