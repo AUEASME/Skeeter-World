@@ -307,13 +307,11 @@ class Mosquito {
     }
   }
 
-  changeInfectionStatus() {
+  introduceInfection() {
     if (this.strains === null) {
       this.strains = new Wolbachia();
       return;
     }
-
-    this.strains = null;
   }
 
   migrate() {
@@ -1192,7 +1190,7 @@ async function runExperiments(event) {
     );
     allMales.forEach((male) => {
       if (Math.random() < experiment.strainsMalesAtStart) {
-        male.changeInfectionStatus();
+        male.introduceInfection();
         male.fitness +=
           male.strains.parasitismMutualismFactor *
           male.strains.infectionDensity;
@@ -1200,7 +1198,7 @@ async function runExperiments(event) {
     });
     allFemales.forEach((female) => {
       if (Math.random() < experiment.strainsFemalesAtStart) {
-        female.changeInfectionStatus();
+        female.introduceInfection();
         female.fitness +=
           female.strains.parasitismMutualismFactor *
           female.strains.infectionDensity;
