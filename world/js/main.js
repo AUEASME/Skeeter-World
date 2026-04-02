@@ -273,7 +273,7 @@ class Mosquito {
     this.blood = 0;
 
     // Keep track of how many children survived per reproductive event.
-    this.successes = 0.0;
+    this.breedingSuccesses = 0.0;
   }
 
   ageUp() {
@@ -533,11 +533,11 @@ class Mosquito {
       child.mapLocation = currentCell;
     }
 
-    this.successes = numberOfEggs;
-    mate.successes = numberOfEggs;
+    this.breedingSuccesses = numberOfEggs;
+    mate.breedingSuccesses = numberOfEggs;
     // Need to update this to not incorporate potentially negative fitness values.
-    this.fitness = (this.fitness + this.successes / 100) / 2;
-    mate.fitness = (mate.fitness + mate.successes / 100) / 2;
+    this.fitness = (this.fitness + this.breedingSuccesses / 100) / 2;
+    mate.fitness = (mate.fitness + mate.breedingSuccesses / 100) / 2;
   }
 }
 
@@ -758,11 +758,11 @@ function updatePlots(currentDay) {
 
   world.traceReproduction.x.push(currentDay);
   // Get all mosquitoes that have a successes property greater than zero.
-  let reproducingMosquitoes = allMosquitoes.filter((m) => m.successes > 0);
+  let reproducingMosquitoes = allMosquitoes.filter((m) => m.breedingSuccesses > 0);
   let averageSuccessRate = 0;
   if (reproducingMosquitoes.length > 0) {
     averageSuccessRate =
-      reproducingMosquitoes.reduce((sum, m) => sum + m.successes, 0) /
+      reproducingMosquitoes.reduce((sum, m) => sum + m.breedingSuccesses, 0) /
       reproducingMosquitoes.length;
   }
   world.traceReproduction.y.push(averageSuccessRate);
@@ -1219,11 +1219,11 @@ async function runExperiments(event) {
           allMosquitoes.length,
       );
       // Get all mosquitoes that have a successes property greater than zero.
-      let reproducingMosquitoes = allMosquitoes.filter((m) => m.successes > 0);
+      let reproducingMosquitoes = allMosquitoes.filter((m) => m.breedingSuccesses > 0);
       let averageSuccessRate = 0;
       if (reproducingMosquitoes.length > 0) {
         averageSuccessRate =
-          reproducingMosquitoes.reduce((sum, m) => sum + m.successes, 0) /
+          reproducingMosquitoes.reduce((sum, m) => sum + m.breedingSuccesses, 0) /
           reproducingMosquitoes.length;
       }
       experiment.reproductiveSuccessOverTime.push(averageSuccessRate);
