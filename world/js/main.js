@@ -384,7 +384,7 @@ class Mosquito {
     ) {
       // Find the nearest water cell.
       let nearestWaterCells = [];
-      let nearestWaterDistance = Infinity;
+      let nearestWaterDistance = world.width + world.height; // Max possible distance in the world.
       for (let y = 0; y < world.height; y++) {
         for (let x = 0; x < world.width; x++) {
           if (world.waterMap[y][x] === 1) {
