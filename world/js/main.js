@@ -322,16 +322,17 @@ class Mosquito {
     // If we still need blood, make sure we're over land.
     if (this.breedingCooldown < 1 && this.blood < 1) {
       // If we're in a water cell, move to the nearest land cell.
-      if (world.waterMap[this.mapLocation.y][this.mapLocation.x] === 1) {
+      if (world.waterMap[this.mapLocation.y][this.mapLocation.x] === "water") {
         // Find the nearest land cell.
         let nearestLandCells = [];
-        let nearestLandDistance = Infinity;
+        let nearestLandDistance = world.width + world.height; // Max possible distance in the world.
         for (let y = 0; y < world.height; y++) {
           for (let x = 0; x < world.width; x++) {
             if (world.waterMap[y][x] === 0) {
               let distance =
                 Math.abs(this.mapLocation.x - x) + Math.abs(this.mapLocation.y - y);
               if (distance <= nearestLandDistance) {
+                // If new record, reset choices array.
                 if (distance < nearestLandDistance) {
                   nearestLandCells = [];
                 }
