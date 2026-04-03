@@ -231,6 +231,8 @@ class Mosquito {
   constructor(dad, mom) {
     // this.sex can be 0 (female) or 1 (male).
     this.sex = Math.round(Math.random());
+    // Female mosquitoes mate only once, storing sperm for their entire lives in specialized organs called spermathecae.
+    this.mate = null;
     // this.strains is an array that stores unique Wolbachia infections.
     this.strains = null;
     // If the mother is infected, the child has a chance to inherit the infection.
