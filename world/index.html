@@ -46,7 +46,7 @@
   </head>
   <script type="text/javascript">
     const GRID_SIZE = 36;
-    const CELL_SIZE = 16;
+    const CELL_SIZE = 12;
     const CANVAS_SIZE = GRID_SIZE * CELL_SIZE;
 
     let canvas, ctx;
@@ -54,7 +54,7 @@
     let currentColor = "SaddleBrown";
     let lastCell = null;
 
-    // 48x48 logical "pixel" buffer
+    // 48x48 logical "pixel" buffer.
     const pixels = Array.from({ length: GRID_SIZE }, () =>
       Array.from({ length: GRID_SIZE }, () => "ForestGreen"),
     );
@@ -75,11 +75,11 @@
     edgePoints.push({
       x: GRID_SIZE - 1,
       y: Math.floor(Math.random() * GRID_SIZE),
-    }); // Right edge
+    }); // Right edge.
     edgePoints.push({
       x: Math.floor(Math.random() * GRID_SIZE),
       y: GRID_SIZE - 1,
-    }); // Bottom edge
+    }); // Bottom edge.
     const p1 = edgePoints[Math.floor(Math.random() * edgePoints.length)];
     // Use modulo to ensure p2 is on the opposite edge.
     const p2 = edgePoints[(edgePoints.indexOf(p1) + 2) % edgePoints.length];
@@ -221,7 +221,7 @@
         ctx.stroke();
       }
 
-      // Border
+      // Border.
       ctx.strokeStyle = "#000";
       ctx.lineWidth = 1;
       ctx.strokeRect(0.5, 0.5, CANVAS_SIZE - 1, CANVAS_SIZE - 1);

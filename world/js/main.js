@@ -853,13 +853,16 @@ function rearrangePage() {
   waterCanvas.height = world.height * 12;
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
-      let cell = world.waterMap[y][x];
-      let color = cell === 1 ? "CornflowerBlue" : "ForestGreen";
-      waterContext.fillStyle = color;
-      waterContext.fillRect(x * 12, y * 12, 12, 12);
-      // Add a black border around each cell.
-      waterContext.strokeStyle = "rgba(0, 0, 0, 0.125)";
-      waterContext.strokeRect(x * 12, y * 12, 12, 12);
+      if (world.map[y][x].terrainType === "grass") {
+        // Color land cells green.
+        waterContext.fillStyle = "rgb(0, 255, 0)";
+      } else if (world.map[y][x].terrainType === "mountain") {
+        // Color mountain cells gray.
+        waterContext.fillStyle = "rgb(128, 128, 128)";
+      } else {
+        // Color water cells blue.
+        waterContext.fillStyle = "rgb(0, 0, 255)";
+      }
     }
   }
   // Show keys.
