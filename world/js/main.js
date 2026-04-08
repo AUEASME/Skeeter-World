@@ -722,8 +722,10 @@ function kTournamentWithReplacement(eligibleMales, k = 3) {
   // Sort the males by fitness (highest first).
   selected.sort((a, b) => b.fitness - a.fitness);
 
-  // Return the most fit male.
-  return selected[0];
+  // If there are multiple males with the same highest fitness, randomly select one of them.
+  let topFitness = selected[0].fitness;
+  let topMales = selected.filter((m) => m.fitness === topFitness);
+  return topMales[Math.floor(Math.random() * topMales.length)];
 }
 
 /********************
