@@ -836,7 +836,7 @@ function rearrangePage() {
   form.remove();
   let customCan = document.getElementById("can");
   customCan.remove();
-  let terrainSelect = document.getElementById("terrainSelect");
+  let terrainSelect = document.getElementById("terrain__select");
   terrainSelect.remove();
 
   // Show plot.
