@@ -227,7 +227,7 @@ class Wolbachia {
  * MOSQUITO CLASS, METHODS, AND SETUP *
  **************************************/
 
-class Mosquito {
+class Insect {
   constructor(dad, mom) {
     // this.sex can be 0 (female) or 1 (male).
     this.sex = Math.round(Math.random());
@@ -522,7 +522,7 @@ class Mosquito {
     }
 
     for (let i = 0; i < numberOfEggs; i++) {
-      let child = new Mosquito(dad, mom);
+      let child = new Insect(dad, mom);
       if (mom.strains !== null) {
         // Use the mother's infection density to determine the chance of inheriting the infection.
         if (
@@ -613,13 +613,13 @@ class World {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         for (let i = 0; i < carryingCapacity; i++) {
-          let mosquito = new Mosquito();
+          let mosquito = new Insect();
           mosquito.age = Math.floor(Math.random() * 14);
           mosquito.breedingCooldown = Math.floor(Math.random() * 4);
           mosquito.mapLocation = { x: x, y: y };
           this.map[y][x].mosquitoes.push(mosquito);
           // Also add to global list of mosquitoes.
-          allMosquitoes.push(mosquito);
+          allInsects.push(mosquito);
         }
       }
     }
@@ -735,15 +735,15 @@ let world = new World(36, 36, 0.125);
 let carryingCapacity = 64;
 
 // Populate world.
-let allMosquitoes = [];
+let allInsects = [];
 
 // Set up logging.
 let currentDay = 0;
 
 function updatePlots(currentDay) {
   // Update infection plot.
-  let uninfectedCount = allMosquitoes.filter((m) => m.strains === null).length;
-  let infectedCount = allMosquitoes.filter((m) => m.strains !== null).length;
+  let uninfectedCount = allInsects.filter((m) => m.strains === null).length;
+  let infectedCount = allInsects.filter((m) => m.strains !== null).length;
 
   world.traceUninfected.x.push(currentDay);
   world.traceUninfected.y.push(uninfectedCount);
@@ -751,9 +751,9 @@ function updatePlots(currentDay) {
   world.traceInfected.y.push(infectedCount);
 
   let layout = {
-    title: "Mosquito Infection Status",
+    title: "Insect Infection Status",
     xaxis: { title: "Day" },
-    yaxis: { title: "Mosquito Count" },
+    yaxis: { title: "Insect Count" },
     barmode: "stack",
   };
 
@@ -761,12 +761,12 @@ function updatePlots(currentDay) {
 
   world.traceReproduction.x.push(currentDay);
   // Get all mosquitoes that have a successes property greater than zero.
-  let reproducingMosquitoes = allMosquitoes.filter((m) => m.breedingSuccesses > 0);
+  let reproducingInsects = allInsects.filter((m) => m.breedingSuccesses > 0);
   let averageSuccessRate = 0;
-  if (reproducingMosquitoes.length > 0) {
+  if (reproducingInsects.length > 0) {
     averageSuccessRate =
-      reproducingMosquitoes.reduce((sum, m) => sum + m.breedingSuccesses, 0) /
-      reproducingMosquitoes.length;
+      reproducingInsects.reduce((sum, m) => sum + m.breedingSuccesses, 0) /
+      reproducingInsects.length;
   }
   world.traceReproduction.y.push(averageSuccessRate);
 
@@ -784,7 +784,7 @@ function updatePlots(currentDay) {
 }
 
 function updateWorld(population) {
-  // Mosquitoes do their thing.
+  // Insects do their thing.
   mosquitoDay(population);
 
   // Population control: kill off mosquitoes to meet carrying capacity.
@@ -811,13 +811,13 @@ function updateWorld(population) {
 
 function shouldStopSimulation() {
   // Check if infection has been eradicated.
-  let infectedMosquitoes = allMosquitoes.filter((m) => m.strains !== null);
-  if (infectedMosquitoes.length === 0) {
+  let infectedInsects = allInsects.filter((m) => m.strains !== null);
+  if (infectedInsects.length === 0) {
     return true;
   }
 
   // Check if all mosquitoes are infected.
-  if (infectedMosquitoes.length === allMosquitoes.length) {
+  if (infectedInsects.length === allInsects.length) {
     return true;
   }
 }
@@ -1167,10 +1167,10 @@ async function runExperiments(event) {
     world.setWaterCells(experiment.waterRatio);
     world.populate();
 
-    allMosquitoes = [];
+    allInsects = [];
     for (let y = 0; y < world.height; y++) {
       for (let x = 0; x < world.width; x++) {
-        allMosquitoes = allMosquitoes.concat(world.map[y][x]);
+        allInsects = allInsects.concat(world.map[y][x]);
       }
     }
 
@@ -1188,10 +1188,10 @@ async function runExperiments(event) {
     renderWorld();
 
     // Infect the specified number of males and females.
-    let allMales = allMosquitoes.filter(
+    let allMales = allInsects.filter(
       (m) => m.sex === 1 && m.strains === null,
     );
-    let allFemales = allMosquitoes.filter(
+    let allFemales = allInsects.filter(
       (m) => m.sex === 0 && m.strains === null,
     );
     allMales.forEach((male) => {
@@ -1213,29 +1213,29 @@ async function runExperiments(event) {
 
     // Run the simulation.
     while (!shouldStopSimulation() && currentDay < days) {
-      allMosquitoes = [];
+      allInsects = [];
       for (let y = 0; y < world.height; y++) {
         for (let x = 0; x < world.width; x++) {
-          allMosquitoes = allMosquitoes.concat(world.map[y][x]);
+          allInsects = allInsects.concat(world.map[y][x]);
         }
       }
       // Update the experiment data.
       experiment.infectionRatio.push(
-        allMosquitoes.filter((m) => m.strains !== null).length /
-          allMosquitoes.length,
+        allInsects.filter((m) => m.strains !== null).length /
+          allInsects.length,
       );
       // Get all mosquitoes that have a successes property greater than zero.
-      let reproducingMosquitoes = allMosquitoes.filter((m) => m.breedingSuccesses > 0);
+      let reproducingInsects = allInsects.filter((m) => m.breedingSuccesses > 0);
       let averageSuccessRate = 0;
-      if (reproducingMosquitoes.length > 0) {
+      if (reproducingInsects.length > 0) {
         averageSuccessRate =
-          reproducingMosquitoes.reduce((sum, m) => sum + m.breedingSuccesses, 0) /
-          reproducingMosquitoes.length;
+          reproducingInsects.reduce((sum, m) => sum + m.breedingSuccesses, 0) /
+          reproducingInsects.length;
       }
       experiment.reproductiveSuccessOverTime.push(averageSuccessRate);
       // Get the average fitness modification of all infected mosquitoes.
       experiment.averageFitnessModificationOverTime.push(
-        allMosquitoes
+        allInsects
           .filter((m) => m.strains !== null)
           .reduce(
             (acc, m) =>
@@ -1243,24 +1243,24 @@ async function runExperiments(event) {
               m.strains.parasitismMutualismFactor *
                 m.strains.infectionDensity,
             0,
-          ) / allMosquitoes.filter((m) => m.strains !== null).length,
+          ) / allInsects.filter((m) => m.strains !== null).length,
       );
       experiment.averageParasitismMutualismOverTime.push(
         // Get the average parasitism/mutualism factor of all infected mosquitoes.
-        allMosquitoes
+        allInsects
           .filter((m) => m.strains !== null)
           .reduce((acc, m) => acc + m.strains.parasitismMutualismFactor, 0) /
-          allMosquitoes.filter((m) => m.strains !== null).length,
+          allInsects.filter((m) => m.strains !== null).length,
       );
       experiment.maternalTransmissionRateOverTime.push(
         // Get the average maternal transmission skill of all infected mosquitoes.
-        allMosquitoes
+        allInsects
           .filter((m) => m.strains !== null)
           .reduce((acc, m) => acc + m.maternalTransmissionRate, 0) /
-          allMosquitoes.filter((m) => m.strains !== null).length,
+          allInsects.filter((m) => m.strains !== null).length,
       );
       // Update the world.
-      allMosquitoes = updateWorld(allMosquitoes);
+      allInsects = updateWorld(allInsects);
       // Sleep for a fifth of a second.
       // This allows the browser time to handle user requests, such as scrolling, which get laggy if the simulation never takes a break.
       await new Promise((r) => setTimeout(r, 100));
