@@ -94,7 +94,6 @@ class Wolbachia {
      * NEW STUFF *
      *************/
 
-
     // Generate two random four-bit strings to represent toxin and antitoxin.
     this.toxin = [0, 0, 0, 0];
     for (let i = 0; i < 4; i++) {
@@ -109,11 +108,9 @@ class Wolbachia {
     this.transporterEfficiency = Math.random(); // Efficiency of amino acid transporter, from 0.0 to 1.0. Note that this can be harmful OR helpful.
     this.environmentalResistance = Math.random(); // Resistance to environmental toxins, from 0.0 to 1.0. Note that this is EXCLUSIVELY helpful.
 
-
     /*************
      * OLD STUFF *
      *************/
-
 
     // Wolbachia are defined by a scalar value, currentFitnessModifierRange[0] (probably -1.0) to currentFitnessModifierRange[1] (probably 1.0).
     // this.parasitismMutualismFactor = Math.random() * 2 - 1; // Random value between -1.0 and 1.0.
@@ -257,8 +254,7 @@ class Insect {
 
     if (this.strains !== null) {
       this.fitness +=
-        this.strains.parasitismMutualismFactor *
-        this.strains.infectionDensity;
+        this.strains.parasitismMutualismFactor * this.strains.infectionDensity;
     }
 
     /**
@@ -330,7 +326,8 @@ class Insect {
           for (let x = 0; x < world.width; x++) {
             if (world.waterMap[y][x] === 0) {
               let distance =
-                Math.abs(this.mapLocation.x - x) + Math.abs(this.mapLocation.y - y);
+                Math.abs(this.mapLocation.x - x) +
+                Math.abs(this.mapLocation.y - y);
               if (distance <= nearestLandDistance) {
                 // If new record, reset choices array.
                 if (distance < nearestLandDistance) {
@@ -389,7 +386,8 @@ class Insect {
         for (let x = 0; x < world.width; x++) {
           if (world.waterMap[y][x] === 1) {
             let distance =
-              Math.abs(this.mapLocation.x - x) + Math.abs(this.mapLocation.y - y);
+              Math.abs(this.mapLocation.x - x) +
+              Math.abs(this.mapLocation.y - y);
             if (distance <= nearestWaterDistance) {
               if (distance < nearestWaterDistance) {
                 nearestWaterCells = [];
@@ -1190,9 +1188,7 @@ async function runExperiments(event) {
     renderWorld();
 
     // Infect the specified number of males and females.
-    let allMales = allInsects.filter(
-      (m) => m.sex === 1 && m.strains === null,
-    );
+    let allMales = allInsects.filter((m) => m.sex === 1 && m.strains === null);
     let allFemales = allInsects.filter(
       (m) => m.sex === 0 && m.strains === null,
     );
@@ -1223,11 +1219,12 @@ async function runExperiments(event) {
       }
       // Update the experiment data.
       experiment.infectionRatio.push(
-        allInsects.filter((m) => m.strains !== null).length /
-          allInsects.length,
+        allInsects.filter((m) => m.strains !== null).length / allInsects.length,
       );
       // Get all insects that have a successes property greater than zero.
-      let reproducingInsects = allInsects.filter((m) => m.breedingSuccesses > 0);
+      let reproducingInsects = allInsects.filter(
+        (m) => m.breedingSuccesses > 0,
+      );
       let averageSuccessRate = 0;
       if (reproducingInsects.length > 0) {
         averageSuccessRate =
@@ -1242,8 +1239,7 @@ async function runExperiments(event) {
           .reduce(
             (acc, m) =>
               acc +
-              m.strains.parasitismMutualismFactor *
-                m.strains.infectionDensity,
+              m.strains.parasitismMutualismFactor * m.strains.infectionDensity,
             0,
           ) / allInsects.filter((m) => m.strains !== null).length,
       );
