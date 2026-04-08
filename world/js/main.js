@@ -5,8 +5,8 @@
 // Immutable parameters.
 let days = 730;
 // World initialization parameters.
-let infectedMaleCounts = [0.25];
-let infectedFemaleCounts = [0.25];
+let infectedMalePercents = [0.25];
+let infectedFemalePercents = [0.25];
 let waterRatios = [0.25];
 let currentWaterRatio = null;
 // Infection parameters.
@@ -879,19 +879,19 @@ function getInputValues(event) {
 
   // Get initial infection parameters and split on commas.
   // Get infected__males (0.0 to 1.0).
-  let infectedMaleCountInDocument = document
+  let infectedMalePercentInDocument = document
     .getElementById("infected__males")
     .value.split(",");
   if (
-    infectedMaleCountInDocument.length > 0 &&
-    infectedMaleCountInDocument[0] !== ""
+    infectedMalePercentInDocument.length > 0 &&
+    infectedMalePercentInDocument[0] !== ""
   ) {
-    infectedMaleCounts = infectedMaleCountInDocument;
+    infectedMalePercents = infectedMalePercentInDocument;
     // Convert to float.
-    infectedMaleCounts = infectedMaleCounts.map((c) => parseFloat(c));
+    infectedMalePercents = infectedMalePercents.map((c) => parseFloat(c));
   }
-  for (let i = 0; i < infectedMaleCounts.length; i++) {
-    if (infectedMaleCounts[i] < 0 || infectedMaleCounts[i] > 1) {
+  for (let i = 0; i < infectedMalePercents.length; i++) {
+    if (infectedMalePercents[i] < 0 || infectedMalePercents[i] > 1) {
       alert(
         "Infected male count cannot be less than zero or greater than one.",
       );
@@ -900,19 +900,19 @@ function getInputValues(event) {
   }
 
   // Get infected females (0.0 to 1.0).
-  let infectedFemaleCountInDocument = document
+  let infectedFemalePercentInDocument = document
     .getElementById("infected__females")
     .value.split(",");
   if (
-    infectedFemaleCountInDocument.length > 0 &&
-    infectedFemaleCountInDocument[0] !== ""
+    infectedFemalePercentInDocument.length > 0 &&
+    infectedFemalePercentInDocument[0] !== ""
   ) {
-    infectedFemaleCounts = infectedFemaleCountInDocument;
+    infectedFemalePercents = infectedFemalePercentInDocument;
     // Convert to float.
-    infectedFemaleCounts = infectedFemaleCounts.map((c) => parseFloat(c));
+    infectedFemalePercents = infectedFemalePercents.map((c) => parseFloat(c));
   }
-  for (let i = 0; i < infectedFemaleCounts.length; i++) {
-    if (infectedFemaleCounts[i] < 0 || infectedFemaleCounts[i] > 1) {
+  for (let i = 0; i < infectedFemalePercents.length; i++) {
+    if (infectedFemalePercents[i] < 0 || infectedFemalePercents[i] > 1) {
       alert(
         "Infected male count cannot be less than zero or greater than one.",
       );
@@ -1126,8 +1126,8 @@ async function runExperiments(event) {
   // Create an experiment object for each combination of parameters.
   let experiments = [];
   for (let r = 0; r < repeatCount; r++) {
-    for (let infectedMaleCount of infectedMaleCounts) {
-      for (let infectedFemaleCount of infectedFemaleCounts) {
+    for (let infectedMalePercent of infectedMalePercents) {
+      for (let infectedFemalePercent of infectedFemalePercents) {
         for (let waterRatio of waterRatios) {
           for (let ciKillRate of ciKillRates) {
             for (let ciRescueRate of ciRescueRates) {
@@ -1137,8 +1137,8 @@ async function runExperiments(event) {
                     for (let maxInfectionDensity of maxInfectionDensities) {
                       // Create a new experiment.
                       let experiment = new Experiment();
-                      experiment.strainsMalesAtStart = infectedMaleCount;
-                      experiment.strainsFemalesAtStart = infectedFemaleCount;
+                      experiment.strainsMalesAtStart = infectedMalePercent;
+                      experiment.strainsFemalesAtStart = infectedFemalePercent;
                       experiment.waterRatio = waterRatio;
                       experiment.ciKillRate = ciKillRate;
                       experiment.ciRescueRate = ciRescueRate;
