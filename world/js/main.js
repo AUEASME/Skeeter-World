@@ -79,12 +79,12 @@ class MapCell {
     this.nitrogenInEnvironment = Math.random(); // Amount of nitrogen in the environment, from 0.0 to 1.0.
     // Amino acid transporters can be adaptive in nitrogen-limiting environments, but they can also be deleterious if they import toxic amino acid analogues. So, the ratio of amino acids to toxic analogues in the environment can influence the fitness effect of an amino acid transporter in a nitrogen-poor cell.
     this.aminoAcidsToAnaloguesRatio = Math.random(); // Ratio of amino acids to toxic analogues in this cell, from 0.0 to 1.0. 1.0 means all amino acids, 0.0 means all toxic analogues.
-    this.mosquitoes = []; // Array of mosquitoes currently in this cell.
+    this.insects = []; // Array of insects currently in this cell.
     this.gravity =
       this.nitrogenInEnvironment *
       this.aminoAcidsToAnaloguesRatio *
       (this.terrainType === "mountain" ? 0.5 : 1.0);
-    // Nitrogen in environment times amino acid to analogue ratio times 0.5 if mountain, from 0.0 to 1.0. This is a measure of how attractive this cell is to mosquitoes, and can influence migration patterns.
+    // Nitrogen in environment times amino acid to analogue ratio times 0.5 if mountain, from 0.0 to 1.0. This is a measure of how attractive this cell is to insects, and can influence migration patterns.
   }
 }
 
@@ -231,7 +231,7 @@ class Insect {
   constructor(dad, mom) {
     // this.sex can be 0 (female) or 1 (male).
     this.sex = Math.round(Math.random());
-    // Female mosquitoes mate only once, storing sperm for their entire lives in specialized organs called spermathecae.
+    // Female insects mate only once, storing sperm for their entire lives in specialized organs called spermathecae.
     this.mate = null;
     // this.strains is an array that stores unique Wolbachia infections.
     this.strains = null;
@@ -249,7 +249,7 @@ class Insect {
     this.fitness = Math.random();
     // Position is set by outside code.
     this.mapLocation = { x: 0, y: 0 };
-    // If this mosquito is the child of two other mosquitoes, override the random values.
+    // If this mosquito is the child of two other insects, override the random values.
     if (dad && mom) {
       this.fitness = (dad.fitness + mom.fitness) / 2;
       this.mapLocation = mom.mapLocation;
@@ -283,7 +283,7 @@ class Insect {
     if (this.age > 14 && this.breedingCooldown > 0) {
       this.breedingCooldown--;
     }
-    // Male mosquitoes live for about eighteen days, and fourteen of those are spend growing, so for each subsequent day, they have a 1/4 chance of dying.
+    // Male insects live for about eighteen days, and fourteen of those are spend growing, so for each subsequent day, they have a 1/4 chance of dying.
     // Longevity can be influenced by the fitness effect of a Wolbachia infection, however.
     // A fitness modifier of -1.0 decreases survival odds to 0.125, while a fitness modifier of 1.0 increases survival odds to 0.375.
     let survivalOdds = 0.25 + this.strains?.parasitismMutualismFactor / 2;
@@ -433,7 +433,7 @@ class Insect {
       }
     }
 
-    // Check if any neighboring cell has fewer mosquitoes. If it does, move there.
+    // Check if any neighboring cell has fewer insects. If it does, move there.
     let currentCell = this.mapLocation;
     let currentPopulation = world.map[currentCell.y][currentCell.x].length;
     let bestCells = [];
@@ -609,17 +609,17 @@ class World {
   }
 
   populate() {
-    // Add mosquitoes to each cell of the map.
+    // Add insects to each cell of the map.
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         for (let i = 0; i < carryingCapacity; i++) {
-          let mosquito = new Insect();
-          mosquito.age = Math.floor(Math.random() * 14);
-          mosquito.breedingCooldown = Math.floor(Math.random() * 4);
-          mosquito.mapLocation = { x: x, y: y };
-          this.map[y][x].mosquitoes.push(mosquito);
-          // Also add to global list of mosquitoes.
-          allInsects.push(mosquito);
+          let insect = new Insect();
+          insect.age = Math.floor(Math.random() * 14);
+          insect.breedingCooldown = Math.floor(Math.random() * 4);
+          insect.mapLocation = { x: x, y: y };
+          this.map[y][x].insects.push(insect);
+          // Also add to global list of insects.
+          allInsects.push(insect);
         }
       }
     }
@@ -638,12 +638,12 @@ function renderWorld() {
   // For each infected mosquito in each cell, add 1 to the blue channel.
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
-      let cell = world.map[y][x].mosquitoes;
+      let cell = world.map[y][x].insects;
       let red = 255;
       let green = 255;
       let blue = 255;
-      for (let mosquito of cell) {
-        if (mosquito.strains === null) {
+      for (let insect of cell) {
+        if (insect.strains === null) {
           green -= 255 / carryingCapacity;
           blue -= 255 / carryingCapacity;
         } else {
@@ -664,17 +664,17 @@ function renderWorld() {
  * SIMULATION FUNCTIONS *
  ************************/
 
-function mosquitoDay(population) {
+function insectDay(population) {
   // Make a 2D grid for all the males in the map.
   let males = new Array(world.height)
     .fill(0)
     .map(() => new Array(world.width).fill(0).map(() => []));
 
   // Assign each male to their cell.
-  for (let mosquito of population) {
-    if (mosquito.sex === 1) {
-      let currentCell = mosquito.mapLocation;
-      males[currentCell.y][currentCell.x].push(mosquito);
+  for (let insect of population) {
+    if (insect.sex === 1) {
+      let currentCell = insect.mapLocation;
+      males[currentCell.y][currentCell.x].push(insect);
     }
   }
 
@@ -684,16 +684,16 @@ function mosquitoDay(population) {
     [population[i], population[j]] = [population[j], population[i]];
   }
 
-  for (let mosquito of population) {
+  for (let insect of population) {
     // Migrate and reproduce.
-    mosquito.migrate();
-    let currentCell = mosquito.mapLocation;
+    insect.migrate();
+    let currentCell = insect.mapLocation;
 
     // If mosquito is female, reproduce.
     if (
-      mosquito.sex === 0 &&
-      mosquito.breedingCooldown < 1 &&
-      mosquito.age > 14 &&
+      insect.sex === 0 &&
+      insect.breedingCooldown < 1 &&
+      insect.age > 14 &&
       world.waterMap[currentCell.y][currentCell.x] === 1
     ) {
       let eligibleMales = males[currentCell.y][currentCell.x].filter(
@@ -702,12 +702,12 @@ function mosquitoDay(population) {
       if (eligibleMales.length > 0) {
         // Get a random mate.
         let mate = kTournamentWithReplacement(eligibleMales, 3);
-        mosquito.reproduce(mate);
+        insect.reproduce(mate);
       }
     }
 
     // Age mosquito.
-    mosquito.ageUp();
+    insect.ageUp();
   }
 }
 
@@ -760,7 +760,7 @@ function updatePlots(currentDay) {
   Plotly.newPlot("plot", [world.traceUninfected, world.traceInfected], layout);
 
   world.traceReproduction.x.push(currentDay);
-  // Get all mosquitoes that have a successes property greater than zero.
+  // Get all insects that have a successes property greater than zero.
   let reproducingInsects = allInsects.filter((m) => m.breedingSuccesses > 0);
   let averageSuccessRate = 0;
   if (reproducingInsects.length > 0) {
@@ -785,15 +785,15 @@ function updatePlots(currentDay) {
 
 function updateWorld(population) {
   // Insects do their thing.
-  mosquitoDay(population);
+  insectDay(population);
 
-  // Population control: kill off mosquitoes to meet carrying capacity.
+  // Population control: kill off insects to meet carrying capacity.
   population = [];
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
-      // Sort mosquitoes by fitness.
+      // Sort insects by fitness.
       world.map[y][x].sort((a, b) => a.fitness - b.fitness);
-      // Keep the top carryingCapacity mosquitoes.
+      // Keep the top carryingCapacity insects.
       world.map[y][x] = world.map[y][x].slice(0, carryingCapacity);
       // Add them to the global list.
       population = population.concat(world.map[y][x]);
@@ -816,7 +816,7 @@ function shouldStopSimulation() {
     return true;
   }
 
-  // Check if all mosquitoes are infected.
+  // Check if all insects are infected.
   if (infectedInsects.length === allInsects.length) {
     return true;
   }
@@ -1224,7 +1224,7 @@ async function runExperiments(event) {
         allInsects.filter((m) => m.strains !== null).length /
           allInsects.length,
       );
-      // Get all mosquitoes that have a successes property greater than zero.
+      // Get all insects that have a successes property greater than zero.
       let reproducingInsects = allInsects.filter((m) => m.breedingSuccesses > 0);
       let averageSuccessRate = 0;
       if (reproducingInsects.length > 0) {
@@ -1233,7 +1233,7 @@ async function runExperiments(event) {
           reproducingInsects.length;
       }
       experiment.reproductiveSuccessOverTime.push(averageSuccessRate);
-      // Get the average fitness modification of all infected mosquitoes.
+      // Get the average fitness modification of all infected insects.
       experiment.averageFitnessModificationOverTime.push(
         allInsects
           .filter((m) => m.strains !== null)
@@ -1246,14 +1246,14 @@ async function runExperiments(event) {
           ) / allInsects.filter((m) => m.strains !== null).length,
       );
       experiment.averageParasitismMutualismOverTime.push(
-        // Get the average parasitism/mutualism factor of all infected mosquitoes.
+        // Get the average parasitism/mutualism factor of all infected insects.
         allInsects
           .filter((m) => m.strains !== null)
           .reduce((acc, m) => acc + m.strains.parasitismMutualismFactor, 0) /
           allInsects.filter((m) => m.strains !== null).length,
       );
       experiment.maternalTransmissionRateOverTime.push(
-        // Get the average maternal transmission skill of all infected mosquitoes.
+        // Get the average maternal transmission skill of all infected insects.
         allInsects
           .filter((m) => m.strains !== null)
           .reduce((acc, m) => acc + m.maternalTransmissionRate, 0) /
