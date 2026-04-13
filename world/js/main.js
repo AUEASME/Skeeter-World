@@ -108,11 +108,16 @@ class Wolbachia {
     // This can influence the maternal transmission rate along with infection density.
     // Bill Sullivan studies this.
     this.maternalTransmissionRate = Math.random();
-    // If parasite, increase density.
+    // If parasite, increase density and maternal transmission rate to increase chance of spreading, at the cost of host fitness.
     if (this.parasitismMutualismFactor < 0) {
-      this.infectionDensity = Math.min(
+      this.infectionDensity = Math.max(
         1.0,
         this.infectionDensity + Math.abs(this.parasitismMutualismFactor) * 0.5,
+      );
+      this.maternalTransmissionRate = Math.max(
+        1.0,
+        this.maternalTransmissionRate +
+          Math.abs(this.parasitismMutualismFactor) * 0.5,
       );
     }
     // Set ciKillRate and ciRescueRate to the current values.
@@ -507,13 +512,16 @@ class Insect {
     // Child fitness is the average of the parents' fitness.
     let dad = mate,
       mom = this;
+
     let numberOfEggs = Math.round(100 * mom.fitness);
     if (dad.strains !== null && mom.strains !== null) {
       numberOfEggs = Math.max(
         Math.floor(
           numberOfEggs *
-            mom.strains.ciRescueRate *
+            (1.0 - (dad.strains.ciKillRate * mom.strains.ciRescueRate)) *
+            // Is this right? If the kill rate is only 50%, then the mom only NEEDS to rescue 50%, so with a 50% rescue rate, the child should have a 75% chance of surviving (50% chance of being killed, then 50% chance of being rescued from that).
             mom.strains.matchLockAndKey(dad.strains),
+            // But if 50% of the children don't even need saving, we'd only need to do the matching for half...
         ),
         0,
       );
