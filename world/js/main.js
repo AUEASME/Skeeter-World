@@ -7,8 +7,6 @@ let days = 730;
 // World initialization parameters.
 let infectedMalePercents = [0.25];
 let infectedFemalePercents = [0.25];
-let waterRatios = [0.25];
-let currentWaterRatio = null;
 // Infection parameters.
 let ciKillRates = [1.0];
 let currentciKillRate = null;
@@ -268,9 +266,9 @@ class Insect {
     if (this.sex === 1 && this.age > 14 && Math.random() < survivalOdds) {
       // Kill self.
       let currentCell = this.mapLocation;
-      world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
-        currentCell.x
-      ].filter((m) => m !== this);
+      world.map[currentCell.y][currentCell.x].insects = world.map[
+        currentCell.y
+      ][currentCell.x].insects.filter((m) => m !== this);
       return;
     }
 
@@ -280,9 +278,9 @@ class Insect {
     if (this.sex === 0 && this.age > 14 && Math.random() < survivalOdds) {
       // Kill self.
       let currentCell = this.mapLocation;
-      world.map[currentCell.y][currentCell.x] = world.map[currentCell.y][
-        currentCell.x
-      ].filter((m) => m !== this);
+      world.map[currentCell.y][currentCell.x].insects = world.map[
+        currentCell.y
+      ][currentCell.x].insects.filter((m) => m !== this);
       return;
     }
   }
@@ -300,13 +298,16 @@ class Insect {
     // If we still need blood, make sure we're over land.
     if (this.breedingCooldown < 1 && this.blood < 1) {
       // If we're in a water cell, move to the nearest land cell.
-      if (world.waterMap[this.mapLocation.y][this.mapLocation.x] === "water") {
+      if (
+        world.map[this.mapLocation.y][this.mapLocation.x].terrainType ===
+        "water"
+      ) {
         // Find the nearest land cell.
         let nearestLandCells = [];
         let nearestLandDistance = world.width + world.height; // Max possible distance in the world.
         for (let y = 0; y < world.height; y++) {
           for (let x = 0; x < world.width; x++) {
-            if (world.waterMap[y][x] === 0) {
+            if (world.map[y][x].terrainType !== "water") {
               let distance =
                 Math.abs(this.mapLocation.x - x) +
                 Math.abs(this.mapLocation.y - y);
@@ -343,10 +344,10 @@ class Insect {
             }
           }
           // Remove from old cell and add to new cell.
-          world.map[originalPosition.y][originalPosition.x] = world.map[
+          world.map[originalPosition.y][originalPosition.x].insects = world.map[
             originalPosition.y
-          ][originalPosition.x].filter((m) => m !== this);
-          world.map[this.mapLocation.y][this.mapLocation.x].push(this);
+          ][originalPosition.x].insects.filter((m) => m !== this);
+          world.map[this.mapLocation.y][this.mapLocation.x].insects.push(this);
           return;
         }
       } else {
@@ -359,14 +360,14 @@ class Insect {
     if (
       this.breedingCooldown < 1 &&
       this.blood > 0 &&
-      world.waterMap[this.mapLocation.y][this.mapLocation.x] === 0
+      world.map[this.mapLocation.y][this.mapLocation.x].terrainType !== "water"
     ) {
       // Find the nearest water cell.
       let nearestWaterCells = [];
       let nearestWaterDistance = world.width + world.height; // Max possible distance in the world.
       for (let y = 0; y < world.height; y++) {
         for (let x = 0; x < world.width; x++) {
-          if (world.waterMap[y][x] === 1) {
+          if (world.map[y][x].terrainType === "water") {
             let distance =
               Math.abs(this.mapLocation.x - x) +
               Math.abs(this.mapLocation.y - y);
@@ -405,17 +406,18 @@ class Insect {
         }
 
         // Remove from old cell and add to new cell.
-        world.map[originalPosition.y][originalPosition.x] = world.map[
+        world.map[originalPosition.y][originalPosition.x].insects = world.map[
           originalPosition.y
-        ][originalPosition.x].filter((m) => m !== this);
-        world.map[this.mapLocation.y][this.mapLocation.x].push(this);
+        ][originalPosition.x].insects.filter((m) => m !== this);
+        world.map[this.mapLocation.y][this.mapLocation.x].insects.push(this);
         return;
       }
     }
 
     // Check if any neighboring cell has fewer insects. If it does, move there.
     let currentCell = this.mapLocation;
-    let currentPopulation = world.map[currentCell.y][currentCell.x].length;
+    let currentPopulation =
+      world.map[currentCell.y][currentCell.x].insects.length;
     let bestCells = [];
     let bestPopulation = currentPopulation;
     for (let dy = -1; dy <= 1; dy++) {
@@ -438,10 +440,10 @@ class Insect {
     if (bestCells.length > 0) {
       let newCell = bestCells[Math.floor(Math.random() * bestCells.length)];
       // Remove from old cell and add to new cell.
-      world.map[originalPosition.y][originalPosition.x] = world.map[
+      world.map[originalPosition.y][originalPosition.x].insects = world.map[
         originalPosition.y
-      ][originalPosition.x].filter((m) => m !== this);
-      world.map[newCell.y][newCell.x].push(this);
+      ][originalPosition.x].insects.filter((m) => m !== this);
+      world.map[newCell.y][newCell.x].insects.push(this);
       this.mapLocation = newCell;
       return;
     }
@@ -462,10 +464,10 @@ class Insect {
       if (neighbors.length > 0) {
         let newCell = neighbors[Math.floor(Math.random() * neighbors.length)];
         // Remove from old cell and add to new cell.
-        world.map[originalPosition.y][originalPosition.x] = world.map[
+        world.map[originalPosition.y][originalPosition.x].insects = world.map[
           originalPosition.y
-        ][originalPosition.x].filter((m) => m !== this);
-        world.map[newCell.y][newCell.x].push(this);
+        ][originalPosition.x].insects.filter((m) => m !== this);
+        world.map[newCell.y][newCell.x].insects.push(this);
         this.mapLocation = newCell;
         return;
       }
@@ -473,6 +475,10 @@ class Insect {
   }
 
   reproduce(mate) {
+    if (!mate) {
+      return;
+    }
+
     // Reset breeding cooldown.
     this.breedingCooldown = 4;
 
@@ -512,7 +518,7 @@ class Insect {
           child.strains = mom.strains.binaryFission();
         }
       }
-      world.map[currentCell.y][currentCell.x].push(child);
+      world.map[currentCell.y][currentCell.x].insects.push(child);
       child.mapLocation = currentCell;
     }
 
@@ -547,7 +553,7 @@ class MapCell {
 }
 
 class World {
-  constructor(width, height) {
+  constructor(width, height, terrainPixels = null) {
     // 0. Get the worldPixels matrix from localStorage.
     let storedPixels = localStorage.getItem("worldPixels");
 
@@ -565,12 +571,28 @@ class World {
       }
     }
 
-    // 3. Update the terrain type of each cell based on the worldPixels matrix.
-    if (storedPixels) {
-      let worldPixels = JSON.parse(storedPixels);
+    // 3. Update the terrain type of each cell from provided terrain or localStorage.
+    let worldPixels = terrainPixels;
+    if (worldPixels === null && storedPixels) {
+      worldPixels = JSON.parse(storedPixels);
+    }
+
+    if (worldPixels) {
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          this.map[y][x].terrainType = worldPixels[y][x];
+          let terrain = worldPixels?.[y]?.[x];
+          if (
+            terrain !== "grass" &&
+            terrain !== "water" &&
+            terrain !== "mountain"
+          ) {
+            terrain = "grass";
+          }
+          this.map[y][x].terrainType = terrain;
+          this.map[y][x].gravity =
+            this.map[y][x].nitrogenInEnvironment *
+            this.map[y][x].aminoAcidsToAnaloguesRatio *
+            (terrain === "mountain" ? 0.5 : 1.0);
         }
       }
     } else {
@@ -692,7 +714,7 @@ function insectDay(population) {
       insect.sex === 0 &&
       insect.breedingCooldown < 1 &&
       insect.age > 14 &&
-      world.waterMap[currentCell.y][currentCell.x] === 1
+      world.map[currentCell.y][currentCell.x].terrainType === "water"
     ) {
       let eligibleMales = males[currentCell.y][currentCell.x].filter(
         (m) => m.age > 14,
@@ -700,7 +722,9 @@ function insectDay(population) {
       if (eligibleMales.length > 0) {
         // Get a random mate.
         let mate = kTournamentWithReplacement(eligibleMales, 3);
-        insect.reproduce(mate);
+        if (mate) {
+          insect.reproduce(mate);
+        }
       }
     }
 
@@ -710,11 +734,20 @@ function insectDay(population) {
 }
 
 function kTournamentWithReplacement(eligibleMales, k = 3) {
+  // Ignore malformed candidates so tournament selection always returns
+  // a real insect object or null.
+  let validMales = eligibleMales.filter(
+    (m) => m !== undefined && m !== null && Number.isFinite(m.fitness),
+  );
+  if (validMales.length === 0) {
+    return null;
+  }
+
   // Select k males at random.
   let selected = [];
   for (let i = 0; i < k; i++) {
-    let randomIndex = Math.floor(Math.random() * eligibleMales.length);
-    selected.push(eligibleMales[randomIndex]);
+    let randomIndex = Math.floor(Math.random() * validMales.length);
+    selected.push(validMales[randomIndex]);
   }
 
   // Sort the males by fitness (highest first).
@@ -723,6 +756,9 @@ function kTournamentWithReplacement(eligibleMales, k = 3) {
   // If there are multiple males with the same highest fitness, randomly select one of them.
   let topFitness = selected[0].fitness;
   let topMales = selected.filter((m) => m.fitness === topFitness);
+  if (topMales.length === 0) {
+    return selected[0] || null;
+  }
   return topMales[Math.floor(Math.random() * topMales.length)];
 }
 
@@ -731,7 +767,7 @@ function kTournamentWithReplacement(eligibleMales, k = 3) {
  ********************/
 
 // Create world.
-let world = new World(36, 36, 0.125);
+let world = new World(36, 36);
 let carryingCapacity = 64;
 
 // Populate world.
@@ -825,10 +861,11 @@ function shouldStopSimulation() {
   }
 }
 
-function resetWorld(waterRatio = 0.25) {
+function resetWorld() {
   // Reset all global variables.
-  world = new World(36, 36, waterRatio);
+  world = new World(36, 36);
   currentDay = 0;
+  allInsects = [];
 }
 
 function rearrangePage() {
@@ -867,6 +904,7 @@ function rearrangePage() {
         // Color water cells blue.
         waterContext.fillStyle = "rgb(0, 0, 255)";
       }
+      waterContext.fillRect(x * 12, y * 12, 12, 12);
     }
   }
   // Show keys.
@@ -919,22 +957,6 @@ function getInputValues(event) {
       alert(
         "Infected male count cannot be less than zero or greater than one.",
       );
-      return;
-    }
-  }
-
-  // Get water__percent (0.0 to 1.0).
-  let waterRatioInDocument = document
-    .getElementById("water__percent")
-    .value.split(",");
-  if (waterRatioInDocument.length > 0 && waterRatioInDocument[0] !== "") {
-    waterRatios = waterRatioInDocument;
-    // Convert to float.
-    waterRatios = waterRatios.map((r) => parseFloat(r));
-  }
-  for (let i = 0; i < waterRatios.length; i++) {
-    if (waterRatios[i] < 0 || waterRatios[i] > 1) {
-      alert("Water ratio must be between 0 and 1.");
       return;
     }
   }
@@ -1064,7 +1086,6 @@ class Experiment {
     this.startTime = new Date();
     this.strainsMalesAtStart = 0.25;
     this.strainsFemalesAtStart = 0.25;
-    this.waterRatio = 0.25;
     // Infection data.
     this.ciKillRate = 1.0;
     this.ciRescueRate = 1.0;
@@ -1089,7 +1110,6 @@ class Experiment {
       ciKillRate: this.ciKillRate,
       ciRescueRate: this.ciRescueRate,
       // New data.
-      waterRatio: this.waterRatio,
       minMaternalTransmissionRate: this.minMaternalTransmissionRate,
       maxMaternalTransmissionRate: this.maxMaternalTransmissionRate,
       minFitnessModifier: this.minFitnessModifier,
@@ -1122,8 +1142,44 @@ class Experiment {
 }
 
 async function runExperiments(event) {
-  // Digest input values and rearrange page.
+  // Digest input values.
   getInputValues(event);
+
+  // Keep one immutable terrain map for every experiment in the queue.
+  // Read directly from localStorage so the latest map-editor changes are used.
+  let fixedTerrainMap = null;
+  let storedPixels = localStorage.getItem("worldPixels");
+  if (storedPixels) {
+    try {
+      let parsedPixels = JSON.parse(storedPixels);
+      if (
+        Array.isArray(parsedPixels) &&
+        parsedPixels.length === world.height &&
+        parsedPixels.every(
+          (row) => Array.isArray(row) && row.length === world.width,
+        )
+      ) {
+        fixedTerrainMap = parsedPixels.map((row) =>
+          row.map((terrain) =>
+            terrain === "grass" || terrain === "water" || terrain === "mountain"
+              ? terrain
+              : "grass",
+          ),
+        );
+      }
+    } catch (e) {
+      console.warn("Could not parse worldPixels from localStorage.", e);
+    }
+  }
+
+  if (!fixedTerrainMap) {
+    fixedTerrainMap = world.map.map((row) =>
+      row.map((cell) => cell.terrainType),
+    );
+  }
+
+  // Ensure the displayed terrain map uses the same fixed map as the simulation.
+  world = new World(36, 36, fixedTerrainMap);
   rearrangePage();
 
   // Create an experiment object for each combination of parameters.
@@ -1131,26 +1187,23 @@ async function runExperiments(event) {
   for (let r = 0; r < repeatCount; r++) {
     for (let infectedMalePercent of infectedMalePercents) {
       for (let infectedFemalePercent of infectedFemalePercents) {
-        for (let waterRatio of waterRatios) {
-          for (let ciKillRate of ciKillRates) {
-            for (let ciRescueRate of ciRescueRates) {
-              for (let minFitnessModifier of minFitnessModifiers) {
-                for (let maxFitnessModifier of maxFitnessModifiers) {
-                  for (let minInfectionDensity of minInfectionDensities) {
-                    for (let maxInfectionDensity of maxInfectionDensities) {
-                      // Create a new experiment.
-                      let experiment = new Experiment();
-                      experiment.strainsMalesAtStart = infectedMalePercent;
-                      experiment.strainsFemalesAtStart = infectedFemalePercent;
-                      experiment.waterRatio = waterRatio;
-                      experiment.ciKillRate = ciKillRate;
-                      experiment.ciRescueRate = ciRescueRate;
-                      experiment.minFitnessModifier = minFitnessModifier;
-                      experiment.maxFitnessModifier = maxFitnessModifier;
-                      experiment.minInfectionDensity = minInfectionDensity;
-                      experiment.maxInfectionDensity = maxInfectionDensity;
-                      experiments.push(experiment);
-                    }
+        for (let ciKillRate of ciKillRates) {
+          for (let ciRescueRate of ciRescueRates) {
+            for (let minFitnessModifier of minFitnessModifiers) {
+              for (let maxFitnessModifier of maxFitnessModifiers) {
+                for (let minInfectionDensity of minInfectionDensities) {
+                  for (let maxInfectionDensity of maxInfectionDensities) {
+                    // Create a new experiment.
+                    let experiment = new Experiment();
+                    experiment.strainsMalesAtStart = infectedMalePercent;
+                    experiment.strainsFemalesAtStart = infectedFemalePercent;
+                    experiment.ciKillRate = ciKillRate;
+                    experiment.ciRescueRate = ciRescueRate;
+                    experiment.minFitnessModifier = minFitnessModifier;
+                    experiment.maxFitnessModifier = maxFitnessModifier;
+                    experiment.minInfectionDensity = minInfectionDensity;
+                    experiment.maxInfectionDensity = maxInfectionDensity;
+                    experiments.push(experiment);
                   }
                 }
               }
@@ -1167,7 +1220,9 @@ async function runExperiments(event) {
     // Log start time.
     console.log(`Start time: ${new Date().toLocaleString()}`);
     // Set up the world.
-    world.setWaterCells(experiment.waterRatio);
+    world = new World(36, 36, fixedTerrainMap);
+    currentDay = 0;
+    allInsects = [];
     world.populate();
 
     allInsects = [];
@@ -1269,9 +1324,6 @@ async function runExperiments(event) {
 
     // Once the simulation is complete, output the data.
     experiment.outputData();
-
-    // Reset the world.
-    resetWorld();
   }
 
   // Reload the page.

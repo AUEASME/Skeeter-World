@@ -31,7 +31,7 @@ body div#mock__console,
 body div.key {
   display: flex;
 }
-body div#terrainSelect {
+body div#terrain__select {
   display: flex;
   flex-flow: column nowrap;
   gap: 0.5rem;
@@ -39,23 +39,23 @@ body div#terrainSelect {
   align-items: center;
   margin-top: 0.5rem;
 }
-body div#terrainSelect p {
+body div#terrain__select p {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.125rem;
 }
-body div#terrainSelect div#terrainButtons {
+body div#terrain__select div#terrainButtons {
   display: flex;
   flex-flow: row nowrap;
   gap: 0.5rem;
 }
-body div#terrainSelect div#terrainButtons .colorButton {
+body div#terrain__select div#terrainButtons .colorButton {
   min-width: 16px;
   min-height: 16px;
   cursor: pointer;
   border: 2px ridge #000;
 }
-body div#terrainSelect div#terrainButtons .colorButton.activeColor {
+body div#terrain__select div#terrainButtons .colorButton.activeColor {
   border: 2px ridge DeepPink;
 }
 body > h4 {
