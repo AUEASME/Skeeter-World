@@ -292,6 +292,33 @@ class Insect {
     }
   }
 
+  canTraverseCell(x, y) {
+    let terrainType = world.map[y][x].terrainType;
+    if (terrainType === "mountain") {
+      return Math.random() < 0.25;
+    }
+    return true;
+  }
+
+  moveToCell(x, y, originalPosition) {
+    // Staying put should not require a traversal check.
+    if (x === originalPosition.x && y === originalPosition.y) {
+      this.mapLocation = { x, y };
+      return true;
+    }
+
+    if (!this.canTraverseCell(x, y)) {
+      return false;
+    }
+
+    world.map[originalPosition.y][originalPosition.x].insects = world.map[
+      originalPosition.y
+    ][originalPosition.x].insects.filter((m) => m !== this);
+    world.map[y][x].insects.push(this);
+    this.mapLocation = { x, y };
+    return true;
+  }
+
   migrate() {
     let originalPosition = { x: this.mapLocation.x, y: this.mapLocation.y };
 
@@ -330,25 +357,24 @@ class Insect {
             ];
           let dx = nearestLandCell.x - this.mapLocation.x;
           let dy = nearestLandCell.y - this.mapLocation.y;
+          let nextX = this.mapLocation.x;
+          let nextY = this.mapLocation.y;
           if (Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) {
-              this.mapLocation.x++;
+              nextX++;
             } else {
-              this.mapLocation.x--;
+              nextX--;
             }
           } else {
             if (dy > 0) {
-              this.mapLocation.y++;
+              nextY++;
             } else {
-              this.mapLocation.y--;
+              nextY--;
             }
           }
-          // Remove from old cell and add to new cell.
-          world.map[originalPosition.y][originalPosition.x].insects = world.map[
-            originalPosition.y
-          ][originalPosition.x].insects.filter((m) => m !== this);
-          world.map[this.mapLocation.y][this.mapLocation.x].insects.push(this);
-          return;
+          if (this.moveToCell(nextX, nextY, originalPosition)) {
+            return;
+          }
         }
       } else {
         // We're already on land, so we can "drink blood" and increase our blood level.
@@ -391,26 +417,25 @@ class Insect {
           ];
         let dx = nearestWaterCell.x - this.mapLocation.x;
         let dy = nearestWaterCell.y - this.mapLocation.y;
+        let nextX = this.mapLocation.x;
+        let nextY = this.mapLocation.y;
         if (Math.abs(dx) > Math.abs(dy)) {
           if (dx > 0) {
-            this.mapLocation.x++;
+            nextX++;
           } else {
-            this.mapLocation.x--;
+            nextX--;
           }
         } else {
           if (dy > 0) {
-            this.mapLocation.y++;
+            nextY++;
           } else {
-            this.mapLocation.y--;
+            nextY--;
           }
         }
 
-        // Remove from old cell and add to new cell.
-        world.map[originalPosition.y][originalPosition.x].insects = world.map[
-          originalPosition.y
-        ][originalPosition.x].insects.filter((m) => m !== this);
-        world.map[this.mapLocation.y][this.mapLocation.x].insects.push(this);
-        return;
+        if (this.moveToCell(nextX, nextY, originalPosition)) {
+          return;
+        }
       }
     }
 
@@ -439,13 +464,9 @@ class Insect {
     }
     if (bestCells.length > 0) {
       let newCell = bestCells[Math.floor(Math.random() * bestCells.length)];
-      // Remove from old cell and add to new cell.
-      world.map[originalPosition.y][originalPosition.x].insects = world.map[
-        originalPosition.y
-      ][originalPosition.x].insects.filter((m) => m !== this);
-      world.map[newCell.y][newCell.x].insects.push(this);
-      this.mapLocation = newCell;
-      return;
+      if (this.moveToCell(newCell.x, newCell.y, originalPosition)) {
+        return;
+      }
     }
 
     // If not breeding, migrate randomly to a neighboring cell.
@@ -463,13 +484,9 @@ class Insect {
       }
       if (neighbors.length > 0) {
         let newCell = neighbors[Math.floor(Math.random() * neighbors.length)];
-        // Remove from old cell and add to new cell.
-        world.map[originalPosition.y][originalPosition.x].insects = world.map[
-          originalPosition.y
-        ][originalPosition.x].insects.filter((m) => m !== this);
-        world.map[newCell.y][newCell.x].insects.push(this);
-        this.mapLocation = newCell;
-        return;
+        if (this.moveToCell(newCell.x, newCell.y, originalPosition)) {
+          return;
+        }
       }
     }
   }
