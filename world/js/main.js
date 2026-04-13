@@ -70,24 +70,6 @@ let repeatCount = 1;
  * "but deleterious when a toxic analogue is also present. In both cases, toxicity is an environment-dependent side-effect of an otherwise adaptive trait."
  */
 
-class MapCell {
-  constructor() {
-    this.location = { x: 0, y: 0 }; // Set by outside code.
-    this.terrainType = "grass"; // grass, water, or mountain.
-    // A nitrogen-limiting environment severely impacts cellular metabolism, forcing organisms to conserve nitrogen by reducing the overall synthesis of nitrogen-rich amino acids, lowering protein production, and initiating the degradation of existing proteins to recycle nitrogen for essential functions.
-    // Source: https://pmc.ncbi.nlm.nih.gov/articles/PMC2686650/
-    this.nitrogenInEnvironment = Math.random(); // Amount of nitrogen in the environment, from 0.0 to 1.0.
-    // Amino acid transporters can be adaptive in nitrogen-limiting environments, but they can also be deleterious if they import toxic amino acid analogues. So, the ratio of amino acids to toxic analogues in the environment can influence the fitness effect of an amino acid transporter in a nitrogen-poor cell.
-    this.aminoAcidsToAnaloguesRatio = Math.random(); // Ratio of amino acids to toxic analogues in this cell, from 0.0 to 1.0. 1.0 means all amino acids, 0.0 means all toxic analogues.
-    this.insects = []; // Array of insects currently in this cell.
-    this.gravity =
-      this.nitrogenInEnvironment *
-      this.aminoAcidsToAnaloguesRatio *
-      (this.terrainType === "mountain" ? 0.5 : 1.0);
-    // Nitrogen in environment times amino acid to analogue ratio times 0.5 if mountain, from 0.0 to 1.0. This is a measure of how attractive this cell is to insects, and can influence migration patterns.
-  }
-}
-
 class Wolbachia {
   constructor() {
     /*************
@@ -441,7 +423,7 @@ class Insect {
         let y = currentCell.y + dy;
         let x = currentCell.x + dx;
         if (y >= 0 && y < world.height && x >= 0 && x < world.width) {
-          let population = world.map[y][x].length;
+          let population = world.map[y][x].insects.length;
           if (population <= bestPopulation) {
             if (population < bestPopulation) {
               bestCells = [];
@@ -545,6 +527,24 @@ class Insect {
 /***********************************
  * WORLD CLASS, METHODS, AND SETUP *
  ***********************************/
+
+class MapCell {
+  constructor() {
+    this.location = { x: 0, y: 0 }; // Set by outside code.
+    this.terrainType = "grass"; // grass, water, or mountain.
+    // A nitrogen-limiting environment severely impacts cellular metabolism, forcing organisms to conserve nitrogen by reducing the overall synthesis of nitrogen-rich amino acids, lowering protein production, and initiating the degradation of existing proteins to recycle nitrogen for essential functions.
+    // Source: https://pmc.ncbi.nlm.nih.gov/articles/PMC2686650/
+    this.nitrogenInEnvironment = Math.random(); // Amount of nitrogen in the environment, from 0.0 to 1.0.
+    // Amino acid transporters can be adaptive in nitrogen-limiting environments, but they can also be deleterious if they import toxic amino acid analogues. So, the ratio of amino acids to toxic analogues in the environment can influence the fitness effect of an amino acid transporter in a nitrogen-poor cell.
+    this.aminoAcidsToAnaloguesRatio = Math.random(); // Ratio of amino acids to toxic analogues in this cell, from 0.0 to 1.0. 1.0 means all amino acids, 0.0 means all toxic analogues.
+    this.insects = []; // Array of insects currently in this cell.
+    this.gravity =
+      this.nitrogenInEnvironment *
+      this.aminoAcidsToAnaloguesRatio *
+      (this.terrainType === "mountain" ? 0.5 : 1.0);
+    // Nitrogen in environment times amino acid to analogue ratio times 0.5 if mountain, from 0.0 to 1.0. This is a measure of how attractive this cell is to insects, and can influence migration patterns.
+  }
+}
 
 class World {
   constructor(width, height) {
@@ -792,11 +792,14 @@ function updateWorld(population) {
   for (let y = 0; y < world.height; y++) {
     for (let x = 0; x < world.width; x++) {
       // Sort insects by fitness.
-      world.map[y][x].sort((a, b) => a.fitness - b.fitness);
+      world.map[y][x].insects.sort((a, b) => a.fitness - b.fitness);
       // Keep the top carryingCapacity insects.
-      world.map[y][x] = world.map[y][x].slice(0, carryingCapacity);
+      world.map[y][x].insects = world.map[y][x].insects.slice(
+        0,
+        carryingCapacity,
+      );
       // Add them to the global list.
-      population = population.concat(world.map[y][x]);
+      population = population.concat(world.map[y][x].insects);
     }
   }
 
@@ -1170,7 +1173,7 @@ async function runExperiments(event) {
     allInsects = [];
     for (let y = 0; y < world.height; y++) {
       for (let x = 0; x < world.width; x++) {
-        allInsects = allInsects.concat(world.map[y][x]);
+        allInsects = allInsects.concat(world.map[y][x].insects);
       }
     }
 
@@ -1214,7 +1217,7 @@ async function runExperiments(event) {
       allInsects = [];
       for (let y = 0; y < world.height; y++) {
         for (let x = 0; x < world.width; x++) {
-          allInsects = allInsects.concat(world.map[y][x]);
+          allInsects = allInsects.concat(world.map[y][x].insects);
         }
       }
       // Update the experiment data.
