@@ -137,12 +137,11 @@ class Wolbachia {
   }
 
   binaryFission() {
-    // Create a new Wolbachia with the same parasitismMutualismFactor.
-    let clone = new Wolbachia();
-    clone.parasitismMutualismFactor = this.parasitismMutualismFactor;
+    // Create a structured clone of this Wolbachia to represent the inherited infection in the child.
+    let clone = structuredClone(this);
 
-    // 1/20 chance to mutate the toxin or antitoxin.
-    if (Math.random() < 0.05) {
+    // 1/100 chance to mutate the toxin or antitoxin.
+    if (Math.random() < 0.01) {
       if (Math.random() < 0.5) {
         // Mutate toxin by increasing or decreasing by 1 (wrapping around).
         clone.toxin = (this.toxin + (Math.random() < 0.5 ? -1 : 1) + 16) % 16;
@@ -153,8 +152,8 @@ class Wolbachia {
       }
     }
 
-    // 1/20 chance to mutate the parasitismMutualismFactor.
-    if (Math.random() < 0.05) {
+    // 1/100 chance to mutate the parasitismMutualismFactor.
+    if (Math.random() < 0.01) {
       clone.parasitismMutualismFactor +=
         (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [-1.0, 1.0].
@@ -175,8 +174,8 @@ class Wolbachia {
       );
     }
 
-    // 1/20 chance to mutate the maternalTransmissionRate by up to 0.05 in either direction.
-    if (Math.random() < 0.05) {
+    // 1/100 chance to mutate the maternalTransmissionRate by up to 0.05 in either direction.
+    if (Math.random() < 0.01) {
       clone.maternalTransmissionRate +=
         (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
@@ -186,15 +185,15 @@ class Wolbachia {
       );
     }
 
-    // 1/20 chance to mutate the ciKillRate by up to 0.05 in either direction.
-    if (Math.random() < 0.05) {
+    // 1/100 chance to mutate the ciKillRate by up to 0.05 in either direction.
+    if (Math.random() < 0.01) {
       clone.ciKillRate += (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
       clone.ciKillRate = Math.max(0.0, Math.min(1.0, clone.ciKillRate));
     }
 
-    // 1/20 chance to mutate the ciRescueRate by up to 0.05 in either direction.
-    if (Math.random() < 0.05) {
+    // 1/100 chance to mutate the ciRescueRate by up to 0.05 in either direction.
+    if (Math.random() < 0.01) {
       clone.ciRescueRate +=
         (Math.random() < 0.5 ? -1 : 1) * Math.random() * 0.05;
       // Clamp the value to the range [0.0, 1.0].
@@ -518,10 +517,10 @@ class Insect {
       numberOfEggs = Math.max(
         Math.floor(
           numberOfEggs *
-            (1.0 - (dad.strains.ciKillRate * mom.strains.ciRescueRate)) *
+            (1.0 - dad.strains.ciKillRate * mom.strains.ciRescueRate) *
             // Is this right? If the kill rate is only 50%, then the mom only NEEDS to rescue 50%, so with a 50% rescue rate, the child should have a 75% chance of surviving (50% chance of being killed, then 50% chance of being rescued from that).
             mom.strains.matchLockAndKey(dad.strains),
-            // But if 50% of the children don't even need saving, we'd only need to do the matching for half...
+          // But if 50% of the children don't even need saving, we'd only need to do the matching for half...
         ),
         0,
       );
