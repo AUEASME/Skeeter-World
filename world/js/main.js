@@ -920,13 +920,13 @@ function rearrangePage() {
     for (let x = 0; x < world.width; x++) {
       if (world.map[y][x].terrainType === "grass") {
         // Color land cells green.
-        waterContext.fillStyle = "rgb(0, 255, 0)";
+        waterContext.fillStyle = "ForestGreen";
       } else if (world.map[y][x].terrainType === "mountain") {
         // Color mountain cells gray.
-        waterContext.fillStyle = "rgb(128, 128, 128)";
+        waterContext.fillStyle = "SaddleBrown";
       } else {
         // Color water cells blue.
-        waterContext.fillStyle = "rgb(0, 0, 255)";
+        waterContext.fillStyle = "DarkTurquoise";
       }
       waterContext.fillRect(x * 12, y * 12, 12, 12);
     }
