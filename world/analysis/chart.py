@@ -37,7 +37,8 @@ for experiment in data:
     else:
         colors.append("limegreen")
 
-plt.scatter(x, y, s=[1000 * (size / max_size) for size in s], alpha=0.5, c=colors)
+plt.scatter(x, y, s=[1000 * (size / max_size)
+            for size in s], alpha=0.5, c=colors)
 
 plt.xlabel("Kill Rate")
 plt.ylabel("Rescue Rate")
