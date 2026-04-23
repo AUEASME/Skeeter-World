@@ -2,6 +2,7 @@
  * SIMULATION PARAMETERS *
  *************************/
 
+let currentExperiment = null;
 // Immutable parameters.
 let days = 730;
 // World initialization parameters.
@@ -230,6 +231,7 @@ class Insect {
     this.fitness = Math.random();
     // Position is set by outside code.
     this.mapLocation = { x: 0, y: 0 };
+    this.initialMapLocation = { x: 0, y: 0 };
     // If this mosquito is the child of two other insects, override the random values.
     if (dad && mom) {
       this.fitness = (dad.fitness + mom.fitness) / 2;
@@ -273,6 +275,11 @@ class Insect {
       world.map[currentCell.y][currentCell.x].insects = world.map[
         currentCell.y
       ][currentCell.x].insects.filter((m) => m !== this);
+      // Add initial and current location to migration patterns for this insect.
+      currentExperiment.migrationPatterns.push({
+        initialLocation: this.initialMapLocation,
+        finalLocation: this.mapLocation,
+      });
       return;
     }
 
@@ -285,6 +292,11 @@ class Insect {
       world.map[currentCell.y][currentCell.x].insects = world.map[
         currentCell.y
       ][currentCell.x].insects.filter((m) => m !== this);
+      // Add initial and current location to migration patterns for this insect.
+      currentExperiment.migrationPatterns.push({
+        initialLocation: this.initialMapLocation,
+        finalLocation: this.mapLocation,
+      });
       return;
     }
   }
@@ -661,6 +673,7 @@ class World {
           insect.age = Math.floor(Math.random() * 14);
           insect.breedingCooldown = Math.floor(Math.random() * 4);
           insect.mapLocation = { x: x, y: y };
+          insect.initialMapLocation = { x: x, y: y };
           this.map[y][x].insects.push(insect);
           // Also add to global list of insects.
           allInsects.push(insect);
@@ -1123,6 +1136,7 @@ class Experiment {
     this.averageParasitismMutualismOverTime = [];
     this.averageFitnessModificationOverTime = [];
     this.maternalTransmissionRateOverTime = [];
+    this.migrationPatterns = [];
   }
 
   outputData() {
@@ -1146,6 +1160,7 @@ class Experiment {
         this.averageParasitismMutualismOverTime,
       averageFitnessModificationOverTime:
         this.averageFitnessModificationOverTime,
+      migrationPatterns: this.migrationPatterns,
     };
 
     // Download the data for the user as a JSON file.
@@ -1241,6 +1256,7 @@ async function runExperiments(event) {
   // Run each experiment.
   for (let experiment of experiments) {
     console.log("Starting new experiment...");
+    currentExperiment = experiment;
     // Log start time.
     console.log(`Start time: ${new Date().toLocaleString()}`);
     // Set up the world.
